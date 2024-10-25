@@ -1,0 +1,561 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		F3EE743B2CCC3C3C00B6FE5E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F3EE74192CCC3C3A00B6FE5E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F3EE74202CCC3C3A00B6FE5E;
+			remoteInfo = "Orbit Breaker";
+		};
+		F3EE74452CCC3C3C00B6FE5E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F3EE74192CCC3C3A00B6FE5E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F3EE74202CCC3C3A00B6FE5E;
+			remoteInfo = "Orbit Breaker";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F3EE74212CCC3C3A00B6FE5E /* Orbit Breaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Orbit Breaker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3EE743A2CCC3C3C00B6FE5E /* Orbit BreakerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Orbit BreakerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3EE74442CCC3C3C00B6FE5E /* Orbit BreakerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Orbit BreakerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		F3EE74232CCC3C3A00B6FE5E /* Orbit Breaker */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Orbit Breaker";
+			sourceTree = "<group>";
+		};
+		F3EE743D2CCC3C3C00B6FE5E /* Orbit BreakerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Orbit BreakerTests";
+			sourceTree = "<group>";
+		};
+		F3EE74472CCC3C3C00B6FE5E /* Orbit BreakerUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Orbit BreakerUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F3EE741E2CCC3C3A00B6FE5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3EE74372CCC3C3C00B6FE5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3EE74412CCC3C3C00B6FE5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F3EE74182CCC3C3A00B6FE5E = {
+			isa = PBXGroup;
+			children = (
+				F3EE74232CCC3C3A00B6FE5E /* Orbit Breaker */,
+				F3EE743D2CCC3C3C00B6FE5E /* Orbit BreakerTests */,
+				F3EE74472CCC3C3C00B6FE5E /* Orbit BreakerUITests */,
+				F3EE74222CCC3C3A00B6FE5E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F3EE74222CCC3C3A00B6FE5E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F3EE74212CCC3C3A00B6FE5E /* Orbit Breaker.app */,
+				F3EE743A2CCC3C3C00B6FE5E /* Orbit BreakerTests.xctest */,
+				F3EE74442CCC3C3C00B6FE5E /* Orbit BreakerUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F3EE74202CCC3C3A00B6FE5E /* Orbit Breaker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F3EE744E2CCC3C3C00B6FE5E /* Build configuration list for PBXNativeTarget "Orbit Breaker" */;
+			buildPhases = (
+				F3EE741D2CCC3C3A00B6FE5E /* Sources */,
+				F3EE741E2CCC3C3A00B6FE5E /* Frameworks */,
+				F3EE741F2CCC3C3A00B6FE5E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F3EE74232CCC3C3A00B6FE5E /* Orbit Breaker */,
+			);
+			name = "Orbit Breaker";
+			packageProductDependencies = (
+			);
+			productName = "Orbit Breaker";
+			productReference = F3EE74212CCC3C3A00B6FE5E /* Orbit Breaker.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F3EE74392CCC3C3C00B6FE5E /* Orbit BreakerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F3EE74512CCC3C3C00B6FE5E /* Build configuration list for PBXNativeTarget "Orbit BreakerTests" */;
+			buildPhases = (
+				F3EE74362CCC3C3C00B6FE5E /* Sources */,
+				F3EE74372CCC3C3C00B6FE5E /* Frameworks */,
+				F3EE74382CCC3C3C00B6FE5E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F3EE743C2CCC3C3C00B6FE5E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F3EE743D2CCC3C3C00B6FE5E /* Orbit BreakerTests */,
+			);
+			name = "Orbit BreakerTests";
+			packageProductDependencies = (
+			);
+			productName = "Orbit BreakerTests";
+			productReference = F3EE743A2CCC3C3C00B6FE5E /* Orbit BreakerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F3EE74432CCC3C3C00B6FE5E /* Orbit BreakerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F3EE74542CCC3C3C00B6FE5E /* Build configuration list for PBXNativeTarget "Orbit BreakerUITests" */;
+			buildPhases = (
+				F3EE74402CCC3C3C00B6FE5E /* Sources */,
+				F3EE74412CCC3C3C00B6FE5E /* Frameworks */,
+				F3EE74422CCC3C3C00B6FE5E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F3EE74462CCC3C3C00B6FE5E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F3EE74472CCC3C3C00B6FE5E /* Orbit BreakerUITests */,
+			);
+			name = "Orbit BreakerUITests";
+			packageProductDependencies = (
+			);
+			productName = "Orbit BreakerUITests";
+			productReference = F3EE74442CCC3C3C00B6FE5E /* Orbit BreakerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F3EE74192CCC3C3A00B6FE5E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					F3EE74202CCC3C3A00B6FE5E = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					F3EE74392CCC3C3C00B6FE5E = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = F3EE74202CCC3C3A00B6FE5E;
+					};
+					F3EE74432CCC3C3C00B6FE5E = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = F3EE74202CCC3C3A00B6FE5E;
+					};
+				};
+			};
+			buildConfigurationList = F3EE741C2CCC3C3A00B6FE5E /* Build configuration list for PBXProject "Orbit Breaker" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F3EE74182CCC3C3A00B6FE5E;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = F3EE74222CCC3C3A00B6FE5E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F3EE74202CCC3C3A00B6FE5E /* Orbit Breaker */,
+				F3EE74392CCC3C3C00B6FE5E /* Orbit BreakerTests */,
+				F3EE74432CCC3C3C00B6FE5E /* Orbit BreakerUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F3EE741F2CCC3C3A00B6FE5E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3EE74382CCC3C3C00B6FE5E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3EE74422CCC3C3C00B6FE5E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F3EE741D2CCC3C3A00B6FE5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3EE74362CCC3C3C00B6FE5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3EE74402CCC3C3C00B6FE5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F3EE743C2CCC3C3C00B6FE5E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F3EE74202CCC3C3A00B6FE5E /* Orbit Breaker */;
+			targetProxy = F3EE743B2CCC3C3C00B6FE5E /* PBXContainerItemProxy */;
+		};
+		F3EE74462CCC3C3C00B6FE5E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F3EE74202CCC3C3A00B6FE5E /* Orbit Breaker */;
+			targetProxy = F3EE74452CCC3C3C00B6FE5E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F3EE744C2CCC3C3C00B6FE5E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F3EE744D2CCC3C3C00B6FE5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F3EE744F2CCC3C3C00B6FE5E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8CZH7D925T;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "August-Wetterau.Orbit-Breaker";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F3EE74502CCC3C3C00B6FE5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8CZH7D925T;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "August-Wetterau.Orbit-Breaker";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F3EE74522CCC3C3C00B6FE5E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8CZH7D925T;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "August-Wetterau.Orbit-BreakerTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Orbit Breaker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Orbit Breaker";
+			};
+			name = Debug;
+		};
+		F3EE74532CCC3C3C00B6FE5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8CZH7D925T;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "August-Wetterau.Orbit-BreakerTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Orbit Breaker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Orbit Breaker";
+			};
+			name = Release;
+		};
+		F3EE74552CCC3C3C00B6FE5E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8CZH7D925T;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "August-Wetterau.Orbit-BreakerUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Orbit Breaker";
+			};
+			name = Debug;
+		};
+		F3EE74562CCC3C3C00B6FE5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8CZH7D925T;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "August-Wetterau.Orbit-BreakerUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Orbit Breaker";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F3EE741C2CCC3C3A00B6FE5E /* Build configuration list for PBXProject "Orbit Breaker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3EE744C2CCC3C3C00B6FE5E /* Debug */,
+				F3EE744D2CCC3C3C00B6FE5E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F3EE744E2CCC3C3C00B6FE5E /* Build configuration list for PBXNativeTarget "Orbit Breaker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3EE744F2CCC3C3C00B6FE5E /* Debug */,
+				F3EE74502CCC3C3C00B6FE5E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F3EE74512CCC3C3C00B6FE5E /* Build configuration list for PBXNativeTarget "Orbit BreakerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3EE74522CCC3C3C00B6FE5E /* Debug */,
+				F3EE74532CCC3C3C00B6FE5E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F3EE74542CCC3C3C00B6FE5E /* Build configuration list for PBXNativeTarget "Orbit BreakerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3EE74552CCC3C3C00B6FE5E /* Debug */,
+				F3EE74562CCC3C3C00B6FE5E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F3EE74192CCC3C3A00B6FE5E /* Project object */;
+}
