@@ -23,12 +23,15 @@ class TestPlayer {
         self.scene = scene
         
         // Initialize ship
-        ship = SKSpriteNode(color: .white, size: CGSize(width: 30, height: 30))
+        //ship = SKSpriteNode(color: .white, size: CGSize(width: 30, height: 30))
+        ship = SKSpriteNode(imageNamed: "Player")
+        ship.size = CGSize(width: 80, height: 80)
         ship.position = CGPoint(x: scene.size.width/2, y: 60)
         ship.name = "testPlayer"
         
         // Add physics for enemy bullet collision
-        ship.physicsBody = SKPhysicsBody(rectangleOf: ship.size)
+        //ship.physicsBody = SKPhysicsBody(rectangleOf: ship.size)
+        ship.physicsBody = SKPhysicsBody(texture: ship.texture!, size: ship.size)
         ship.physicsBody?.categoryBitMask = 0x1 << 0     // Category 1
         ship.physicsBody?.contactTestBitMask = 0x1 << 3  // Will contact with category 4 (enemy bullets)
         ship.physicsBody?.collisionBitMask = 0
