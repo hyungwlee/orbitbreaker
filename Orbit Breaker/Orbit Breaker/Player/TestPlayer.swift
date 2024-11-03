@@ -56,7 +56,7 @@ class TestPlayer {
         // Create rapid fire button
         rapidFireButton = SKShapeNode(rectOf: buttonSize, cornerRadius: 10)
         (rapidFireButton as! SKShapeNode).fillColor = .green
-        (rapidFireButton as! SKShapeNode).strokeColor = .white
+        (rapidFireButton as! SKShapeNode).strokeColor = .black
         rapidFireButton.position = CGPoint(x: 40, y: 40)
         rapidFireButton.name = "rapidFireButton"
         
@@ -118,12 +118,17 @@ class TestPlayer {
         // Handle ship movement
         let previousLocation = touch.previousLocation(in: scene)
         let deltaX = location.x - previousLocation.x
+        let deltaY = location.y - previousLocation.y
         let newX = ship.position.x + deltaX
+        let newY = ship.position.y + deltaY
         
         // Screen bounds checking
         let minX = ship.size.width/2
         let maxX = scene.size.width - ship.size.width/2
+        let minY = ship.size.height/2
+        let maxY = scene.size.width - ship.size.height/2
         ship.position.x = min(maxX, max(minX, newX))
+        ship.position.y = min(maxY, max(minY, newY))
     }
     
     private func toggleShooting() {
