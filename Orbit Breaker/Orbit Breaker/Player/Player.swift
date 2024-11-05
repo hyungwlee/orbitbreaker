@@ -9,7 +9,7 @@
 
 import SpriteKit
 
-class TestPlayer {
+class Player {
     private weak var scene: SKScene?
     private var ship: SKSpriteNode
     private var lastFireTime: TimeInterval = 0
