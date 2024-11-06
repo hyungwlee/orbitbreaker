@@ -16,6 +16,8 @@ class Player {
     public var fireRate: TimeInterval = 0.2  // Made variable to allow modification
     private var isDragging = false
     private var canShoot = true  // New property to control shooting
+    private var shield: SKSpriteNode?
+    public var damageMultiplier: Int = 1
     
     init(scene: SKScene) {
         self.scene = scene
@@ -34,7 +36,6 @@ class Player {
         ship.physicsBody?.contactTestBitMask = 0x1 << 3  // Will contact with category 4 (enemy bullets)
         ship.physicsBody?.collisionBitMask = 0
         ship.physicsBody?.affectedByGravity = false
-        
         scene.addChild(ship)
     }
     
@@ -45,12 +46,10 @@ class Player {
         }
     }
     
-    private func fireBullet() {
+    func fireBullet() {
         guard let scene = scene else { return }
-        
-        // Set the damage value for the bullet
-        let bulletDamage = 10
-        let bullet = Bullet(damage: bulletDamage, color: .yellow, size: CGSize(width: 4, height: 10))
+        let bulletdamage: Int = 10 * damageMultiplier
+        let bullet = Bullet(damage: bulletdamage, color: .yellow, size: CGSize(width: 4, height: 10))
         bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height/2)
         bullet.name = "testBullet"
         
@@ -82,8 +81,20 @@ class Player {
         ship.position.y = min(maxY, max(minY, newY))
     }
     
+    func addShield() {
+        if shield == nil {
+            let shield = SKSpriteNode(color: .blue, size: CGSize(width: 100, height: 100))
+            shield.position = CGPoint(x: 0, y: 0)
+            ship.addChild(shield)
+        }
+    }
+    
+    func removeShield() {
+        shield?.removeFromParent()
+        shield = nil
+    }
+    
     func cleanup() {
         ship.removeFromParent()
-
     }
 }

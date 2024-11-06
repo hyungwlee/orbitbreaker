@@ -25,13 +25,13 @@ class PowerUp {
     func apply(to player: Player) {
         switch type {
         case .shield:
-            Player.addShield()
+            player.addShield()
             scheduleEndEffect(for: player, after: duration)
+            // enemy bullets damage = 0
         case .doubleDamage:
-            // TODO
-            break
+            player.damageMultiplier = 2
         case .moreBullets:
-            
+            break
         }
     }
     
@@ -46,12 +46,11 @@ class PowerUp {
         case .shield:
             Player.removeShield()
         case .doubleDamage:
-            Player.fireRate /= 0.5
+            Player.damageMultiplier = 1
         case .moreBullets:
             break
         }
     }
-
 }
 
 
