@@ -13,6 +13,7 @@ class EnemyManager {
     private var enemies: [Enemy] = []
     private var waveManager: WaveManager
     private var currentWave = 0
+    private var bossNum: Int = 1
     
     init(scene: SKScene) {
         self.scene = scene
@@ -138,7 +139,23 @@ class EnemyManager {
         
         print("Creating boss for wave \(currentWave)") // Debug print
         
-        let boss = Boss(type: .anger)
+        let boss: Boss
+        
+        switch bossNum {
+        case 1:
+            boss = Boss(type: .anger)
+            bossNum += 1
+        case 2:
+            boss = Boss(type: .fear)
+            bossNum += 1
+        case 3:
+            boss = Boss(type: .sadness)
+            bossNum += 1
+        default:
+            boss = Boss(type: .disgust)
+            bossNum = 1
+        }
+        
         boss.position = CGPoint(x: scene.size.width/2, y: scene.size.height * 0.8)
         scene.addChild(boss)
         enemies.append(boss)

@@ -16,14 +16,14 @@ private enum BossMovementPattern: Int, CaseIterable {
 enum BossType {
     case anger    // Round 5
     case sadness  // Round 10 (future)
-    case joy      // Round 15 (future)
+    case disgust      // Round 15 (future)
     case fear     // Round 20 (future)
     
     var size: CGSize {
         switch self {
         case .anger:
             return CGSize(width: 60, height: 60)  // Made boss bigger
-        case .sadness, .joy, .fear:
+        case .sadness, .disgust, .fear:
             return CGSize(width: 60, height: 60)
         }
     }
@@ -34,8 +34,8 @@ enum BossType {
             return .red
         case .sadness:
             return .blue
-        case .joy:
-            return .yellow
+        case .disgust:
+            return .green
         case .fear:
             return .purple
         }
@@ -45,7 +45,7 @@ enum BossType {
         switch self {
         case .anger:
             return 300
-        case .sadness, .joy, .fear:
+        case .sadness, .disgust, .fear:
             return 350
         }
     }
