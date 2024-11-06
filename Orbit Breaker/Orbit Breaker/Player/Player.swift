@@ -5,7 +5,7 @@
 //  Created by August Wetterau on 10/25/24.
 //
 
-// TestPlayer.swift
+// Player.swift
 
 import SpriteKit
 
@@ -13,11 +13,9 @@ class Player {
     private weak var scene: SKScene?
     private var ship: SKSpriteNode
     private var lastFireTime: TimeInterval = 0
-    private var fireRate: TimeInterval = 0.2  // Made variable to allow modification
+    public var fireRate: TimeInterval = 0.2  // Made variable to allow modification
     private var isDragging = false
     private var canShoot = true  // New property to control shooting
-    private var disableButton: SKNode
-    private var rapidFireButton: SKNode
     
     init(scene: SKScene) {
         self.scene = scene
@@ -37,40 +35,7 @@ class Player {
         ship.physicsBody?.collisionBitMask = 0
         ship.physicsBody?.affectedByGravity = false
         
-        // Create disable shooting button
-        let buttonSize = CGSize(width: 60, height: 60)
-        disableButton = SKShapeNode(rectOf: buttonSize, cornerRadius: 10)
-        (disableButton as! SKShapeNode).fillColor = .red
-        (disableButton as! SKShapeNode).strokeColor = .white
-        disableButton.position = CGPoint(x: scene.size.width - 40, y: 40)
-        disableButton.name = "disableButton"
-        
-        let disableLabel = SKLabelNode(text: "Stop")
-        disableLabel.fontSize = 16
-        disableLabel.fontColor = .white
-        disableLabel.verticalAlignmentMode = .center
-        disableLabel.horizontalAlignmentMode = .center
-        disableLabel.position = CGPoint(x: 0, y: 0)
-        disableButton.addChild(disableLabel)
-        
-        // Create rapid fire button
-        rapidFireButton = SKShapeNode(rectOf: buttonSize, cornerRadius: 10)
-        (rapidFireButton as! SKShapeNode).fillColor = .green
-        (rapidFireButton as! SKShapeNode).strokeColor = .black
-        rapidFireButton.position = CGPoint(x: 40, y: 40)
-        rapidFireButton.name = "rapidFireButton"
-        
-        let rapidFireLabel = SKLabelNode(text: "Rapid")
-        rapidFireLabel.fontSize = 16
-        rapidFireLabel.fontColor = .white
-        rapidFireLabel.verticalAlignmentMode = .center
-        rapidFireLabel.horizontalAlignmentMode = .center
-        rapidFireLabel.position = CGPoint(x: 0, y: 0)
-        rapidFireButton.addChild(rapidFireLabel)
-        
         scene.addChild(ship)
-        scene.addChild(disableButton)
-        scene.addChild(rapidFireButton)
     }
     
     func update(currentTime: TimeInterval) {
@@ -83,15 +48,11 @@ class Player {
     private func fireBullet() {
         guard let scene = scene else { return }
         
-        let bullet = SKSpriteNode(color: .yellow, size: CGSize(width: 4, height: 10))
+        // Set the damage value for the bullet
+        let bulletDamage = 10
+        let bullet = Bullet(damage: bulletDamage, color: .yellow, size: CGSize(width: 4, height: 10))
         bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height/2)
         bullet.name = "testBullet"
-        
-        bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.size)
-        bullet.physicsBody?.categoryBitMask = 0x1 << 1
-        bullet.physicsBody?.contactTestBitMask = 0x1 << 2
-        bullet.physicsBody?.collisionBitMask = 0
-        bullet.physicsBody?.affectedByGravity = false
         
         scene.addChild(bullet)
         
@@ -99,21 +60,11 @@ class Player {
         let removeAction = SKAction.removeFromParent()
         bullet.run(SKAction.sequence([moveAction, removeAction]))
     }
+
     
     func handleTouch(_ touch: UITouch) {
         guard let scene = scene else { return }
         let location = touch.location(in: scene)
-        
-        // Check if either button was tapped
-        if disableButton.contains(location) {
-            toggleShooting()
-            return
-        }
-        
-        if rapidFireButton.contains(location) {
-            toggleRapidFire()
-            return
-        }
         
         // Handle ship movement
         let previousLocation = touch.previousLocation(in: scene)
@@ -131,26 +82,8 @@ class Player {
         ship.position.y = min(maxY, max(minY, newY))
     }
     
-    private func toggleShooting() {
-        canShoot.toggle()
-        (disableButton as! SKShapeNode).fillColor = canShoot ? .red : .gray
-        let label = disableButton.children.first as! SKLabelNode
-        label.text = canShoot ? "Stop" : "Start"
-    }
-    
-    private func toggleRapidFire() {
-        if fireRate == 0.01 {
-            fireRate = 0.2  // Normal fire rate
-            (rapidFireButton as! SKShapeNode).fillColor = .green
-        } else {
-            fireRate = 0.01  // Rapid fire rate
-            (rapidFireButton as! SKShapeNode).fillColor = .yellow
-        }
-    }
-    
     func cleanup() {
         ship.removeFromParent()
-        disableButton.removeFromParent()
-        rapidFireButton.removeFromParent()
+
     }
 }
