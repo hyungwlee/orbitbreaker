@@ -11,6 +11,7 @@ enum EnemyType {
     case a
     case b
     case c
+    case d
     
     static var size: CGSize {
         return CGSize(width: 24, height: 16)
@@ -20,20 +21,22 @@ enum EnemyType {
         return "enemy"
     }
     
-    var color: SKColor {
-        switch self {
-        case .a: return .red
-        case .b: return .green
-        case .c: return .blue
+    // Now color is based on health instead of type
+    static func colorForHealth(_ health: Int) -> SKColor {
+        switch health {
+        case 40: return .purple    // Full health
+        case 30: return .red       // Lost some health
+        case 20: return .orange    // Half health
+        default: return .yellow         // Low health
         }
     }
     
-    // Add health for each type
+    // Initial color should be purple since all start at 40 health
+    var color: SKColor {
+        return EnemyType.colorForHealth(40)
+    }
+    
     var initialHealth: Int {
-            switch self {
-            case .a: return 40  // Now requires 1 hit (with 10 damage)
-            case .b: return 40  // Now requires 2 hits
-            case .c: return 40  // Now requires 3 hits
-            }
-        }
+        return 40  // All enemies start with 40 health
+    }
 }

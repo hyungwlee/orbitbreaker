@@ -81,13 +81,16 @@ class Enemy: SKSpriteNode {
     func takeDamage(_ amount: Int) -> Bool {
             health -= amount
             print("Enemy took \(amount) damage. Health now: \(health)")  // Debug print
-            
+           
+            if let circleShape = self.children.first as? SKShapeNode {
+                circleShape.fillColor = EnemyType.colorForHealth(health)
+            }
             // Flash effect
             if let circleShape = self.children.first as? SKShapeNode {
-                let originalColor = (self as? Boss)?.bossType.color ?? circleShape.fillColor
+                let currentColor = EnemyType.colorForHealth(health)
                 circleShape.run(SKAction.sequence([
                     SKAction.colorize(with: .white, colorBlendFactor: 1.0, duration: 0.1),
-                    SKAction.colorize(with: originalColor, colorBlendFactor: 1.0, duration: 0.1)
+                    SKAction.colorize(with: currentColor, colorBlendFactor: 1.0, duration: 0.1)
                 ]))
             }
             
