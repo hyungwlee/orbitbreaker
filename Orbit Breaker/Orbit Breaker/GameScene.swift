@@ -11,7 +11,7 @@ import GameplayKit
 class GameScene: SKScene, SKPhysicsContactDelegate {
     private var contentCreated = false
     private var enemyManager: EnemyManager!
-    private var testPlayer: TestPlayer!
+    private var Player: Player!
     
     override func didMove(to view: SKView) {
         if !contentCreated {
@@ -29,7 +29,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Initialize managers/systems
         enemyManager = EnemyManager(scene: self)
-        testPlayer = TestPlayer(scene: self)
+        Player = Orbit_Breaker.Player(scene: self)
         
         // Setup game elements
         setupGame()
@@ -42,7 +42,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
         enemyManager.update(currentTime: currentTime)
-           testPlayer.update(currentTime: currentTime)
+           Player.update(currentTime: currentTime)
        
     }
     
@@ -55,30 +55,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
             guard let touch = touches.first else { return }
-            testPlayer.handleTouch(touch)
+            Player.handleTouch(touch)
         }
         
-        func didBegin(_ contact: SKPhysicsContact) {
-            guard let nodeA = contact.bodyA.node,
-                  let nodeB = contact.bodyB.node else { return }
-            
-            // Handle player bullet hitting enemy
-            if nodeA.name == "testBullet" && nodeB.name == "enemy",
-               let enemy = nodeB as? Enemy {
-                enemyManager.handleBulletCollision(bullet: nodeA, enemy: enemy)
-            }
-            else if nodeB.name == "testBullet" && nodeA.name == "enemy",
-                    let enemy = nodeA as? Enemy {
-                enemyManager.handleBulletCollision(bullet: nodeB, enemy: enemy)
-            }
-            
-            // Handle enemy bullet hitting player
-            if (nodeA.name == "enemyBullet" && nodeB.name == "testPlayer") ||
-               (nodeB.name == "enemyBullet" && nodeA.name == "testPlayer") {
-                let bullet = nodeA.name == "enemyBullet" ? nodeA : nodeB
-                bullet.removeFromParent()
-                // Add player hit feedback here if desired
-            }
+    func didBegin(_ contact: SKPhysicsContact) {
+        let nodeA = contact.bodyA.node
+        let nodeB = contact.bodyB.node
+        
+        // Check if the contact is between a bullet and an enemy
+        if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
+            enemy.takeDamage(bullet.damage)
+            bullet.removeFromParent()  // Remove the bullet after it hits
+        } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
+            enemy.takeDamage(bullet.damage)
+            bullet.removeFromParent()  // Remove the bullet after it hits
         }
+    }
+
 }
+
 
