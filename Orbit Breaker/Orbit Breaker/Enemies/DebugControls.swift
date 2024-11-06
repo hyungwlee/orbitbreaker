@@ -10,7 +10,7 @@ import SwiftUI
 struct DebugControls: View {
     @Binding var isVisible: Bool
     var nextWave: () -> Void
-    @State private var currentWave = 1
+    @State var currentWave = 1
     
     var body: some View {
         VStack {

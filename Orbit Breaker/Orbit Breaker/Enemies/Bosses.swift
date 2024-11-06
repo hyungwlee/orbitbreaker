@@ -51,17 +51,19 @@ enum BossType {
     }
 }
 class Boss: Enemy {
+    
     let bossType: BossType
         private var lastShootTime: TimeInterval = 0
         private var lastSwoopTime: TimeInterval = 0
         private var normalHeight: CGFloat = 0
         private var isSwooping = false
         private var moveDirection: CGFloat = 1
+        private var hasEnteredScene = false
+        private var entryStartTime: TimeInterval = 0
         
-    init(type: BossType) {
+        init(type: BossType) {
             self.bossType = type
-            // Initialize super with temporary EnemyType but correct health value
-            super.init(type: .a)  // Call super.init first
+            super.init(type: .a)
             
             // Remove default circle shape
             self.removeAllChildren()
@@ -75,44 +77,85 @@ class Boss: Enemy {
             
             // Update physics body for boss size
             self.physicsBody = SKPhysicsBody(circleOfRadius: type.size.width / 2)
-            self.physicsBody?.categoryBitMask = 0x1 << 2
-            self.physicsBody?.contactTestBitMask = 0x1 << 1
-            self.physicsBody?.collisionBitMask = 0
-            self.physicsBody?.affectedByGravity = false
-            self.physicsBody?.isDynamic = true
+                   self.physicsBody?.categoryBitMask = 0x1 << 2     // Category 3
+                   self.physicsBody?.contactTestBitMask = 0x1 << 0  // Will contact with player (Category 1)
+                   self.physicsBody?.collisionBitMask = 0
+                   self.physicsBody?.affectedByGravity = false
+                   self.physicsBody?.isDynamic = true
             
-            // Just set the current health value
             self.health = type.health
-            
-            self.canShoot = true
+            self.canShoot = false  // Start with shooting disabled
         }
         
         required init?(coder aDecoder: NSCoder) {
             fatalError("init(coder:) has not been implemented")
         }
     
+    private func startEntryAnimation(in scene: SKScene) {
+            // Start position above screen
+            position = CGPoint(x: scene.size.width/2, y: scene.size.height + 100)
+            
+            // Create dramatic entry animation
+            let moveDown = SKAction.moveTo(y: scene.size.height * 0.8, duration: 2.0)
+            moveDown.timingMode = .easeOut  // Slow down as it reaches position
+            
+            // Add some rotation for style
+            let rotate = SKAction.rotate(byAngle: CGFloat.pi * 2, duration: 2.0)
+            
+            // Combine movements
+            let entryGroup = SKAction.group([moveDown, rotate])
+            
+            run(entryGroup)
+        }
+    
     func update(currentTime: TimeInterval, in scene: SKScene) {
-        // Initialize normal height once
-        if normalHeight == 0 {
-            normalHeight = scene.size.height * 0.8
-            position.y = normalHeight
-        }
-        
-        // Only update shooting and movement if not swooping
-        if !isSwooping {
-            if currentTime - lastShootTime >= 3.0 {
-                shootFireballPattern(in: scene)
-                lastShootTime = currentTime
+            if !hasEnteredScene {
+                startEntryAnimation(in: scene)
+                entryStartTime = currentTime
+                hasEnteredScene = true
+                return
             }
-            updateMovement(currentTime: currentTime, in: scene)
+            
+            // Time elapsed since entry started
+            let timeSinceEntry = currentTime - entryStartTime
+            
+            // Initialize normal height once
+            if normalHeight == 0 {
+                normalHeight = scene.size.height * 0.8
+            }
+            
+            // Only start attack patterns after entry animation and delay
+            if timeSinceEntry > 3.0 {  // 3 second delay after entry
+                // Enable shooting after entry
+                self.canShoot = true
+                
+                // Only update shooting and movement if not swooping
+                if !isSwooping {
+                    if lastShootTime == 0 {
+                        // First shot should be 2 seconds after we start attacking
+                        lastShootTime = currentTime - 1.0  // Will trigger first shot in 2 seconds
+                    }
+                    
+                    if currentTime - lastShootTime >= 3.0 {
+                        shootFireballPattern(in: scene)
+                        lastShootTime = currentTime
+                    }
+                    updateMovement(currentTime: currentTime, in: scene)
+                }
+                
+                // Initialize swoop timer after entry
+                if lastSwoopTime == 0 {
+                    // First swoop should be 5 seconds after we start attacking
+                    lastSwoopTime = currentTime - 5.0
+                }
+                
+                // Check for swoop timing
+                if currentTime - lastSwoopTime >= 7.0 && !isSwooping {
+                    startSwoop(in: scene)
+                    lastSwoopTime = currentTime
+                }
+            }
         }
-        
-        // Check for swoop timing
-        if currentTime - lastSwoopTime >= 10.0 && !isSwooping {
-            startSwoop(in: scene)
-            lastSwoopTime = currentTime
-        }
-    }
     
     private func startSwoop(in scene: SKScene) {
         isSwooping = true

@@ -121,6 +121,18 @@ class EnemyManager {
     }
 
     
+    func cleanupAllEnemies() {
+            // Remove all enemies
+            enemies.forEach { $0.removeFromParent() }
+            enemies.removeAll()
+            
+            // Reset wave count
+            currentWave = 0
+            
+            // Reset wave manager
+            waveManager.reset()
+        }
+    
     private func setupBossWave() {
         guard let scene = scene else { return }
         
@@ -136,6 +148,7 @@ class EnemyManager {
     func handleEnemyDestroyed(_ enemy: Enemy) {
             if let index = enemies.firstIndex(of: enemy) {
                 enemies.remove(at: index)
+                
                 
                 // If all enemies are destroyed, start next wave after a delay
                 if enemies.isEmpty {
