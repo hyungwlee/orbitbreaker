@@ -29,8 +29,6 @@ struct EnemyWaveConfig {
         func generatePath(from startPoint: CGPoint, to endPoint: CGPoint, waveNumber: Int) -> UIBezierPath {
             let path = UIBezierPath()
             path.move(to: startPoint)
-            
-            if waveNumber <= 3 {
                 // Original basic swooping pattern for early waves
                 switch self {
                 case .swoopLeft, .advancedSwoopLeft:
@@ -43,32 +41,7 @@ struct EnemyWaveConfig {
                     let controlPoint2 = CGPoint(x: endPoint.x - 60, y: endPoint.y + 60)
                     path.addCurve(to: endPoint, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
                 }
-            } else {
-                // Advanced swooping pattern for later waves
-                switch self {
-                case .swoopLeft, .advancedSwoopLeft:
-                    // First curve down to bottom point
-                    let downControlPoint1 = CGPoint(x: startPoint.x + 100, y: startPoint.y)
-                    let downControlPoint2 = CGPoint(x: leftBottomPoint.x - 50, y: leftBottomPoint.y + 100)
-                    path.addCurve(to: leftBottomPoint, controlPoint1: downControlPoint1, controlPoint2: downControlPoint2)
-                    
-                    // Second curve up to final position
-                    let upControlPoint1 = CGPoint(x: leftBottomPoint.x + 50, y: leftBottomPoint.y)
-                    let upControlPoint2 = CGPoint(x: endPoint.x - 50, y: endPoint.y - 100)
-                    path.addCurve(to: endPoint, controlPoint1: upControlPoint1, controlPoint2: upControlPoint2)
-                    
-                case .swoopRight, .advancedSwoopRight:
-                    // First curve down to bottom point
-                    let downControlPoint1 = CGPoint(x: startPoint.x - 100, y: startPoint.y)
-                    let downControlPoint2 = CGPoint(x: rightBottomPoint.x + 50, y: rightBottomPoint.y + 100)
-                    path.addCurve(to: rightBottomPoint, controlPoint1: downControlPoint1, controlPoint2: downControlPoint2)
-                    
-                    // Second curve up to final position
-                    let upControlPoint1 = CGPoint(x: rightBottomPoint.x - 50, y: rightBottomPoint.y)
-                    let upControlPoint2 = CGPoint(x: endPoint.x + 50, y: endPoint.y - 100)
-                    path.addCurve(to: endPoint, controlPoint1: upControlPoint1, controlPoint2: upControlPoint2)
-                }
-            }
+            
             
             return path
         }
@@ -85,6 +58,11 @@ class WaveManager {
     init(scene: SKScene) {
         self.scene = scene
     }
+    func reset() {
+            isSpawning = false
+            enemySpawnQueue.removeAll()
+            lastSpawnTime = 0
+        }
     
     func startNextWave(enemies: [(Enemy, CGPoint)]) {
         currentWave += 1

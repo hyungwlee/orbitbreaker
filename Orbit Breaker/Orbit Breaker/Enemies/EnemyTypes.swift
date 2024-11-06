@@ -30,10 +30,10 @@ enum EnemyType {
     
     // Add health for each type
     var initialHealth: Int {
-        switch self {
-        case .a: return 1  // Easily customize health per type
-        case .b: return 1
-        case .c: return 1
+            switch self {
+            case .a: return 40  // Now requires 1 hit (with 10 damage)
+            case .b: return 40  // Now requires 2 hits
+            case .c: return 40  // Now requires 3 hits
+            }
         }
-    }
 }
