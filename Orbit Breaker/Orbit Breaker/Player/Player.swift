@@ -13,7 +13,7 @@ class Player {
     private weak var scene: SKScene?
     private var ship: SKSpriteNode
     private var lastFireTime: TimeInterval = 0
-    public var fireRate: TimeInterval = 0.2  // Made variable to allow modification
+    public var fireRate: TimeInterval = 0.15  // Made variable to change fire rate
     private var isDragging = false
     private var canShoot = true  // New property to control shooting
     private var shield: SKSpriteNode?
@@ -48,11 +48,17 @@ class Player {
     
     func fireBullet() {
         guard let scene = scene else { return }
+        // bullet damage gets multiplied by damage multiplier (either 0 or 1 depending on power up status)
         let bulletdamage: Int = 10 * damageMultiplier
+        
+        // Create new bullet with damage criteria from above
         let bullet = Bullet(damage: bulletdamage, color: .yellow, size: CGSize(width: 4, height: 10))
+        
+        // set bullet position
         bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height/2)
         bullet.name = "testBullet"
         
+        // adds bullet to ship
         scene.addChild(bullet)
         
         let moveAction = SKAction.moveBy(x: 0, y: scene.size.height + bullet.size.height, duration: 1.0)
@@ -81,19 +87,26 @@ class Player {
         ship.position.y = min(maxY, max(minY, newY))
     }
     
+    // adding shield function, creates a blue box, not sure how it looks yet I haven't run this part
     func addShield() {
+        
+        // checks if shield exists, then if not and the function is called, it creates a new shield around the ship
         if shield == nil {
             let shield = SKSpriteNode(color: .blue, size: CGSize(width: 100, height: 100))
             shield.position = CGPoint(x: 0, y: 0)
+            
+            // adds shield to the ship
             ship.addChild(shield)
         }
     }
     
+    // when called, the shield is removed and set to nil as to not interfere with previous function
     func removeShield() {
         shield?.removeFromParent()
         shield = nil
     }
     
+    // removes ship from screen
     func cleanup() {
         ship.removeFromParent()
     }

@@ -10,14 +10,14 @@ import SpriteKit
 enum PowerUps: CaseIterable {
     case shield
     case doubleDamage
-    case moreBullets
 }
 
 class PowerUp : SKSpriteNode {
     let type : PowerUps
     private let duration : TimeInterval
     
-    init(type: PowerUps, duration: TimeInterval = 5.0, color: UIColor, size: CGSize) {
+    // intitialize all power up traits
+        init(type: PowerUps, duration: TimeInterval = 5.0, color: UIColor, size: CGSize) {
         self.type = type
         self.duration = duration
         
@@ -29,16 +29,16 @@ class PowerUp : SKSpriteNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // apply to the player ship
     func apply(to player: Player) {
         switch type {
         case .shield:
             player.addShield()
             scheduleEndEffect(for: player, after: duration)
-            // enemy bullets damage = 0
+            // enemy bullets damage = 0 or some other way to implement 0 damage for enemies
         case .doubleDamage:
+            // alter damage multiplier from player class to double the existing 10 damage
             player.damageMultiplier = 2
-        case .moreBullets:
-            break
         }
     }
     
@@ -50,14 +50,14 @@ class PowerUp : SKSpriteNode {
         }
     }
     
+    // removing these power ups after a certain amout of time (5s at the moment)
     private func remove(from Player: Player) {
         switch type {
         case .shield:
             Player.removeShield()
         case .doubleDamage:
             Player.damageMultiplier = 1
-        case .moreBullets:
-            break
+
         }
     }
 }
