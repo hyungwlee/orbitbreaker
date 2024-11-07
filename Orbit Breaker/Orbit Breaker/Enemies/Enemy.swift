@@ -13,12 +13,14 @@ class Enemy: SKSpriteNode {
         let initialHealth: Int
         private var nextShootTime: TimeInterval = 0
         var canShoot: Bool
+        var holdsPowerUp: Bool
         
         init(type: EnemyType) {
             // Set health based on enemy type
             self.initialHealth = type.initialHealth
             self.health = type.initialHealth
             self.canShoot = false
+            self.holdsPowerUp = false
             
             super.init(texture: nil, color: type.color, size: EnemyType.size)
             
@@ -78,23 +80,35 @@ class Enemy: SKSpriteNode {
             bullet.run(SKAction.sequence([moveAction, removeAction]))
         }
     
-    func dropPowerUp() -> Int {
-        let dropRate = 0.7
-        if Double.random(in: 0...1) <= dropRate{
+    func dropPowerUp(scene: SKScene) {
+//        let dropRate = 0.7
+//        if Double.random(in: 0...1) <= dropRate{
+        if (self.holdsPowerUp){
+            print ("dropped powerup")
+            
             let powerUpType = PowerUps.allCases.randomElement()!
             let powerUp = PowerUp(type: powerUpType, color: .green, size: CGSize(width: 10, height: 10))
+            powerUp.name = "powerUp"
             
-        
-            powerUp.position = self.position
+            powerUp.position = CGPoint(x: position.x, y: position.y - size.height/2)
             
-            if let scene = scene.self {
-                scene.addChild(powerUp)
-            }
+            powerUp.physicsBody = SKPhysicsBody(rectangleOf: powerUp.size)
+            powerUp.physicsBody?.categoryBitMask = 0x1 << 3
+            powerUp.physicsBody?.contactTestBitMask = 0x1 << 0
+            powerUp.physicsBody?.collisionBitMask = 0
+            powerUp.physicsBody?.affectedByGravity = false
             
-            return 1
+            scene.addChild(powerUp)
+            
+            
+            // Ensure powerUps travel full screen height
+            let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + powerUp.size.height), duration: 6.5)
+            let removeAction = SKAction.removeFromParent()
+            powerUp.run(SKAction.sequence([moveAction, removeAction]))
+            
+            
             
         }
-        return 0
     }
         
     func takeDamage(_ amount: Int) -> Bool {

@@ -118,6 +118,9 @@ class EnemyManager {
         // Assign shooters
         assignShooters()
         
+        // Assign power-up holders
+        assignPowerUpDroppers()
+        
         print("Total regular enemies created: \(enemies.count)") // Debug print
     }
 
@@ -222,6 +225,29 @@ class EnemyManager {
                 enemy.updateShooting(currentTime: -initialDelay, scene: scene, waveNumber: currentWave)
             }
         }
+    }
+    
+    func assignPowerUpDroppers(){
+        
+        // Make sure we have enough enemies
+        guard enemies.count >= 4 else { return }
+        
+        // Reset all enemies to non-holding powerups
+        enemies.forEach { $0.holdsPowerUp = false }
+        
+        // Get 4=3 random indices
+        let powerUpHolders = Array(0..<enemies.count).shuffled().prefix(4)
+        
+        for (indices, holderIndex) in powerUpHolders.enumerated() {
+            let enemy = enemies[holderIndex]
+            enemy.holdsPowerUp = true
+            print("")
+            print("chosen")
+            print("")
+        }
+        
+        
+        
     }
 }
 

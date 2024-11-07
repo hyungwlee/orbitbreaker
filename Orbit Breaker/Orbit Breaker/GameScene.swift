@@ -168,6 +168,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             enumerateChildNodes(withName: "enemyBullet") { node, _ in
                 node.removeFromParent()
             }
+            enumerateChildNodes(withName: "powerUp") { node, _ in
+                node.removeFromParent()
+            }
             
             // Remove all enemies through enemy manager
             enemyManager.cleanupAllEnemies()
@@ -211,9 +214,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Handle enemy damage
         if enemy.takeDamage(bullet.damage) {
-            if (powerUpsDropped < maxPowerUpsDropped){
-                powerUpsDropped += enemy.dropPowerUp()
-            }
+            enemy.dropPowerUp(scene: self)
+//            if (powerUpsDropped < maxPowerUpsDropped){
+//                powerUpsDropped += enemy.dropPowerUp()
+//            }
             // If enemy should die
             enemy.removeFromParent()
             // Notify enemy manager

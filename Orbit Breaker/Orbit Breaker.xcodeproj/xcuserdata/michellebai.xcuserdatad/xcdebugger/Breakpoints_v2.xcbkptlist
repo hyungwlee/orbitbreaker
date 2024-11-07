@@ -14,8 +14,8 @@
             filePath = "Orbit Breaker/Enemies/Enemy.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "58"
-            endingLineNumber = "58"
+            startingLineNumber = "60"
+            endingLineNumber = "60"
             landmarkName = "updateShooting(currentTime:scene:waveNumber:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "Orbit Breaker/Enemies/Enemy.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "56"
-            endingLineNumber = "56"
+            startingLineNumber = "58"
+            endingLineNumber = "58"
             landmarkName = "updateShooting(currentTime:scene:waveNumber:)"
             landmarkType = "7">
          </BreakpointContent>
