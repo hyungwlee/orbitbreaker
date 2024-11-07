@@ -84,10 +84,12 @@ class Enemy: SKSpriteNode {
 //        let dropRate = 0.7
 //        if Double.random(in: 0...1) <= dropRate{
         if (self.holdsPowerUp){
-            print ("dropped powerup")
+            
             
             let powerUpType = PowerUps.allCases.randomElement()!
             let powerUp = PowerUp(type: powerUpType, color: .green, size: CGSize(width: 10, height: 10))
+            print ("dropped powerup of type \(powerUp.type)")
+            
             powerUp.name = "powerUp"
             
             powerUp.position = CGPoint(x: position.x, y: position.y - size.height/2)

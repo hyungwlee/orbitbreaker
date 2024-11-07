@@ -22,7 +22,11 @@ class PowerUp : SKSpriteNode {
         self.duration = duration
         
         super.init(texture: nil, color: color, size: size)
-        
+        self.physicsBody = SKPhysicsBody(rectangleOf: size)
+        self.physicsBody?.categoryBitMask = 0x1 << 1
+        self.physicsBody?.contactTestBitMask = 0x1 << 2
+        self.physicsBody?.collisionBitMask = 0
+        self.physicsBody?.affectedByGravity = false
     }
     
     required init?(coder aDecoder: NSCoder){

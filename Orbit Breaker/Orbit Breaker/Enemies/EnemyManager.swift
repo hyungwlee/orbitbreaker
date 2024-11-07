@@ -241,9 +241,7 @@ class EnemyManager {
         for (indices, holderIndex) in powerUpHolders.enumerated() {
             let enemy = enemies[holderIndex]
             enemy.holdsPowerUp = true
-            print("")
-            print("chosen")
-            print("")
+            
         }
         
         
