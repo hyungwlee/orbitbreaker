@@ -14,6 +14,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var enemyManager: EnemyManager!
     private var Player: Player!
     private var debugControls: UIHostingController<DebugControls>?
+    var powerUpsDropped = 0
+    let maxPowerUpsDropped = 3
+    
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -47,6 +50,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemyManager.forceCleanup()
         // Setup next wave
         enemyManager.setupEnemies()
+        
+        powerUpsDropped = 0
     }
     
     private func createContent() {
@@ -206,12 +211,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Handle enemy damage
         if enemy.takeDamage(bullet.damage) {
+            if (powerUpsDropped < maxPowerUpsDropped){
+                powerUpsDropped += enemy.dropPowerUp()
+            }
             // If enemy should die
             enemy.removeFromParent()
             // Notify enemy manager
             enemyManager.handleEnemyDestroyed(enemy)
         }
     }
+    
+    
+//    func canDropPowerUps() -> Bool{
+//        return (powerUpsDropped <= maxPowerUpsDropped)
+//    }
+    
 }
 
 

@@ -77,11 +77,37 @@ class Enemy: SKSpriteNode {
             let removeAction = SKAction.removeFromParent()
             bullet.run(SKAction.sequence([moveAction, removeAction]))
         }
+    
+    func dropPowerUp() -> Int {
+        let dropRate = 0.7
+        if Double.random(in: 0...1) <= dropRate{
+            let powerUpType = PowerUps.allCases.randomElement()!
+            let powerUp = PowerUp(type: powerUpType, color: .green, size: CGSize(width: 10, height: 10))
+            
+        
+            powerUp.position = self.position
+            
+            if let scene = scene.self {
+                scene.addChild(powerUp)
+            }
+            
+            return 1
+            
+        }
+        return 0
+    }
         
     func takeDamage(_ amount: Int) -> Bool {
             health -= amount
             print("Enemy took \(amount) damage. Health now: \(health)")  // Debug print
            
+            let isDead = (health <= 0)
+        
+            if (isDead){
+                    return isDead
+            }
+            
+            
             if let circleShape = self.children.first as? SKShapeNode {
                 circleShape.fillColor = EnemyType.colorForHealth(health)
             }
@@ -94,7 +120,7 @@ class Enemy: SKSpriteNode {
                 ]))
             }
             
-            return health <= 0
+            return false
         }
 }
 

@@ -13,13 +13,20 @@ enum PowerUps: CaseIterable {
     case moreBullets
 }
 
-class PowerUp {
+class PowerUp : SKSpriteNode {
     let type : PowerUps
     private let duration : TimeInterval
     
-    init(type: PowerUps, duration: TimeInterval = 5.0) {
+    init(type: PowerUps, duration: TimeInterval = 5.0, color: UIColor, size: CGSize) {
         self.type = type
         self.duration = duration
+        
+        super.init(texture: nil, color: color, size: size)
+        
+    }
+    
+    required init?(coder aDecoder: NSCoder){
+        fatalError("init(coder:) has not been implemented")
     }
     
     func apply(to player: Player) {
@@ -34,6 +41,8 @@ class PowerUp {
             break
         }
     }
+    
+    
     
     private func scheduleEndEffect(for player: Player, after duration: TimeInterval) {
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
