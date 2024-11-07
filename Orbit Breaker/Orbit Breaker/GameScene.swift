@@ -10,6 +10,7 @@ import GameplayKit
 import SwiftUI
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    @State private var hasShield = false
     private var contentCreated = false
     private var enemyManager: EnemyManager!
     private var Player: Player!
@@ -91,50 +92,67 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
-        let nodeA = contact.bodyA.node
-        let nodeB = contact.bodyB.node
+            let nodeA = contact.bodyA.node
+            let nodeB = contact.bodyB.node
 
-        // Check bullet-enemy collisions
-        if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
-           handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
-        } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
-           handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
-        }
+            // Check bullet-enemy collisions
+            if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
+               handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
+            } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
+               handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
+            }
 
-        // Check player-enemy bullet collisions
-        if let bullet = nodeA, let player = nodeB,
-          (bullet.name == "enemyBullet" && player.name == "testPlayer") {
-           handlePlayerHit()
-           bullet.removeFromParent()
-        } else if let bullet = nodeB, let player = nodeA,
-                 (bullet.name == "enemyBullet" && player.name == "testPlayer") {
-           handlePlayerHit()
-           bullet.removeFromParent()
-        }
-    
-    
-        // Check player-powerUp collisions
-        if let powerUp = nodeA as? PowerUp, let player = nodeB,
-           (powerUp.name == "powerUp" && player.name == "testPlayer") {
-            powerUp.apply(to: Player)
-            powerUp.removeFromParent()
-            print ("got powerup")
-        } else if let powerUp = nodeB as? PowerUp, let player = nodeA,
-                  (powerUp.name == "powerUp" && player.name == "testPlayer") {
-            powerUp.apply(to: Player )
-            powerUp.removeFromParent()
-            print ("got powerup")
-        }
+            // Check player-enemy bullet collisions
+            if let bullet = nodeA, let player = nodeB,
+               (bullet.name == "enemyBullet" && player.name == "testPlayer") {
+                if !Player.hasShield {  // Use Player's shield state
+                    handlePlayerHit()
+                } else {
+                    Player.hasShield = false
+                    Player.removeShield()
+                }
+                bullet.removeFromParent()
+            } else if let bullet = nodeB, let player = nodeA,
+                      (bullet.name == "enemyBullet" && player.name == "testPlayer") {
+                if !Player.hasShield {  // Use Player's shield state
+                    handlePlayerHit()
+                } else {
+                    Player.hasShield = false
+                    Player.removeShield()
+                }
+                bullet.removeFromParent()
+            }
+        
+            // Check player-powerUp collisions
+            if let powerUp = nodeA as? PowerUp, let player = nodeB,
+               (powerUp.name == "powerUp" && player.name == "testPlayer") {
+                powerUp.apply(to: Player)
+                powerUp.removeFromParent()
+            } else if let powerUp = nodeB as? PowerUp, let player = nodeA,
+                      (powerUp.name == "powerUp" && player.name == "testPlayer") {
+                powerUp.apply(to: Player)
+                powerUp.removeFromParent()
+            }
 
-        // Check player-boss collisions
-        if let boss = nodeA as? Boss, let player = nodeB as? SKSpriteNode,
-          player.name == "testPlayer" {
-           handlePlayerHit()
-        } else if let boss = nodeB as? Boss, let player = nodeA as? SKSpriteNode,
-                 player.name == "testPlayer" {
-           handlePlayerHit()
+            // Check player-boss collisions
+            if let _ = nodeA as? Boss, let player = nodeB as? SKSpriteNode,
+               player.name == "testPlayer" {
+                if !Player.hasShield {  // Use Player's shield state
+                    handlePlayerHit()
+                } else {
+                    Player.hasShield = false
+                    Player.removeShield()
+                }
+            } else if let _ = nodeB as? Boss, let player = nodeA as? SKSpriteNode,
+                      player.name == "testPlayer" {
+                if !Player.hasShield {  // Use Player's shield state
+                    handlePlayerHit()
+                } else {
+                    Player.hasShield = false
+                    Player.removeShield()
+                }
+            }
         }
-   }
     
     private func restartGame() {
             // Remove game over screen and all other nodes
@@ -206,7 +224,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handlePlayerHit() {
             print("Player was hit!")
-            
             // Play hit effect
             if let playerNode = childNode(withName: "testPlayer") {
                 let flash = SKAction.sequence([

@@ -55,12 +55,12 @@ class PowerUp : SKSpriteNode {
     }
     
     // removing these power ups after a certain amout of time (5s at the moment)
-    private func remove(from Player: Player) {
+    private func remove(from player: Player) {
         switch type {
         case .shield:
-            Player.removeShield()
+            player.removeShield()
         case .doubleDamage:
-            Player.damageMultiplier = 1
+            player.damageMultiplier = 1
 
         }
     }

@@ -17,6 +17,7 @@ class Player {
     private var isDragging = false
     private var canShoot = true  // New property to control shooting
     private var shield: SKSpriteNode?
+    var hasShield: Bool = false
     public var damageMultiplier: Int = 1
     
     init(scene: SKScene) {
@@ -91,8 +92,11 @@ class Player {
     func addShield() {
         
         // checks if shield exists, then if not and the function is called, it creates a new shield around the ship
+        hasShield = true
         if shield == nil {
-            let shield = SKSpriteNode(color: .blue, size: CGSize(width: 100, height: 100))
+            let shield = SKShapeNode(circleOfRadius: 50)
+            shield.strokeColor = .clear
+            shield.fillColor = UIColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 0.3)
             shield.position = CGPoint(x: 0, y: 0)
             
             // adds shield to the ship
@@ -102,6 +106,7 @@ class Player {
     
     // when called, the shield is removed and set to nil as to not interfere with previous function
     func removeShield() {
+        hasShield = false
         shield?.removeFromParent()
         shield = nil
     }
