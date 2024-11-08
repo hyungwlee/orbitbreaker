@@ -35,6 +35,7 @@ class Player {
         ship.physicsBody = SKPhysicsBody(texture: ship.texture!, size: ship.size)
         ship.physicsBody?.categoryBitMask = 0x1 << 0     // Category 1
         ship.physicsBody?.contactTestBitMask = 0x1 << 3  // Will contact with category 4 (enemy bullets)
+        ship.physicsBody?.contactTestBitMask = 0x1 << 1 // dies on contact with enemy now
         ship.physicsBody?.collisionBitMask = 0
         ship.physicsBody?.affectedByGravity = false
         scene.addChild(ship)
@@ -53,7 +54,7 @@ class Player {
         let bulletdamage: Int = 10 * damageMultiplier
         
         // Create new bullet with damage criteria from above
-        let bullet = Bullet(damage: bulletdamage, color: .yellow, size: CGSize(width: 4, height: 10))
+        let bullet = Bullet(damage: bulletdamage, color: .yellow, size: CGSize(width: 6, height: 10))
         
         // set bullet position
         bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height/2)
@@ -83,7 +84,7 @@ class Player {
         let minX = ship.size.width/2
         let maxX = scene.size.width - ship.size.width/2
         let minY = ship.size.height/2
-        let maxY = scene.size.width - ship.size.height/2
+        let maxY = scene.size.height - ship.size.height/2
         ship.position.x = min(maxX, max(minX, newX))
         ship.position.y = min(maxY, max(minY, newY))
     }
