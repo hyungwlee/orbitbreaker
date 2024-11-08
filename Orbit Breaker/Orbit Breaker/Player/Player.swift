@@ -16,9 +16,11 @@ class Player {
     public var fireRate: TimeInterval = 0.15  // Made variable to change fire rate
     private var isDragging = false
     private var canShoot = true  // New property to control shooting
-    private var shield: SKSpriteNode?
+    private var shieldNode: SKShapeNode?
     var hasShield: Bool = false
     public var damageMultiplier: Int = 1
+    private var shieldTimer: Timer?
+    private var damageTimer: Timer?
     
     init(scene: SKScene) {
         self.scene = scene
@@ -91,29 +93,53 @@ class Player {
     
     // adding shield function, creates a blue box, not sure how it looks yet I haven't run this part
     func addShield() {
-        
-        // checks if shield exists, then if not and the function is called, it creates a new shield around the ship
-        hasShield = true
-        if shield == nil {
-            let shield = SKShapeNode(circleOfRadius: 50)
-            shield.strokeColor = .clear
-            shield.fillColor = UIColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 0.3)
-            shield.position = CGPoint(x: 0, y: 0)
-            
-            // adds shield to the ship
-            ship.addChild(shield)
+            hasShield = true
+            if shieldNode == nil {
+                shieldNode = SKShapeNode(circleOfRadius: 50)
+                shieldNode?.strokeColor = .clear
+                shieldNode?.fillColor = UIColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 0.3)
+                shieldNode?.position = CGPoint(x: 0, y: 0)
+                ship.addChild(shieldNode!)
+                
+                // Cancel existing timer if any
+                shieldTimer?.invalidate()
+                
+                // Set new timer
+                shieldTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
+                    self?.removeShield()
+                }
+            }
         }
-    }
-    
-    // when called, the shield is removed and set to nil as to not interfere with previous function
-    func removeShield() {
-        hasShield = false
-        shield?.removeFromParent()
-        shield = nil
-    }
-    
-    // removes ship from screen
-    func cleanup() {
-        ship.removeFromParent()
-    }
+        
+        func removeShield() {
+            hasShield = false
+            shieldNode?.removeFromParent()
+            shieldNode = nil
+            shieldTimer?.invalidate()
+            shieldTimer = nil
+        }
+        
+    func setDoubleDamage() {
+            damageMultiplier = 2
+            
+            // Cancel existing timer if any
+            damageTimer?.invalidate()
+            
+            // Set new timer
+            damageTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
+                self?.removeDamageBoost()
+            }
+        }
+        
+        func removeDamageBoost() {
+            damageMultiplier = 1
+            damageTimer?.invalidate()
+            damageTimer = nil
+        }
+        
+        func cleanup() {
+            removeShield()
+            removeDamageBoost()
+            ship.removeFromParent()
+        }
 }
