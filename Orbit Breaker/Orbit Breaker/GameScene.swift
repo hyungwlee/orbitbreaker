@@ -13,63 +13,76 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     @State private var hasShield = false
     private var contentCreated = false
     private var enemyManager: EnemyManager!
-    private var Player: Player!
+    private var user: Player!
     private var PowerUp: PowerUp!
     private var debugControls: UIHostingController<DebugControls>?
     var powerUpsDropped = 0
     let maxPowerUpsDropped = 3
+    private var score: Int = 0
+    private var scoreLabel: SKLabelNode!
     
     
     override func didMove(to view: SKView) {
-        super.didMove(to: view)
-        setupDebugControls()
-        if !contentCreated {
-            createContent()
-            contentCreated = true
+            super.didMove(to: view)
+            setupDebugControls()
+            if !contentCreated {
+                createContent()
+                contentCreated = true
+            }
         }
-    }
     
     private func setupDebugControls() {
-        #if DEBUG
-        let debugView = DebugControls(isVisible: .constant(true)) { [weak self] in
-            self?.startNextWave()
+            #if DEBUG
+            let debugView = DebugControls(isVisible: .constant(true)) { [weak self] in
+                self?.startNextWave()
+            }
+            
+            let hostingController = UIHostingController(rootView: debugView)
+            hostingController.view.backgroundColor = .clear
+            hostingController.view.frame = CGRect(x: 10, y: 30, width: 120, height: 100)
+            
+            self.view?.addSubview(hostingController.view)
+            self.debugControls = hostingController
+            #endif
         }
-        
-        let hostingController = UIHostingController(rootView: debugView)
-        hostingController.view.backgroundColor = .clear
-        hostingController.view.frame = CGRect(x: 10, y: 30, width: 120, height: 100)
-        
-        self.view?.addSubview(hostingController.view)
-        self.debugControls = hostingController
-        #endif
-    }
     
     deinit {
         debugControls?.view.removeFromSuperview()
     }
-    private func startNextWave() {
-        // Force cleanup of any existing enemies
-        enemyManager.forceCleanup()
-        // Setup next wave
-        enemyManager.setupEnemies()
-        
-        powerUpsDropped = 0
-    }
+
     
     private func createContent() {
-        backgroundColor = .black
+            backgroundColor = .black
+            
+            // Set up physics world
+            physicsWorld.gravity = CGVector(dx: 0, dy: 0)
+            physicsWorld.contactDelegate = self
+            
+            // Initialize managers/systems
+            enemyManager = EnemyManager(scene: self)
+            user = Orbit_Breaker.Player(scene: self)
+            
+            // Setup score label
+            setupScoreLabel()
+            
+            // Setup game elements
+            setupGame()
+        }
         
-        // Set up physics world
-        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
-        physicsWorld.contactDelegate = self
+        private func setupScoreLabel() {
+            scoreLabel = SKLabelNode(fontNamed: "Arial")
+            scoreLabel.text = "Score: 0"
+            scoreLabel.fontSize = 24
+            scoreLabel.fontColor = .white
+            scoreLabel.horizontalAlignmentMode = .right
+            scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 40)
+            addChild(scoreLabel)
+        }
         
-        // Initialize managers/systems
-        enemyManager = EnemyManager(scene: self)
-        Player = Orbit_Breaker.Player(scene: self)
-        
-        // Setup game elements
-        setupGame()
-    }
+        private func updateScore(_ points: Int) {
+            score += points
+            scoreLabel.text = "Score: \(score)"
+        }
     
     private func setupGame() {
         // Add a slight delay to ensure everything is properly initialized
@@ -82,79 +95,92 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
         enemyManager.update(currentTime: currentTime)
-        Player.update(currentTime: currentTime)
+        user.update(currentTime: currentTime)
     }
     
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        Player.handleTouch(touch)
+        user.handleTouch(touch)
     }
     
-    func didBegin(_ contact: SKPhysicsContact) {
-            let nodeA = contact.bodyA.node
-            let nodeB = contact.bodyB.node
-
-            // Check bullet-enemy collisions
-            if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
-               handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
-            } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
-               handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
-            }
-
-            // Check player-enemy bullet collisions
-            if let bullet = nodeA, let player = nodeB,
-               (bullet.name == "enemyBullet" && player.name == "testPlayer") {
-                if !Player.hasShield {  // Use Player's shield state
-                    handlePlayerHit()
-                } else {
-                    Player.hasShield = false
-                    Player.removeShield()
-                }
-                bullet.removeFromParent()
-            } else if let bullet = nodeB, let player = nodeA,
-                      (bullet.name == "enemyBullet" && player.name == "testPlayer") {
-                if !Player.hasShield {  // Use Player's shield state
-                    handlePlayerHit()
-                } else {
-                    Player.hasShield = false
-                    Player.removeShield()
-                }
-                bullet.removeFromParent()
-            }
-        
-            // Check player-powerUp collisions
-            if let powerUp = nodeA as? PowerUp, let player = nodeB,
-               (powerUp.name == "powerUp" && player.name == "testPlayer") {
-                powerUp.apply(to: Player)
-                powerUp.removeFromParent()
-            } else if let powerUp = nodeB as? PowerUp, let player = nodeA,
-                      (powerUp.name == "powerUp" && player.name == "testPlayer") {
-                powerUp.apply(to: Player)
-                powerUp.removeFromParent()
-            }
-
-            // Check player-boss collisions
-            if let _ = nodeA as? Boss, let player = nodeB as? SKSpriteNode,
-               player.name == "testPlayer" {
-                if !Player.hasShield {  // Use Player's shield state
-                    handlePlayerHit()
-                } else {
-                    Player.hasShield = false
-                    Player.removeShield()
-                }
-            } else if let _ = nodeB as? Boss, let player = nodeA as? SKSpriteNode,
-                      player.name == "testPlayer" {
-                if !Player.hasShield {  // Use Player's shield state
-                    handlePlayerHit()
-                } else {
-                    Player.hasShield = false
-                    Player.removeShield()
-                }
-            }
+    private func startNextWave() {
+            // Ensure power-ups and timers are removed before starting next wave
+            user.removeShield()
+            user.removeDamageBoost()
+            
+            // Force cleanup of any existing enemies
+            enemyManager.forceCleanup()
+            
+            // Setup next wave
+            enemyManager.setupEnemies()
+            
+            powerUpsDropped = 0
         }
+       
+       func didBegin(_ contact: SKPhysicsContact) {
+           let nodeA = contact.bodyA.node
+           let nodeB = contact.bodyB.node
+
+           // Check bullet-enemy collisions
+           if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
+               handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
+           } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
+               handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
+           }
+
+           // Handle player collisions with enemy bullets
+           if let bullet = nodeA, let playerNode = nodeB as? SKSpriteNode,
+              bullet.name == "enemyBullet" && playerNode.name == "testPlayer" {
+               handlePlayerBulletCollision(bullet)
+           } else if let bullet = nodeB, let playerNode = nodeA as? SKSpriteNode,
+                     bullet.name == "enemyBullet" && playerNode.name == "testPlayer" {
+               handlePlayerBulletCollision(bullet)
+           }
+
+           // Handle power-up collisions
+           if let powerUp = nodeA as? PowerUp, let playerNode = nodeB as? SKSpriteNode,
+              powerUp.name == "powerUp" && playerNode.name == "testPlayer" {
+               handlePowerUpCollision(powerUp)
+           } else if let powerUp = nodeB as? PowerUp, let playerNode = nodeA as? SKSpriteNode,
+                     powerUp.name == "powerUp" && playerNode.name == "testPlayer" {
+               handlePowerUpCollision(powerUp)
+           }
+       }
+
+       private func handlePlayerBulletCollision(_ bullet: SKNode) {
+           if user.hasShield {
+               user.removeShield()  // This will set hasShield to false and remove the shield node
+               bullet.removeFromParent()
+           } else {
+               handlePlayerHit()
+           }
+       }
+
+       private func handlePowerUpCollision(_ powerUp: PowerUp) {
+           powerUp.apply(to: user)
+           powerUp.removeFromParent()
+       }
+
+       private func handlePlayerHit() {
+           print("Player was hit!")
+           if let playerNode = childNode(withName: "testPlayer") {
+               let flash = SKAction.sequence([
+                   SKAction.colorize(with: .red, colorBlendFactor: 1.0, duration: 0.1),
+                   SKAction.colorize(withColorBlendFactor: 0.0, duration: 0.1)
+               ])
+               playerNode.run(flash)
+           }
+           
+           user.cleanup()
+           gameOver()
+       }
     
     private func restartGame() {
+            // Reset score
+            score = 0
+            scoreLabel.text = "Score: 0"
+            
             // Remove game over screen and all other nodes
             removeAllChildren()
             
@@ -221,41 +247,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
         }
-    
-    private func handlePlayerHit() {
-            print("Player was hit!")
-            // Play hit effect
-            if let playerNode = childNode(withName: "testPlayer") {
-                let flash = SKAction.sequence([
-                    SKAction.colorize(with: .red, colorBlendFactor: 1.0, duration: 0.1),
-                    SKAction.colorize(withColorBlendFactor: 0.0, duration: 0.1)
-                ])
-                playerNode.run(flash)
-            }
-            
-            // Clean up the player
-            Player.cleanup()
-            
-            // Game over
-            gameOver()
-        }
+
     
     private func handleBulletEnemyCollision(bullet: Bullet, enemy: Enemy) {
-        // Remove bullet first
-        bullet.removeFromParent()
-        
-        // Handle enemy damage
-        if enemy.takeDamage(bullet.damage) {
-            enemy.dropPowerUp(scene: self)
-//            if (powerUpsDropped < maxPowerUpsDropped){
-//                powerUpsDropped += enemy.dropPowerUp()
-//            }
-            // If enemy should die
-            enemy.removeFromParent()
-            // Notify enemy manager
-            enemyManager.handleEnemyDestroyed(enemy)
+            bullet.removeFromParent()
+            
+            if enemy.takeDamage(bullet.damage) {
+                // Add score based on enemy type
+                if enemy is Boss {
+                    updateScore(500)  // Boss kill
+                } else {
+                    updateScore(10)   // Regular enemy kill
+                }
+                
+                enemy.dropPowerUp(scene: self)
+                enemy.removeFromParent()
+                enemyManager.handleEnemyDestroyed(enemy)
+            }
         }
-    }
     
     
 //    func canDropPowerUps() -> Bool{

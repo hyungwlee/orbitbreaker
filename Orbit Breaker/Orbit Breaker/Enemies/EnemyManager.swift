@@ -236,7 +236,7 @@ class EnemyManager {
         enemies.forEach { $0.holdsPowerUp = false }
         
         // Get 4=3 random indices
-        let powerUpHolders = Array(0..<enemies.count).shuffled().prefix(4)
+        let powerUpHolders = Array(0..<enemies.count).shuffled().prefix(1)
         
         for (indices, holderIndex) in powerUpHolders.enumerated() {
             let enemy = enemies[holderIndex]
