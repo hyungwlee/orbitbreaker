@@ -35,7 +35,7 @@ class Player {
         ship.physicsBody = SKPhysicsBody(texture: ship.texture!, size: ship.size)
         ship.physicsBody?.categoryBitMask = 0x1 << 0     // Category 1
         ship.physicsBody?.contactTestBitMask = 0x1 << 3  // Will contact with category 4 (enemy bullets)
-        ship.physicsBody?.contactTestBitMask = 0x1 << 1 // dies on contact with enemy now
+        ship.physicsBody?.contactTestBitMask = 0x1 << 1 // dies on contact with enemy (cat 2)
         ship.physicsBody?.collisionBitMask = 0
         ship.physicsBody?.affectedByGravity = false
         scene.addChild(ship)
