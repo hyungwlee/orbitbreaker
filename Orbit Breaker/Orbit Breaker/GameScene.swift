@@ -24,7 +24,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func didMove(to view: SKView) {
             super.didMove(to: view)
-            setupDebugControls()
+  //          setupDebugControls()
             if !contentCreated {
                 createContent()
                 contentCreated = true
@@ -52,7 +52,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     
     private func createContent() {
-            backgroundColor = .black
+            let background = SKSpriteNode(imageNamed: "background")
+            background.position = CGPoint(x: size.width/2, y: size.height/2)
+            background.size = self.size
+            background.zPosition = -1  // Ensure background is behind other elements
+            addChild(background)
             
             // Set up physics world
             physicsWorld.gravity = CGVector(dx: 0, dy: 0)

@@ -84,7 +84,7 @@ class EnemyManager {
         
         let topMargin: CGFloat = scene.size.height * 0.8
         let availableHeight = scene.size.height * 0.3
-        let verticalSpacing = availableHeight / CGFloat(EnemyConfig.rowCount - 1)
+        let verticalSpacing = availableHeight / CGFloat(EnemyConfig.rowCount)
         
         var enemyQueue: [(Enemy, CGPoint)] = []
         

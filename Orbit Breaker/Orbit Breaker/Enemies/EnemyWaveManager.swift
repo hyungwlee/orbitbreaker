@@ -84,22 +84,22 @@ class WaveManager {
         let pattern: EnemyWaveConfig.EntryPattern = useLeftEntry ? .advancedSwoopLeft : .advancedSwoopRight
         
         enemy.position = startPoint
+        // Set rotation to 0 (facing right)
+        enemy.zRotation = 0
         scene.addChild(enemy)
         
         let path = pattern.generatePath(from: startPoint, to: finalPosition, waveNumber: currentWave)
         
-        // Adjust duration based on wave number for more dramatic effect
         let pathDuration = currentWave <= 3 ?
             EnemyWaveConfig.pathDuration :
-            EnemyWaveConfig.pathDuration * 1.5 // Slightly slower for more dramatic effect
+            EnemyWaveConfig.pathDuration * 1.5
         
         let followPath = SKAction.follow(path.cgPath,
                                        asOffset: false,
-                                       orientToPath: true,
+                                       orientToPath: false,  // Keep orientation fixed
                                        duration: pathDuration)
-        let rotateToFaceDown = SKAction.rotate(toAngle: CGFloat.pi/2, duration: 0.2)
         
-        enemy.run(SKAction.sequence([followPath, rotateToFaceDown]))
+        enemy.run(followPath)
         
         lastSpawnTime = currentTime
         
