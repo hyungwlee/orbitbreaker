@@ -16,7 +16,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "60"
             endingLineNumber = "60"
-            landmarkName = "updateShooting(currentTime:scene:waveNumber:)"
+            landmarkName = "init(type:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -32,7 +32,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "58"
             endingLineNumber = "58"
-            landmarkName = "updateShooting(currentTime:scene:waveNumber:)"
+            landmarkName = "init(type:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

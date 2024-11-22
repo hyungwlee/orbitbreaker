@@ -21,6 +21,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var score: Int = 0
     private var scoreLabel: SKLabelNode!
     
+    var background1: SKSpriteNode!
+    var background2: SKSpriteNode!
+    
     
     override func didMove(to view: SKView) {
             super.didMove(to: view)
@@ -29,6 +32,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 createContent()
                 contentCreated = true
             }
+        
+        
+                // Initialize and add the background nodes
+                background1 = SKSpriteNode(imageNamed: "background")
+                background1.size = CGSize(width: size.width, height: size.height)
+                background1.position = CGPoint(x: size.width / 2, y: size.height / 2)
+                background1.zPosition = -1
+                addChild(background1)
+                
+                background2 = SKSpriteNode(imageNamed: "background")
+                background2.size = CGSize(width: size.width, height: size.height)
+                background2.position = CGPoint(x: size.width / 2, y: background1.position.y + size.height)
+                background2.zPosition = -1
+                addChild(background2)
+                
+                // Define scrolling actions
+                let moveDown = SKAction.moveBy(x: 0, y: -size.height, duration: 5.0)
+                let resetPosition = SKAction.moveBy(x: 0, y: size.height, duration: 0.0)
+                let scrollLoop = SKAction.sequence([moveDown, resetPosition])
+                let continuousScroll = SKAction.repeatForever(scrollLoop)
+                
+                // Apply actions to both backgrounds
+                background1.run(continuousScroll)
+                background2.run(continuousScroll)
+            
+        
         }
     
     private func setupDebugControls() {
@@ -52,12 +81,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     
     private func createContent() {
-            let background = SKSpriteNode(imageNamed: "background")
-            background.position = CGPoint(x: size.width/2, y: size.height/2)
-            background.size = self.size
-            background.zPosition = -1  // Ensure background is behind other elements
-            addChild(background)
+           
+        let background1 = SKSpriteNode(imageNamed: "background")
+            background1.size = self.size
+            background1.position = CGPoint(x: size.width / 2, y: size.height / 2)
+            background1.zPosition = -1
+            addChild(background1)
             
+        let background2 = SKSpriteNode(imageNamed: "background")
+            background2.size = self.size
+            background2.position = CGPoint(x: size.width / 2, y: background1.position.y + size.height)
+            background2.zPosition = -1
+            addChild(background2)
+            
+            // Start scrolling
+            let moveDown = SKAction.moveBy(x: 0, y: -size.height, duration: 5.0)
+            let resetPosition = SKAction.moveBy(x: 0, y: size.height, duration: 0.0)
+            let scrollLoop = SKAction.sequence([moveDown, resetPosition])
+            let continuousScroll = SKAction.repeatForever(scrollLoop)
+            
+            background1.run(continuousScroll)
+            background2.run(continuousScroll)
             // Set up physics world
             physicsWorld.gravity = CGVector(dx: 0, dy: 0)
             physicsWorld.contactDelegate = self
@@ -100,6 +144,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         super.update(currentTime)
         enemyManager.update(currentTime: currentTime)
         user.update(currentTime: currentTime)
+        
     }
     
     
@@ -270,10 +315,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
     
-    
-//    func canDropPowerUps() -> Bool{
-//        return (powerUpsDropped <= maxPowerUpsDropped)
-//    }
     
 }
 
