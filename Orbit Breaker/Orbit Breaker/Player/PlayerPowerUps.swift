@@ -32,12 +32,12 @@ class PowerUp: SKSpriteNode {
     }
     
     func apply(to player: Player) {
-            switch type {
-            case .shield:
-                player.addShield()
-            case .doubleDamage:
-                player.setDoubleDamage()
-            }
+        switch type {
+        case .shield:
+            player.addShield()
+        case .doubleDamage:
+            player.setDoubleDamage()
         }
+    }
 }
 

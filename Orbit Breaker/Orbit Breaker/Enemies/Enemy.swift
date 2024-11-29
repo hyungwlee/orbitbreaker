@@ -10,64 +10,36 @@ import SwiftUI
 
 class Enemy: SKSpriteNode {
     var health: Int
-    let initialHealth: Int
+    var initialHealth: Int
     private var nextShootTime: TimeInterval = 0
     var canShoot: Bool
     var holdsPowerUp: Bool
     
     init(type: EnemyType) {
-            // Set health based on enemy type
-            self.initialHealth = type.initialHealth
-            self.health = type.initialHealth
-            self.canShoot = false
-            self.holdsPowerUp = false
-            
-            // Load the enemy animation frames
-            let textureAtlas = SKTextureAtlas(named: "Enemy")
-            var frames: [SKTexture] = []
-            
-            // Assuming your gif frames are named "enemy_0", "enemy_1", "enemy_2", etc.
-            // Adjust the range based on your number of frames
-            for i in 0..<textureAtlas.textureNames.count {
-                let textureName = "enemy_\(i)"
-                frames.append(textureAtlas.textureNamed(textureName))
-            }
-            
-            // Initialize with the first frame
-            let doubledSize = CGSize(width: EnemyType.size.width * 2, height: EnemyType.size.height * 3)
-            super.init(texture: frames[0], color: .white, size: doubledSize)
-            
-            // Create the animation action
-            let animateAction = SKAction.animate(with: frames,
-                                                 timePerFrame: 0.15, // Adjust timing as needed
-                                               resize: false,
-                                               restore: true)
-            let repeatForever = SKAction.repeatForever(animateAction)
-            
-            // Run the animation
-            self.run(repeatForever)
-                
-            // Set initial rotation (facing right)
-            self.zRotation = 0
-            
-            // Set the color blend to tint the sprite
-            self.colorBlendFactor = 1.0
-            
-            // Create circular physics body
-            self.physicsBody = SKPhysicsBody(circleOfRadius: EnemyType.size.width)
-            self.physicsBody?.categoryBitMask = 0x1 << 2
-            self.physicsBody?.contactTestBitMask = 0x1 << 1
-            self.physicsBody?.collisionBitMask = 0
-            self.physicsBody?.affectedByGravity = false
-            self.physicsBody?.isDynamic = true
-            
-            // Don't allow physics to affect rotation
-            self.physicsBody?.allowsRotation = false
-        }
+        self.initialHealth = type.initialHealth
+        self.health = type.initialHealth
+        self.canShoot = false
+        self.holdsPowerUp = false
         
-        required init?(coder aDecoder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
+        super.init(texture: SKTexture(imageNamed: "enemy"), color: .white,
+                   size: CGSize(width: EnemyType.size.width * 2, height: EnemyType.size.height * 2.3))
+        
+        self.zPosition = 1
+        self.zRotation = 0
+        self.colorBlendFactor = 1.0
+        
+        self.physicsBody = SKPhysicsBody(circleOfRadius: EnemyType.size.width)
+        self.physicsBody?.categoryBitMask = 0x1 << 2
+        self.physicsBody?.contactTestBitMask = 0x1 << 1
+        self.physicsBody?.collisionBitMask = 0
+        self.physicsBody?.affectedByGravity = false
+        self.physicsBody?.isDynamic = true
+        self.physicsBody?.allowsRotation = false
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     func updateShooting(currentTime: TimeInterval, scene: SKScene, waveNumber: Int) {
         guard canShoot else { return }
         

@@ -12,7 +12,7 @@ class EnemyManager {
     private weak var scene: SKScene?
     private var enemies: [Enemy] = []
     private var waveManager: WaveManager
-    private var currentWave = 0
+    var currentWave = 0
     private var bossNum: Int = 1
     
     init(scene: SKScene) {
@@ -52,28 +52,28 @@ class EnemyManager {
     }
     
     func update(currentTime: TimeInterval) {
-            guard let scene = scene else { return }
-            waveManager.update(currentTime: currentTime)
-            
-            for enemy in enemies {
-                if let boss = enemy as? Boss {
-                    // Call the boss-specific update method
-                    boss.update(currentTime: currentTime, in: scene)
-                } else {
-                    // Regular enemy update
-                    enemy.updateShooting(currentTime: currentTime, scene: scene, waveNumber: currentWave)
-                }
+        guard let scene = scene else { return }
+        waveManager.update(currentTime: currentTime)
+        
+        for enemy in enemies {
+            if let boss = enemy as? Boss {
+                // Call the boss-specific update method
+                boss.update(currentTime: currentTime, in: scene)
+            } else {
+                // Regular enemy update
+                enemy.updateShooting(currentTime: currentTime, scene: scene, waveNumber: currentWave)
             }
         }
+    }
     
     func forceCleanup() {
-            // Remove all existing enemies
-            enemies.forEach { $0.removeFromParent() }
-            enemies.removeAll()
-            
-            // Reset wave manager state if needed
-            waveManager.reset()
-        }
+        // Remove all existing enemies
+        enemies.forEach { $0.removeFromParent() }
+        enemies.removeAll()
+        
+        // Reset wave manager state if needed
+        waveManager.reset()
+    }
     private func setupRegularWave() {
         guard let scene = scene else { return }
         
@@ -123,19 +123,19 @@ class EnemyManager {
         
         print("Total regular enemies created: \(enemies.count)") // Debug print
     }
-
+    
     
     func cleanupAllEnemies() {
-            // Remove all enemies
-            enemies.forEach { $0.removeFromParent() }
-            enemies.removeAll()
-            
-            // Reset wave count
-            currentWave = 0
-            
-            // Reset wave manager
-            waveManager.reset()
-        }
+        // Remove all enemies
+        enemies.forEach { $0.removeFromParent() }
+        enemies.removeAll()
+        
+        // Reset wave count
+        currentWave = 0
+        
+        // Reset wave manager
+        waveManager.reset()
+    }
     
     private func setupBossWave() {
         guard let scene = scene else { return }
@@ -149,10 +149,10 @@ class EnemyManager {
             boss = Boss(type: .anger)
             bossNum += 1
         case 2:
-            boss = Boss(type: .fear)
+            boss = Boss(type: .sadness)
             bossNum += 1
         case 3:
-            boss = Boss(type: .sadness)
+            boss = Boss(type: .fear)
             bossNum += 1
         default:
             boss = Boss(type: .disgust)
@@ -166,38 +166,38 @@ class EnemyManager {
         print("Boss created and added to scene") // Debug print
     }
     func handleEnemyDestroyed(_ enemy: Enemy) {
+        if let index = enemies.firstIndex(of: enemy) {
+            enemies.remove(at: index)
+            
+            
+            // If all enemies are destroyed, start next wave after a delay
+            if enemies.isEmpty {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                    self?.setupEnemies()
+                }
+            }
+        }
+    }
+    func handleBulletCollision(bullet: SKNode, enemy: Enemy) {
+        guard let bullet = bullet as? Bullet else { return }
+        
+        print("Bullet hit enemy with damage: \(bullet.damage)")  // Debug print
+        
+        if enemy.takeDamage(bullet.damage) {
+            print("Enemy died")  // Debug print
+            enemy.removeFromParent()
             if let index = enemies.firstIndex(of: enemy) {
                 enemies.remove(at: index)
                 
-                
-                // If all enemies are destroyed, start next wave after a delay
                 if enemies.isEmpty {
+                    // Add a small delay before setting up next wave
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
                         self?.setupEnemies()
                     }
                 }
             }
         }
-    func handleBulletCollision(bullet: SKNode, enemy: Enemy) {
-            guard let bullet = bullet as? Bullet else { return }
-            
-            print("Bullet hit enemy with damage: \(bullet.damage)")  // Debug print
-            
-            if enemy.takeDamage(bullet.damage) {
-                print("Enemy died")  // Debug print
-                enemy.removeFromParent()
-                if let index = enemies.firstIndex(of: enemy) {
-                    enemies.remove(at: index)
-                    
-                    if enemies.isEmpty {
-                        // Add a small delay before setting up next wave
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-                            self?.setupEnemies()
-                        }
-                    }
-                }
-            }
-            bullet.removeFromParent()
+        bullet.removeFromParent()
     }
     
     func getAllEnemies() -> [Enemy] {

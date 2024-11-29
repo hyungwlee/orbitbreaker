@@ -69,7 +69,7 @@ class Player {
         let removeAction = SKAction.removeFromParent()
         bullet.run(SKAction.sequence([moveAction, removeAction]))
     }
-
+    
     
     func handleTouch(_ touch: UITouch) {
         guard let scene = scene else { return }
@@ -93,53 +93,53 @@ class Player {
     
     // adding shield function, creates a blue box, not sure how it looks yet I haven't run this part
     func addShield() {
-            hasShield = true
-            if shieldNode == nil {
-                shieldNode = SKShapeNode(circleOfRadius: 50)
-                shieldNode?.strokeColor = .clear
-                shieldNode?.fillColor = UIColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 0.3)
-                shieldNode?.position = CGPoint(x: 0, y: 0)
-                ship.addChild(shieldNode!)
-                
-                // Cancel existing timer if any
-                shieldTimer?.invalidate()
-                
-                // Set new timer
-                shieldTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
-                    self?.removeShield()
-                }
-            }
-        }
-        
-        func removeShield() {
-            hasShield = false
-            shieldNode?.removeFromParent()
-            shieldNode = nil
-            shieldTimer?.invalidate()
-            shieldTimer = nil
-        }
-        
-    func setDoubleDamage() {
-            damageMultiplier = 2
+        hasShield = true
+        if shieldNode == nil {
+            shieldNode = SKShapeNode(circleOfRadius: 50)
+            shieldNode?.strokeColor = .clear
+            shieldNode?.fillColor = UIColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 0.3)
+            shieldNode?.position = CGPoint(x: 0, y: 0)
+            ship.addChild(shieldNode!)
             
             // Cancel existing timer if any
-            damageTimer?.invalidate()
+            shieldTimer?.invalidate()
             
             // Set new timer
-            damageTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
-                self?.removeDamageBoost()
+            shieldTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
+                self?.removeShield()
             }
         }
+    }
+    
+    func removeShield() {
+        hasShield = false
+        shieldNode?.removeFromParent()
+        shieldNode = nil
+        shieldTimer?.invalidate()
+        shieldTimer = nil
+    }
+    
+    func setDoubleDamage() {
+        damageMultiplier = 2
         
-        func removeDamageBoost() {
-            damageMultiplier = 1
-            damageTimer?.invalidate()
-            damageTimer = nil
-        }
+        // Cancel existing timer if any
+        damageTimer?.invalidate()
         
-        func cleanup() {
-            removeShield()
-            removeDamageBoost()
-            ship.removeFromParent()
+        // Set new timer
+        damageTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
+            self?.removeDamageBoost()
         }
+    }
+    
+    func removeDamageBoost() {
+        damageMultiplier = 1
+        damageTimer?.invalidate()
+        damageTimer = nil
+    }
+    
+    func cleanup() {
+        removeShield()
+        removeDamageBoost()
+        ship.removeFromParent()
+    }
 }

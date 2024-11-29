@@ -29,18 +29,18 @@ struct EnemyWaveConfig {
         func generatePath(from startPoint: CGPoint, to endPoint: CGPoint, waveNumber: Int) -> UIBezierPath {
             let path = UIBezierPath()
             path.move(to: startPoint)
-                // Original basic swooping pattern for early waves
-                switch self {
-                case .swoopLeft, .advancedSwoopLeft:
-                    let controlPoint1 = CGPoint(x: startPoint.x + 100, y: startPoint.y + 40)
-                    let controlPoint2 = CGPoint(x: endPoint.x + 60, y: endPoint.y + 60)
-                    path.addCurve(to: endPoint, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
-                    
-                case .swoopRight, .advancedSwoopRight:
-                    let controlPoint1 = CGPoint(x: startPoint.x - 100, y: startPoint.y + 40)
-                    let controlPoint2 = CGPoint(x: endPoint.x - 60, y: endPoint.y + 60)
-                    path.addCurve(to: endPoint, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
-                }
+            // Original basic swooping pattern for early waves
+            switch self {
+            case .swoopLeft, .advancedSwoopLeft:
+                let controlPoint1 = CGPoint(x: startPoint.x + 100, y: startPoint.y + 40)
+                let controlPoint2 = CGPoint(x: endPoint.x + 60, y: endPoint.y + 60)
+                path.addCurve(to: endPoint, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
+                
+            case .swoopRight, .advancedSwoopRight:
+                let controlPoint1 = CGPoint(x: startPoint.x - 100, y: startPoint.y + 40)
+                let controlPoint2 = CGPoint(x: endPoint.x - 60, y: endPoint.y + 60)
+                path.addCurve(to: endPoint, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
+            }
             
             
             return path
@@ -59,10 +59,10 @@ class WaveManager {
         self.scene = scene
     }
     func reset() {
-            isSpawning = false
-            enemySpawnQueue.removeAll()
-            lastSpawnTime = 0
-        }
+        isSpawning = false
+        enemySpawnQueue.removeAll()
+        lastSpawnTime = 0
+    }
     
     func startNextWave(enemies: [(Enemy, CGPoint)]) {
         currentWave += 1
@@ -91,13 +91,13 @@ class WaveManager {
         let path = pattern.generatePath(from: startPoint, to: finalPosition, waveNumber: currentWave)
         
         let pathDuration = currentWave <= 3 ?
-            EnemyWaveConfig.pathDuration :
-            EnemyWaveConfig.pathDuration * 1.5
+        EnemyWaveConfig.pathDuration :
+        EnemyWaveConfig.pathDuration * 1.5
         
         let followPath = SKAction.follow(path.cgPath,
-                                       asOffset: false,
-                                       orientToPath: false,  // Keep orientation fixed
-                                       duration: pathDuration)
+                                         asOffset: false,
+                                         orientToPath: false,  // Keep orientation fixed
+                                         duration: pathDuration)
         
         enemy.run(followPath)
         
