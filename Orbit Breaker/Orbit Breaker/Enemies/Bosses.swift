@@ -16,7 +16,7 @@ private enum BossMovementPattern: Int, CaseIterable {
 enum BossType {
     case anger    // Round 5
     case sadness  // Round 10
-    case disgust  // Round 15 (future)
+    case disgust  // Round 15
     case fear     // Round 20 (future)
     
     var size: CGSize {
@@ -24,8 +24,10 @@ enum BossType {
         case .anger:
             return CGSize(width: 60, height: 60)
         case .sadness:
-            return CGSize(width: 80, height: 50)  // Wider for cloud shape
-        case .disgust, .fear:
+            return CGSize(width: 80, height: 50)
+        case .disgust:
+            return CGSize(width: 60, height: 60)
+        case .fear:
             return CGSize(width: 60, height: 60)
         }
     }
@@ -50,7 +52,7 @@ enum BossType {
         case .sadness:
             return 750
         case .disgust, .fear:
-            return 350
+            return 750
         }
     }
 }
@@ -69,6 +71,19 @@ class Boss: Enemy {
     private var verticalOffset: CGFloat = 0
     private var healthBar: SKShapeNode!
     private var healthBarFill: SKShapeNode!
+    private var lastPoisonBurstTime: TimeInterval = 0
+    private var lastCorruptionZoneTime: TimeInterval = 0
+    private var toxicPools: [SKNode] = []
+    private var healthThresholds: Set<Int> = [75, 50, 25]
+    private var slimeTrail: [SKShapeNode] = []
+    private var lastSlimeTime: TimeInterval = 0
+    private var originalPosition: CGPoint = .zero
+    private var targetPosition: CGPoint = .zero
+    private var velocityX: CGFloat = 0
+    private var velocityY: CGFloat = 0
+    private var lastDirectionChange: TimeInterval = 0
+    
+  
     
     
     init(type: BossType) {
@@ -83,10 +98,11 @@ class Boss: Enemy {
         
         let spriteSize = CGSize(
             width: type.size.width * 2,
-            height: type == .sadness ? type.size.height * 2 : type.size.height * 1.7
+            height: type.size.height * 1.7
         )
         
-        let sprite = SKSpriteNode(imageNamed: type == .sadness ? "sadness" : "anger")
+        let sprite = SKSpriteNode(imageNamed: type == .sadness ? "sadness" :
+                                              type == .disgust ? "disgust" : "anger")
         sprite.size = spriteSize
         addChild(sprite)
         
@@ -108,7 +124,7 @@ class Boss: Enemy {
         let yPosition = scene.size.height - 100
         
         let titleLabel = SKLabelNode(fontNamed: "Arial-Bold")
-        titleLabel.text = bossType == .anger ? "Anger" : "Sadness"
+        titleLabel.text = bossType == .anger ? "Anger" : bossType == .sadness ? "Sadness" : bossType == .disgust ? "Disgust" : "Anger"
         titleLabel.fontSize = 24
         titleLabel.fontColor = .white
         titleLabel.position = CGPoint(x: scene.size.width/2, y: yPosition + 20)
@@ -121,7 +137,7 @@ class Boss: Enemy {
         healthBar.position = CGPoint(x: scene.size.width/2, y: yPosition)
         
         healthBarFill = SKShapeNode(rectOf: CGSize(width: barWidth, height: barHeight))
-        healthBarFill.fillColor = bossType == .anger ? .red : .blue
+        healthBarFill.fillColor = bossType == .anger ? .red : bossType == .sadness ? .blue : .green
         healthBarFill.strokeColor = .clear
         healthBarFill.position = CGPoint(x: scene.size.width/2, y: yPosition)
         
@@ -159,31 +175,30 @@ class Boss: Enemy {
     }
     
     func cleanup() {
-        // Remove all raindrops
         for raindrop in raindrops {
             raindrop.removeFromParent()
         }
         raindrops.removeAll()
         
-        // Remove all mini clouds with fade
+        for slime in slimeTrail {
+            slime.removeFromParent()
+        }
+        slimeTrail.removeAll()
+        
         for cloud in miniClouds {
-            cloud.run(SKAction.sequence([
-                SKAction.fadeOut(withDuration: 0.3),
-                SKAction.removeFromParent()
-            ]))
+            cloud.removeFromParent()
         }
         miniClouds.removeAll()
         
-        // Remove health bar elements
         healthBar?.removeFromParent()
         healthBarFill?.removeFromParent()
-        if let scene = scene {
-            scene.enumerateChildNodes(withName: "bossTitle") { node, _ in
-                node.removeFromParent()
-            }
+        scene?.enumerateChildNodes(withName: "bossTitle") { node, _ in
+            node.removeFromParent()
+        }
+        scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
+            node.removeFromParent()
         }
     }
-    
     
     private func createRaindrop(at position: CGPoint, in scene: SKScene) {
         let raindrop = SKSpriteNode(imageNamed: "raindrop")
@@ -293,6 +308,8 @@ class Boss: Enemy {
                         shootFireballPattern(in: scene)
                         lastShootTime = currentTime
                     }
+                } else if bossType == .disgust {
+                    handleDisgustMovement(currentTime: currentTime, in: scene)
                 }
             }
         }
@@ -308,6 +325,129 @@ class Boss: Enemy {
             }
         }
     }
+    
+    private func handleDisgustMovement(currentTime: TimeInterval, in scene: SKScene) {
+        guard let player = scene.childNode(withName: "testPlayer") else { return }
+        
+        let maxSpeed: CGFloat = 200
+        let acceleration: CGFloat = 2.5
+        
+        let dx = player.position.x - position.x
+        let dy = player.position.y - position.y
+        let distance = hypot(dx, dy)
+        
+        if distance > 0 {
+            let directionX = dx / distance
+            let directionY = dy / distance
+            
+            velocityX += directionX * acceleration
+            velocityY += directionY * acceleration
+            
+            let currentSpeed = hypot(velocityX, velocityY)
+            if currentSpeed > maxSpeed {
+                let scale = maxSpeed / currentSpeed
+                velocityX *= scale
+                velocityY *= scale
+            }
+        }
+        
+        velocityX *= 0.97
+        velocityY *= 0.97
+        
+        position.x += velocityX * 1/60
+        position.y += velocityY * 1/60
+        
+        if currentTime - lastSlimeTime >= 0.05 {  // More frequent trail
+            createSlimeTrail(in: scene)
+            lastSlimeTime = currentTime
+        }
+        
+        if currentTime - lastShootTime >= 0.8 {
+            shootToxicProjectile(in: scene)
+            lastShootTime = currentTime
+        }
+    }
+
+    
+    private func updateTargetPosition(in scene: SKScene) {
+        let padding: CGFloat = 80
+        targetPosition = CGPoint(
+            x: CGFloat.random(in: padding...(scene.size.width - padding)),
+            y: CGFloat.random(in: padding...(scene.size.height - 150))
+        )
+    }
+       
+    private func createSlimeTrail(in scene: SKScene) {
+        let slime = SKShapeNode(circleOfRadius: 25)  // Bigger radius
+        slime.fillColor = .green
+        slime.strokeColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.4)
+        slime.alpha = 0.6  // More visible
+        slime.position = position
+        slime.zPosition = 1
+        
+        scene.addChild(slime)
+        slimeTrail.append(slime)
+        
+        let scaleUp = SKAction.scale(to: 1.3, duration: 0.2)
+        let scaleDown = SKAction.scale(to: 0.7, duration: 2.0)  // Longer duration
+        let fadeOut = SKAction.fadeOut(withDuration: 2.0)  // Longer duration
+        
+        slime.run(SKAction.sequence([
+            scaleUp,
+            SKAction.group([scaleDown, fadeOut]),
+            SKAction.removeFromParent()
+        ])) { [weak self] in
+            self?.slimeTrail.removeFirst()
+        }
+        
+        slime.physicsBody = SKPhysicsBody(circleOfRadius: 25)
+        slime.physicsBody?.categoryBitMask = 0x1 << 3
+        slime.physicsBody?.contactTestBitMask = 0x1 << 0
+        slime.physicsBody?.collisionBitMask = 0
+        slime.physicsBody?.isDynamic = false
+    }
+    
+    private func shootToxicProjectile(in scene: SKScene) {
+        guard let player = scene.childNode(withName: "testPlayer") else { return }
+        
+        let projectile = SKSpriteNode(imageNamed: "slimeBall")
+        projectile.size = CGSize(width: 20, height: 20)
+        projectile.position = position
+        projectile.name = "enemyBullet"
+        
+        projectile.physicsBody = SKPhysicsBody(circleOfRadius: 10)
+        projectile.physicsBody?.categoryBitMask = 0x1 << 3
+        projectile.physicsBody?.contactTestBitMask = 0x1 << 0
+        projectile.physicsBody?.collisionBitMask = 0
+        projectile.physicsBody?.affectedByGravity = false
+        
+        scene.addChild(projectile)
+        
+        let direction = CGPoint(
+            x: player.position.x - position.x,
+            y: player.position.y - position.y
+        )
+        let distance = hypot(direction.x, direction.y)
+        let normalizedDirection = CGPoint(
+            x: direction.x / distance,
+            y: direction.y / distance
+        )
+        
+        let speed: CGFloat = 400
+        let screenDiagonal = hypot(scene.size.width, scene.size.height)
+        let moveVector = CGVector(
+            dx: normalizedDirection.x * screenDiagonal,
+            dy: normalizedDirection.y * screenDiagonal
+        )
+        
+        projectile.run(SKAction.sequence([
+            SKAction.move(by: moveVector, duration: TimeInterval(screenDiagonal / speed)),
+            SKAction.removeFromParent()
+        ]))
+    }
+
+    
+
     
     private func handleSadnessMovement(currentTime: TimeInterval, in scene: SKScene) {
         let time = currentTime * 0.5
@@ -360,32 +500,59 @@ class Boss: Enemy {
     
     override func takeDamage(_ amount: Int) -> Bool {
         health -= amount
-        let percentage = CGFloat(health) / CGFloat(initialHealth)
-        let barWidth: CGFloat = 200
-        healthBarFill.path = CGPath(rect: CGRect(x: -barWidth/2, y: -10, width: barWidth * percentage, height: 20), transform: nil)
+        updateHealthBar()
+        
+        if bossType == .disgust {
+            let percentage = Float(health) / Float(initialHealth) * 100
+            for threshold in healthThresholds where percentage <= Float(threshold) {
+                createPoisonBurst(in: scene!)
+                healthThresholds.remove(threshold)
+            }
+        }
         
         if health <= 0 {
             cleanup()
-            physicsBody?.categoryBitMask = 0
-            healthBar.removeFromParent()
-            healthBarFill.removeFromParent()
-            run(SKAction.sequence([
-                SKAction.fadeOut(withDuration: 0.5),
-                SKAction.removeFromParent()
-            ]))
             return true
-        }
-        
-        // Flash effect
-        if let sprite = self.children.first as? SKSpriteNode {
-            sprite.run(SKAction.sequence([
-                SKAction.colorize(with: .white, colorBlendFactor: 1.0, duration: 0.1),
-                SKAction.colorize(withColorBlendFactor: 0.0, duration: 0.1)
-            ]))
         }
         
         return false
     }
+    
+    private func createPoisonBurst(in scene: SKScene) {
+        let bulletCount = 12
+        let bulletSpeed: CGFloat = 300
+        
+        for i in 0..<bulletCount {
+            let angle = (CGFloat(i) / CGFloat(bulletCount)) * CGFloat.pi * 2
+            
+            let bullet = SKShapeNode(circleOfRadius: 8)
+            bullet.fillColor = .green
+            bullet.strokeColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 1.0)
+            bullet.name = "enemyBullet"
+            bullet.position = position
+            
+            bullet.physicsBody = SKPhysicsBody(circleOfRadius: 8)
+            bullet.physicsBody?.categoryBitMask = 0x1 << 3
+            bullet.physicsBody?.contactTestBitMask = 0x1 << 0
+            bullet.physicsBody?.collisionBitMask = 0
+            bullet.physicsBody?.affectedByGravity = false
+            
+            scene.addChild(bullet)
+            
+            let screenDiagonal = hypot(scene.size.width, scene.size.height)
+            let dx = cos(angle) * screenDiagonal
+            let dy = sin(angle) * screenDiagonal
+            
+            let moveVector = CGVector(dx: dx, dy: dy)
+            let duration = screenDiagonal / bulletSpeed
+            
+            bullet.run(SKAction.sequence([
+                SKAction.move(by: moveVector, duration: duration),
+                SKAction.removeFromParent()
+            ]))
+        }
+    }
+
     
     private func startSwoop(in scene: SKScene) {
         isSwooping = true

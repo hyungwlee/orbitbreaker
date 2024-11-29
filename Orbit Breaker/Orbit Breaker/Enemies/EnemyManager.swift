@@ -152,10 +152,10 @@ class EnemyManager {
             boss = Boss(type: .sadness)
             bossNum += 1
         case 3:
-            boss = Boss(type: .fear)
+            boss = Boss(type: .disgust)
             bossNum += 1
         default:
-            boss = Boss(type: .disgust)
+            boss = Boss(type: .fear)
             bossNum = 1
         }
         
