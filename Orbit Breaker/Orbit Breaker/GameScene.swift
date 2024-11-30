@@ -166,10 +166,70 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         powerUpsDropped = 0
     }
+    private func shieldHit(_ shield: SKSpriteNode) {
+        // Find boss in the scene
+        enumerateChildNodes(withName: "boss") { node, _ in
+            if let boss = node as? Boss {
+                boss.damageShield(shield)
+            }
+        }
+    }
+
     
     func didBegin(_ contact: SKPhysicsContact) {
         let nodeA = contact.bodyA.node
         let nodeB = contact.bodyB.node
+        
+        // Check for heart shield collision with bullets
+        if let bullet = nodeA as? Bullet, let shield = nodeB as? SKSpriteNode,
+               shield.name == "heartShield" {
+                bullet.removeFromParent()
+                shieldHit(shield)
+            } else if let bullet = nodeB as? Bullet, let shield = nodeA as? SKSpriteNode,
+                      shield.name == "heartShield" {
+                bullet.removeFromParent()
+                shieldHit(shield)
+            }
+            
+        
+        
+        
+        // Check for slime trail collision with player
+        if let cloud = nodeA as? SKShapeNode, let player = nodeB as? SKSpriteNode,
+           cloud.fillColor == .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5),
+           player.name == "testPlayer" {
+            handlePlayerHit()
+        } else if let cloud = nodeB as? SKShapeNode, let player = nodeA as? SKSpriteNode,
+                  cloud.fillColor == .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5),
+                  player.name == "testPlayer" {
+            handlePlayerHit()
+        }
+        
+
+           
+        
+            
+        // Add check for boss intro state
+        if let bullet = nodeA as? Bullet, let boss = nodeB as? Boss {
+               if !boss.hasEnteredScene {
+                   bullet.removeFromParent()
+                   return
+               }
+               handleBulletEnemyCollision(bullet: bullet, enemy: boss)
+           } else if let bullet = nodeB as? Bullet, let boss = nodeA as? Boss {
+               if !boss.hasEnteredScene {
+                   bullet.removeFromParent()
+                   return
+               }
+               handleBulletEnemyCollision(bullet: bullet, enemy: boss)
+           }
+        
+        // Handle player collision with enemy
+        if (nodeA?.name == "testPlayer" && nodeB is Enemy) ||
+           (nodeB?.name == "testPlayer" && nodeA is Enemy) {
+            handlePlayerHit()
+            return
+        }
         
         // Check bullet-enemy collisions
         if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
@@ -186,6 +246,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                   bullet.name == "enemyBullet" && playerNode.name == "testPlayer" {
             handlePlayerBulletCollision(bullet)
         }
+            
+        
         
         // Handle power-up collisions
         if let powerUp = nodeA as? PowerUp, let playerNode = nodeB as? SKSpriteNode,

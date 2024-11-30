@@ -17,7 +17,7 @@ enum BossType {
     case anger    // Round 5
     case sadness  // Round 10
     case disgust  // Round 15
-    case fear     // Round 20 (future)
+    case love     // Round 20 (future)
     
     var size: CGSize {
         switch self {
@@ -27,7 +27,7 @@ enum BossType {
             return CGSize(width: 80, height: 50)
         case .disgust:
             return CGSize(width: 60, height: 60)
-        case .fear:
+        case .love:
             return CGSize(width: 60, height: 60)
         }
     }
@@ -40,8 +40,8 @@ enum BossType {
             return .blue
         case .disgust:
             return .green
-        case .fear:
-            return .purple
+        case .love:
+            return .systemPink
         }
     }
     
@@ -51,8 +51,9 @@ enum BossType {
             return 500
         case .sadness:
             return 750
-        case .disgust, .fear:
+        case .disgust, .love:
             return 750
+            
         }
     }
 }
@@ -64,7 +65,7 @@ class Boss: Enemy {
     private var normalHeight: CGFloat = 0
     private var isSwooping = false
     private var moveDirection: CGFloat = 1
-    private var hasEnteredScene = false
+    private(set) var hasEnteredScene = false
     private var entryStartTime: TimeInterval = 0
     private var raindrops: [SKNode] = []
     private var miniClouds: [SKNode] = []
@@ -82,11 +83,20 @@ class Boss: Enemy {
     private var velocityX: CGFloat = 0
     private var velocityY: CGFloat = 0
     private var lastDirectionChange: TimeInterval = 0
+    private var lastHeartBurstTime: TimeInterval = 0
+    private var heartProjectiles: [SKNode] = []
+    var heartShields: [SKNode] = []
+    private var shieldHealth: [SKNode: Int] = [:]
+    private var shieldDamageCount: [SKNode: Int] = [:]
+    private var shieldHits: [SKNode: Int] = [:]
+    
     
   
     
     
+    // In Boss.swift
     init(type: BossType) {
+        
         self.bossType = type
         super.init(type: .a)
         
@@ -102,13 +112,13 @@ class Boss: Enemy {
         )
         
         let sprite = SKSpriteNode(imageNamed: type == .sadness ? "sadness" :
-                                              type == .disgust ? "disgust" : "anger")
+                                    type == .disgust ? "disgust" : type == .love ? "love" : "anger")
         sprite.size = spriteSize
         addChild(sprite)
         
-        self.physicsBody = SKPhysicsBody(rectangleOf: spriteSize)
-        self.physicsBody?.categoryBitMask = 0
-        self.physicsBody?.contactTestBitMask = 0x1 << 0
+        self.physicsBody = SKPhysicsBody(circleOfRadius: min(type.size.width, type.size.height))
+        self.physicsBody?.categoryBitMask = 0x1 << 4
+        self.physicsBody?.contactTestBitMask = 0x1 << 1
         self.physicsBody?.collisionBitMask = 0
         self.physicsBody?.affectedByGravity = false
         self.physicsBody?.isDynamic = true
@@ -116,7 +126,12 @@ class Boss: Enemy {
         self.health = type.health
         self.initialHealth = type.health
         self.canShoot = false
-        
+        self.name = "boss"
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        self.bossType = .anger  // Default value
+        super.init(coder: aDecoder)
     }
     func setupHealthBar(in scene: SKScene) {
         let barWidth: CGFloat = 200
@@ -124,7 +139,7 @@ class Boss: Enemy {
         let yPosition = scene.size.height - 100
         
         let titleLabel = SKLabelNode(fontNamed: "Arial-Bold")
-        titleLabel.text = bossType == .anger ? "Anger" : bossType == .sadness ? "Sadness" : bossType == .disgust ? "Disgust" : "Anger"
+        titleLabel.text = bossType == .anger ? "Anger" : bossType == .sadness ? "Sadness" : bossType == .disgust ? "Disgust" : bossType == .love ? "Love" : "Anger"
         titleLabel.fontSize = 24
         titleLabel.fontColor = .white
         titleLabel.position = CGPoint(x: scene.size.width/2, y: yPosition + 20)
@@ -137,7 +152,7 @@ class Boss: Enemy {
         healthBar.position = CGPoint(x: scene.size.width/2, y: yPosition)
         
         healthBarFill = SKShapeNode(rectOf: CGSize(width: barWidth, height: barHeight))
-        healthBarFill.fillColor = bossType == .anger ? .red : bossType == .sadness ? .blue : .green
+        healthBarFill.fillColor = bossType == .anger ? .red : bossType == .sadness ? .blue : bossType == .disgust ? .green : bossType == .love ? .systemPink : .red
         healthBarFill.strokeColor = .clear
         healthBarFill.position = CGPoint(x: scene.size.width/2, y: yPosition)
         
@@ -146,11 +161,14 @@ class Boss: Enemy {
     }
     
     
+    
     private func startEntryAnimation(in scene: SKScene) {
         setupHealthBar(in: scene)
         position = CGPoint(x: scene.size.width/2, y: scene.size.height + 100)
         
+        // Disable both category and contact test masks
         physicsBody?.categoryBitMask = 0
+        physicsBody?.contactTestBitMask = 0
         alpha = 0
         
         let moveDown = SKAction.moveTo(y: scene.size.height * 0.8, duration: 2.0)
@@ -158,47 +176,235 @@ class Boss: Enemy {
         
         let sequence = SKAction.sequence([
             SKAction.group([moveDown, SKAction.fadeIn(withDuration: 2.0)]),
+            SKAction.wait(forDuration: 0.5),
             SKAction.run { [weak self] in
-                self?.physicsBody?.categoryBitMask = 0x1 << 2
+                // Re-enable both masks after animation
+                self?.physicsBody?.categoryBitMask = 0x1 << 4
+                self?.physicsBody?.contactTestBitMask = 0x1 << 1
+                self?.canShoot = true
             }
         ])
         
         run(sequence)
     }
+    
+    private func handleLoveMovement(currentTime: TimeInterval, in scene: SKScene) {
+           let time = currentTime * 0.3
+           let radiusX: CGFloat = 150
+           let radiusY: CGFloat = 80
+           let centerX = scene.size.width / 2
+           let centerY = scene.size.height * 0.7
+           
+           let targetX = centerX + radiusX * cos(time)
+           let targetY = centerY + radiusY * sin(2 * time)
+           
+           let smoothing: CGFloat = 0.05
+           position = CGPoint(
+               x: position.x + (targetX - position.x) * smoothing,
+               y: position.y + (targetY - position.y) * smoothing
+           )
+       }
+       
+    private func shootHomingHeart(in scene: SKScene) {
+        guard let player = scene.childNode(withName: "testPlayer") else { return }
+        
+        let heart = SKSpriteNode(imageNamed: "heart")
+        heart.size = CGSize(width: 20, height: 20)
+        heart.name = "enemyBullet"
+        heart.position = position
+        
+        heart.physicsBody = SKPhysicsBody(rectangleOf: heart.size)
+        heart.physicsBody?.categoryBitMask = 0x1 << 3
+        heart.physicsBody?.contactTestBitMask = 0x1 << 0
+        heart.physicsBody?.collisionBitMask = 0
+        heart.physicsBody?.affectedByGravity = false
+        
+        scene.addChild(heart)
+        
+        // Calculate initial direction towards player with some randomness
+        let dx = player.position.x - position.x
+        let dy = player.position.y - position.y
+        let angle = atan2(dy, dx)
+        let randomSpread = CGFloat.random(in: -0.3...0.3)
+        let finalAngle = angle + randomSpread
+        
+        let initialSpeed: CGFloat = 200
+        let homingSpeed: CGFloat = 300
+        let screenDiagonal = hypot(scene.size.width, scene.size.height)
+        
+        let initialMove = SKAction.move(by: CGVector(
+            dx: cos(finalAngle) * initialSpeed,
+            dy: sin(finalAngle) * initialSpeed
+        ), duration: 1.0)
+        
+        let wait = SKAction.wait(forDuration: 1.0)
+        
+        let targetPosition = player.position
+        let homingMove = SKAction.move(by: CGVector(
+            dx: cos(finalAngle) * screenDiagonal,
+            dy: sin(finalAngle) * screenDiagonal
+        ), duration: screenDiagonal / homingSpeed)
+        
+        heart.run(SKAction.sequence([initialMove, wait, homingMove, SKAction.removeFromParent()]))
+    }
+
+    private func createHeartShields() {
+        let shieldCount = 20
+        let radius: CGFloat = 100
+        
+        for i in 0..<shieldCount {
+            let angle = (CGFloat(i) / CGFloat(shieldCount)) * CGFloat.pi * 2
+            
+            let shield = SKSpriteNode(imageNamed: "heartShield")
+            shield.size = CGSize(width: 20, height: 20)
+            shield.name = "heartShield"
+            shield.zPosition = 1
+            shield.position = CGPoint(
+                x: position.x + radius * cos(angle),
+                y: position.y + radius * sin(angle)
+            )
+            
+            // Store the initial angle in userData
+            shield.userData = ["baseAngle": angle]
+            
+            shield.physicsBody = SKPhysicsBody(rectangleOf: shield.size)
+            shield.physicsBody?.categoryBitMask = 0x1 << 5
+            shield.physicsBody?.contactTestBitMask = 0x1 << 1
+            shield.physicsBody?.collisionBitMask = 0
+            shield.physicsBody?.isDynamic = false
+            
+            scene?.addChild(shield)
+            heartShields.append(shield)
+        }
+    }
+
+    private func rotateShields(currentTime: TimeInterval) {
+        let radius: CGFloat = 100
+        let rotationSpeed: CGFloat = 1.5
+        
+        for shield in heartShields {
+            // Use the shield's current base angle instead of recalculating based on index
+            if let baseAngle = shield.userData?["baseAngle"] as? CGFloat {
+                let rotationAngle = baseAngle + (currentTime * rotationSpeed)
+                
+                shield.position = CGPoint(
+                    x: position.x + radius * cos(rotationAngle),
+                    y: position.y + radius * sin(rotationAngle)
+                )
+                shield.zRotation = rotationAngle
+            }
+        }
+    }
+
+    
+       
+    func handleShieldHit(_ shield: SKNode) {
+        shieldDamageCount[shield, default: 0] += 1
+        
+        if shieldDamageCount[shield, default: 0] >= 2 {
+            shield.removeFromParent()
+            heartShields.removeAll { $0 == shield }
+            shieldDamageCount.removeValue(forKey: shield)
+        } else {
+            shield.run(SKAction.sequence([
+                SKAction.scale(to: 1.2, duration: 0.1),
+                SKAction.scale(to: 1.0, duration: 0.1)
+            ]))
+        }
+    }
+       
+       private func createHeartBurst(in scene: SKScene) {
+           let heartCount = 8
+           let radius: CGFloat = 100
+           
+           for i in 0..<heartCount {
+               let angle = (CGFloat(i) / CGFloat(heartCount)) * CGFloat.pi * 2
+               let position = CGPoint(
+                   x: self.position.x + radius * cos(angle),
+                   y: self.position.y + radius * sin(angle)
+               )
+               
+               let heart = SKShapeNode(rect: CGRect(x: -15, y: -15, width: 30, height: 30), cornerRadius: 7.5)
+               heart.fillColor = .systemPink
+               heart.strokeColor = .red
+               heart.name = "enemyBullet"
+               heart.position = position
+               heart.zRotation = angle + .pi / 4
+               
+               heart.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 30, height: 30))
+               heart.physicsBody?.categoryBitMask = 0x1 << 3
+               heart.physicsBody?.contactTestBitMask = 0x1 << 0
+               heart.physicsBody?.collisionBitMask = 0
+               heart.physicsBody?.affectedByGravity = false
+               
+               scene.addChild(heart)
+               
+               // Pulsing animation
+               let scale = SKAction.sequence([
+                   SKAction.scale(to: 1.2, duration: 0.3),
+                   SKAction.scale(to: 1.0, duration: 0.3)
+               ])
+               
+               let rotate = SKAction.rotate(byAngle: .pi * 2, duration: 2.0)
+               
+               heart.run(SKAction.group([
+                   SKAction.repeatForever(scale),
+                   SKAction.repeatForever(rotate)
+               ]))
+               
+               // Gradually expand outward
+               let expandDuration: TimeInterval = 3.0
+               let expandAction = SKAction.customAction(withDuration: expandDuration) { node, elapsedTime in
+                   let progress = elapsedTime / CGFloat(expandDuration)
+                   let currentRadius = radius * (1 + progress)
+                   node.position = CGPoint(
+                       x: self.position.x + currentRadius * cos(angle),
+                       y: self.position.y + currentRadius * sin(angle)
+                   )
+               }
+               
+               heart.run(SKAction.sequence([
+                   expandAction,
+                   SKAction.fadeOut(withDuration: 0.5),
+                   SKAction.removeFromParent()
+               ]))
+           }
+       }
+
+    
     private func updateHealthBar() {
         let percentage = CGFloat(health) / CGFloat(initialHealth)
         let barWidth: CGFloat = 200
         healthBarFill.path = CGPath(rect: CGRect(x: -barWidth/2, y: -10, width: barWidth * percentage, height: 20), transform: nil)
     }
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     
     func cleanup() {
-        for raindrop in raindrops {
-            raindrop.removeFromParent()
-        }
-        raindrops.removeAll()
-        
-        for slime in slimeTrail {
-            slime.removeFromParent()
-        }
-        slimeTrail.removeAll()
-        
-        for cloud in miniClouds {
-            cloud.removeFromParent()
-        }
-        miniClouds.removeAll()
-        
-        healthBar?.removeFromParent()
-        healthBarFill?.removeFromParent()
-        scene?.enumerateChildNodes(withName: "bossTitle") { node, _ in
-            node.removeFromParent()
-        }
-        scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
-            node.removeFromParent()
-        }
-    }
+           for shield in heartShields {
+               shield.removeFromParent()
+           }
+           heartShields.removeAll()
+           shieldHealth.removeAll()
+           
+           for slime in slimeTrail {
+               slime.removeFromParent()
+           }
+           slimeTrail.removeAll()
+           
+           for cloud in miniClouds {
+               cloud.removeFromParent()
+           }
+           miniClouds.removeAll()
+           
+           healthBar?.removeFromParent()
+           healthBarFill?.removeFromParent()
+           scene?.enumerateChildNodes(withName: "bossTitle") { node, _ in
+               node.removeFromParent()
+           }
+           scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
+               node.removeFromParent()
+           }
+       }
+       
     
     private func createRaindrop(at position: CGPoint, in scene: SKScene) {
         let raindrop = SKSpriteNode(imageNamed: "raindrop")
@@ -296,9 +502,8 @@ class Boss: Enemy {
             normalHeight = scene.size.height * 0.8
         }
         
+        // Remove the collision enabling code from here since it's now in the animation sequence
         if timeSinceEntry > 3.0 {
-            self.canShoot = true
-            
             if !isSwooping {
                 if bossType == .sadness {
                     handleSadnessMovement(currentTime: currentTime, in: scene)
@@ -310,19 +515,38 @@ class Boss: Enemy {
                     }
                 } else if bossType == .disgust {
                     handleDisgustMovement(currentTime: currentTime, in: scene)
+                } else if bossType == .love {
+                    handleLoveMovement(currentTime: currentTime, in: scene)
+                    if currentTime - lastShootTime >= 1.2 {
+                        shootHomingHeart(in: scene)
+                        lastShootTime = currentTime
+                    }
+                    
+                    // Create shields after entry animation
+                    if timeSinceEntry > 3.0 && heartShields.isEmpty {
+                        createHeartShields()
+                    }
+                    
+                    rotateShields(currentTime: currentTime)
                 }
             }
         }
-        
-        if bossType == .anger {
-            if lastSwoopTime == 0 {
-                lastSwoopTime = currentTime - 5.0
-            }
+    }
+    
+    func damageShield(_ shield: SKNode) {
+        shieldHits[shield, default: 0] += 1
             
-            if currentTime - lastSwoopTime >= 7.0 && !isSwooping {
-                startSwoop(in: scene)
-                lastSwoopTime = currentTime
-            }
+        if shieldHits[shield, default: 0] >= 4 {
+            shield.removeFromParent()
+            heartShields.removeAll { $0 == shield }
+            shieldHits.removeValue(forKey: shield)
+        } else {
+            shield.run(SKAction.sequence([
+                SKAction.scale(to: 1.2, duration: 0.1),
+                SKAction.colorize(with: .white, colorBlendFactor: 0.5, duration: 0.1),
+                SKAction.scale(to: 1.0, duration: 0.1),
+                SKAction.colorize(withColorBlendFactor: 0.0, duration: 0.1)
+            ]))
         }
     }
     
@@ -378,34 +602,47 @@ class Boss: Enemy {
     }
        
     private func createSlimeTrail(in scene: SKScene) {
-        let slime = SKShapeNode(circleOfRadius: 25)  // Bigger radius
-        slime.fillColor = .green
-        slime.strokeColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.4)
-        slime.alpha = 0.6  // More visible
-        slime.position = position
-        slime.zPosition = 1
+        // Create main toxic cloud
+        let cloud = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
+        cloud.fillColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5)
+        cloud.strokeColor = .green
+        cloud.alpha = 0.7
+        cloud.position = position
+        cloud.zPosition = 1
         
-        scene.addChild(slime)
-        slimeTrail.append(slime)
+        // Add toxic effect
+        let glow = SKEffectNode()
+        glow.shouldRasterize = true
+        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5.0])
         
-        let scaleUp = SKAction.scale(to: 1.3, duration: 0.2)
-        let scaleDown = SKAction.scale(to: 0.7, duration: 2.0)  // Longer duration
-        let fadeOut = SKAction.fadeOut(withDuration: 2.0)  // Longer duration
+        let glowShape = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
+        glowShape.fillColor = .green
+        glowShape.strokeColor = .clear
+        glow.addChild(glowShape)
+        cloud.addChild(glow)
         
-        slime.run(SKAction.sequence([
-            scaleUp,
-            SKAction.group([scaleDown, fadeOut]),
+        scene.addChild(cloud)
+        slimeTrail.append(cloud)
+        
+        // Deadly collision
+        cloud.physicsBody = SKPhysicsBody(circleOfRadius: 25)  // Smaller collision radius
+        cloud.physicsBody?.categoryBitMask = 0x1 << 3  // Same as enemy bullets
+        cloud.physicsBody?.contactTestBitMask = 0x1 << 0  // Player category
+        cloud.physicsBody?.collisionBitMask = 0
+        cloud.physicsBody?.isDynamic = false
+        
+        // Animation
+        let sequence = SKAction.sequence([
+            SKAction.wait(forDuration: 2.5),
+            SKAction.fadeOut(withDuration: 1.0),
             SKAction.removeFromParent()
-        ])) { [weak self] in
+        ])
+        
+        cloud.run(sequence) { [weak self] in
             self?.slimeTrail.removeFirst()
         }
-        
-        slime.physicsBody = SKPhysicsBody(circleOfRadius: 25)
-        slime.physicsBody?.categoryBitMask = 0x1 << 3
-        slime.physicsBody?.contactTestBitMask = 0x1 << 0
-        slime.physicsBody?.collisionBitMask = 0
-        slime.physicsBody?.isDynamic = false
     }
+
     
     private func shootToxicProjectile(in scene: SKScene) {
         guard let player = scene.childNode(withName: "testPlayer") else { return }

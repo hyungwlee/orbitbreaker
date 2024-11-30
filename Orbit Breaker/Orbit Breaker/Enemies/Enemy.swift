@@ -31,9 +31,9 @@ class Enemy: SKSpriteNode {
         self.colorBlendFactor = 1.0
         
         self.physicsBody = SKPhysicsBody(circleOfRadius: EnemyType.size.width)
-        self.physicsBody?.categoryBitMask = 0x1 << 2
-        self.physicsBody?.contactTestBitMask = 0x1 << 1
-        self.physicsBody?.collisionBitMask = 0
+        self.physicsBody?.categoryBitMask = 0x1 << 2        // Category 2 (Enemy)
+        self.physicsBody?.contactTestBitMask = 0x1 << 1     // Player bullets (Category 1)
+        self.physicsBody?.collisionBitMask = 0              // No physical collisions
         self.physicsBody?.affectedByGravity = false
         self.physicsBody?.isDynamic = true
         self.physicsBody?.allowsRotation = false

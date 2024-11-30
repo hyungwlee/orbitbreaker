@@ -35,11 +35,12 @@ class Player {
         // Add physics for enemy bullet collision
         //ship.physicsBody = SKPhysicsBody(rectangleOf: ship.size)
         ship.physicsBody = SKPhysicsBody(texture: ship.texture!, size: ship.size)
-        ship.physicsBody?.categoryBitMask = 0x1 << 0     // Category 1
-        ship.physicsBody?.contactTestBitMask = 0x1 << 3  // Will contact with category 4 (enemy bullets)
-        ship.physicsBody?.contactTestBitMask = 0x1 << 1 // dies on contact with enemy (cat 2)
-        ship.physicsBody?.collisionBitMask = 0
-        ship.physicsBody?.affectedByGravity = false
+           ship.physicsBody?.categoryBitMask = 0x1 << 0        // Category 0 (Player)
+           ship.physicsBody?.contactTestBitMask = 0x1 << 2 |   // Enemy (Category 2)
+                                                0x1 << 3 |      // Enemy bullets (Category 3)
+                                                0x1 << 4        // Boss (Category 4)
+           ship.physicsBody?.collisionBitMask = 0
+           ship.physicsBody?.affectedByGravity = false
         scene.addChild(ship)
     }
     

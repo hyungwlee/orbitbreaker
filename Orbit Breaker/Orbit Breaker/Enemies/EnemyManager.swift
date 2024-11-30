@@ -68,7 +68,11 @@ class EnemyManager {
     
     func forceCleanup() {
         // Remove all existing enemies
-        enemies.forEach { $0.removeFromParent() }
+        enemies.forEach {
+            if let boss = $0 as? Boss {
+                        boss.cleanup()  // This will remove health bars
+                    }
+            $0.removeFromParent() }
         enemies.removeAll()
         
         // Reset wave manager state if needed
@@ -154,8 +158,11 @@ class EnemyManager {
         case 3:
             boss = Boss(type: .disgust)
             bossNum += 1
+        case 4:
+            boss = Boss(type: .love)
+            bossNum += 1
         default:
-            boss = Boss(type: .fear)
+            boss = Boss(type: .love)
             bossNum = 1
         }
         
