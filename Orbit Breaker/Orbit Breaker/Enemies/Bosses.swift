@@ -731,6 +731,12 @@ class Boss: Enemy {
         let minHeight = maxHeight - 30
         verticalOffset = sin(currentTime * 2) * 15
         position.y = min(maxHeight, max(minHeight, normalHeight + verticalOffset))
+        
+        
+        if currentTime - lastSwoopTime >= 5.0 {
+                   startSwoop(in: scene)
+                   lastSwoopTime = currentTime
+               }
     }
     
     
