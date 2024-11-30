@@ -9,15 +9,14 @@ import SpriteKit
 
 class Bullet: SKSpriteNode {
     var damage: Int
-    // initializes damage class, takes three parameters damage, color and size
-    init(damage: Int, color: UIColor, size: CGSize) {
+    
+    init(damage: Int, texture: SKTexture? = SKTexture(imageNamed: "playerbullet"), size: CGSize) {
         self.damage = damage
-        super.init(texture: nil, color: color, size: size)
+        super.init(texture: texture, color: .clear, size: size)
         
-        // collision logic
         self.physicsBody = SKPhysicsBody(rectangleOf: size)
-        self.physicsBody?.categoryBitMask = 0x1 << 1
-        self.physicsBody?.contactTestBitMask = 0x1 << 2
+        self.physicsBody?.categoryBitMask = 0x1 << 1 // Bullet category
+        self.physicsBody?.contactTestBitMask = 0x1 << 2 // Enemy category
         self.physicsBody?.collisionBitMask = 0
         self.physicsBody?.affectedByGravity = false
     }
@@ -26,3 +25,4 @@ class Bullet: SKSpriteNode {
         fatalError("init(coder:) has not been implemented")
     }
 }
+

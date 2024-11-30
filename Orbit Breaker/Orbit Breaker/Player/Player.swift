@@ -57,7 +57,7 @@ class Player {
         let bulletdamage: Int = 10 * damageMultiplier
         
         // Create new bullet with damage criteria from above
-        let bullet = Bullet(damage: bulletdamage, color: .yellow, size: CGSize(width: 6, height: 10))
+        let bullet = Bullet(damage: bulletdamage, texture: SKTexture(imageNamed: "playerbullet"), size: CGSize(width: 6, height: 10))
         
         // set bullet position
         bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height/2)
