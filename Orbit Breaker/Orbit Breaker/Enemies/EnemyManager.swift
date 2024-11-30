@@ -12,12 +12,14 @@ class EnemyManager {
     private weak var scene: SKScene?
     private var enemies: [Enemy] = []
     private var waveManager: WaveManager
+    private var bossAnnouncement: BossAnnouncement?
     var currentWave = 0
     private var bossNum: Int = 1
     
     init(scene: SKScene) {
         self.scene = scene
         self.waveManager = WaveManager(scene: scene)
+        self.bossAnnouncement = BossAnnouncement(scene: scene)
     }
     
     func setupEnemies() {
@@ -51,6 +53,25 @@ class EnemyManager {
         return sorted
     }
     
+    private func assignKamikazeEnemies() {
+            guard currentWave > 3 && currentWave % 5 != 0 else { return }
+            
+            // Determine number of kamikaze enemies based on wave
+            let maxKamikazeCount = min(2, enemies.count - 1) // Never convert all enemies
+            let kamikazeCount = Int.random(in: 1...maxKamikazeCount)
+            
+            // Select random enemies to become kamikaze
+            let selectedEnemies = enemies.shuffled().prefix(kamikazeCount)
+            
+            // Convert selected enemies to kamikaze
+            for enemy in selectedEnemies {
+                // Don't convert bosses
+                if !(enemy is Boss) {
+                    enemy.startKamikazeBehavior()
+                }
+            }
+        }
+    
     func update(currentTime: TimeInterval) {
         guard let scene = scene else { return }
         waveManager.update(currentTime: currentTime)
@@ -70,8 +91,8 @@ class EnemyManager {
         // Remove all existing enemies
         enemies.forEach {
             if let boss = $0 as? Boss {
-                        boss.cleanup()  // This will remove health bars
-                    }
+                boss.cleanup()  // This will remove health bars
+            }
             $0.removeFromParent() }
         enemies.removeAll()
         
@@ -81,52 +102,49 @@ class EnemyManager {
     private func setupRegularWave() {
         guard let scene = scene else { return }
         
-        // Calculate proper spacing
-        let horizontalMargin: CGFloat = 40
-        let availableWidth = scene.size.width - (2 * horizontalMargin)
-        let horizontalSpacing = availableWidth / CGFloat(EnemyConfig.columnCount - 1)
+        // Choose formation based on wave number
+        let formationKeys = Array(FormationMatrix.formations.keys)
+        let formationKey = formationKeys[currentWave % formationKeys.count]
+        let formation = FormationMatrix.formations[formationKey] ?? FormationMatrix.formations["standard"]!
         
-        let topMargin: CGFloat = scene.size.height * 0.8
-        let availableHeight = scene.size.height * 0.3
-        let verticalSpacing = availableHeight / CGFloat(EnemyConfig.rowCount)
+        // Get positions for current formation
+        let positions = FormationGenerator.generatePositions(
+            from: formation,
+            in: scene,
+            spacing: CGSize(width: 60, height: 50),
+            topMargin: 0.8
+        )
         
         var enemyQueue: [(Enemy, CGPoint)] = []
         
-        // Create enemies
-        for row in 0..<EnemyConfig.rowCount {
+        // Create enemies at calculated positions
+        for (index, position) in positions.enumerated() {
             let enemyType: EnemyType = {
-                switch row % 3 {
+                switch index % 3 {
                 case 0: return .a
                 case 1: return .b
                 default: return .c
                 }
             }()
             
-            let enemyPositionY = topMargin - (CGFloat(row) * verticalSpacing)
-            
-            for column in 0..<EnemyConfig.columnCount {
-                let enemyPositionX = horizontalMargin + (CGFloat(column) * horizontalSpacing)
-                let finalPosition = CGPoint(x: enemyPositionX, y: enemyPositionY)
-                
-                let enemy = EnemySpawner.makeEnemy(ofType: enemyType)
-                enemies.append(enemy)
-                enemyQueue.append((enemy, finalPosition))
-                print("Created enemy at position: \(finalPosition)") // Debug print
-            }
+            let enemy = EnemySpawner.makeEnemy(ofType: enemyType)
+            enemies.append(enemy)
+            enemyQueue.append((enemy, position))
         }
         
-        // Start the wave
+        // Start the wave with ordered enemies
         let orderedQueue = orderEnemiesForEntry(enemyQueue)
         waveManager.startNextWave(enemies: orderedQueue)
         
-        // Assign shooters
         assignShooters()
-        
-        // Assign power-up holders
         assignPowerUpDroppers()
-        
-        print("Total regular enemies created: \(enemies.count)") // Debug print
+        if currentWave > 3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                self?.assignKamikazeEnemies()
+            }
+        }
     }
+    
     
     
     func cleanupAllEnemies() {
@@ -144,7 +162,15 @@ class EnemyManager {
     private func setupBossWave() {
         guard let scene = scene else { return }
         
-        print("Creating boss for wave \(currentWave)") // Debug print
+        bossAnnouncement?.showAnnouncement(bossType: getBossType()) { [weak self] in
+            self?.spawnBoss()
+        }
+        
+        
+    }
+    
+    private func spawnBoss() {
+        guard let scene = scene else { return }
         
         let boss: Boss
         
@@ -169,8 +195,16 @@ class EnemyManager {
         boss.position = CGPoint(x: scene.size.width/2, y: scene.size.height * 0.8)
         scene.addChild(boss)
         enemies.append(boss)
-        
-        print("Boss created and added to scene") // Debug print
+    }
+    
+    private func getBossType() -> BossType {
+        switch bossNum {
+        case 1: return .anger
+        case 2: return .sadness
+        case 3: return .disgust
+        case 4: return .love
+        default: return .love
+        }
     }
     func handleEnemyDestroyed(_ enemy: Enemy) {
         if let index = enemies.firstIndex(of: enemy) {

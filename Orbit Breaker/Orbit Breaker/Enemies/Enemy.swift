@@ -55,6 +55,60 @@ class Enemy: SKSpriteNode {
         }
     }
     
+    func startKamikazeBehavior() {
+        guard let scene = scene else { return }
+        
+        // Mark this enemy as a kamikaze
+        self.name = "kamikazeEnemy"
+        
+        // Change appearance to indicate danger
+        self.run(SKAction.colorize(with: .red, colorBlendFactor: 0.7, duration: 0.3))
+        
+        // Add pulsing warning effect
+        let pulse = SKAction.sequence([
+            SKAction.scale(to: 1.2, duration: 0.5),
+            SKAction.scale(to: 1.0, duration: 0.5)
+        ])
+        self.run(SKAction.repeatForever(pulse))
+        
+        // Start tracking and attacking player
+        let updateInterval = 1.0 / 60.0 // 60fps
+        let trackingAction = SKAction.run { [weak self] in
+            guard let self = self,
+                  let player = scene.childNode(withName: "testPlayer") else { return }
+            
+            // Calculate direction to player
+            let dx = player.position.x - self.position.x
+            let dy = player.position.y - self.position.y
+            let distance = hypot(dx, dy)
+            
+            // Normalize direction
+            let normalizedDx = dx / distance
+            let normalizedDy = dy / distance
+            
+            // Move towards player
+            let speed: CGFloat = 300.0
+            self.position.x += normalizedDx * speed * CGFloat(updateInterval)
+            self.position.y += normalizedDy * speed * CGFloat(updateInterval)
+            
+            // Rotate to face player
+            let angle = atan2(dy, dx)
+            self.zRotation = angle + .pi / 2
+        }
+        
+        let sequence = SKAction.sequence([
+            SKAction.wait(forDuration: 1.0), // Wait before charging
+            SKAction.repeatForever(
+                SKAction.sequence([
+                    trackingAction,
+                    SKAction.wait(forDuration: updateInterval)
+                ])
+            )
+        ])
+        
+        self.run(sequence)
+    }
+    
     private func shoot(scene: SKScene) {
         let bullet = SKSpriteNode(color: .red, size: CGSize(width: 4, height: 10))
         bullet.position = CGPoint(x: position.x, y: position.y - size.height/2)

@@ -276,6 +276,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private func handlePlayerHit() {
         print("Player was hit!")
         if let playerNode = childNode(withName: "testPlayer") {
+            // Add explosion effect
+            VisualEffects.addExplosion(at: playerNode.position, in: self)
+            VisualEffects.addScreenShake(to: self, intensity: 15)
+            
             let flash = SKAction.sequence([
                 SKAction.colorize(with: .red, colorBlendFactor: 1.0, duration: 0.1),
                 SKAction.colorize(withColorBlendFactor: 0.0, duration: 0.1)
@@ -364,11 +368,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         bullet.removeFromParent()
         
         if enemy.takeDamage(bullet.damage) {
-            // Add score based on enemy type
+            // Add explosion effect
+            VisualEffects.addExplosion(at: enemy.position, in: self)
+            
+            // Add screen shake for boss defeats
             if enemy is Boss {
-                updateScore(500)  // Boss kill
+                VisualEffects.addScreenShake(to: self, intensity: 20)
+                updateScore(500)
             } else {
-                updateScore(10)   // Regular enemy kill
+                updateScore(10)
             }
             
             enemy.dropPowerUp(scene: self)
