@@ -100,21 +100,28 @@ class PowerUpManager {
         setupIndicators()
     }
     
+    func cleanup() {
+            indicators.forEach { $0.removeFromParent() }
+            indicators.removeAll()
+        }
+    
     private func setupIndicators() {
         guard let scene = scene else { return }
         
         let size: CGFloat = 50
         let spacing: CGFloat = 10
-        let leftMargin: CGFloat = 15  // Small margin from left edge
+        let leftMargin: CGFloat = 15
         let bottomMargin: CGFloat = 20
         
-        // Position starting from far left
-        for (index, _) in PowerUps.allCases.enumerated() {
+        // Create an array of power up types in the order we want them
+        let orderedPowerUps = [PowerUps.shield, PowerUps.doubleDamage]
+        
+        for (index, type) in orderedPowerUps.enumerated() {
             let indicator = PowerUpIndicator(size: size)
+            let xPosition = leftMargin + (size / 2) + (CGFloat(index) * (size + spacing))
             
-            // Position from left edge
             indicator.position = CGPoint(
-                x: leftMargin + size/2 + CGFloat(index) * (size + spacing),
+                x: xPosition,
                 y: size/2 + bottomMargin
             )
             

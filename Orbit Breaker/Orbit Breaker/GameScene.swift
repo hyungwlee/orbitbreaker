@@ -21,6 +21,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var score: Int = 0
     private var scoreLabel: SKLabelNode!
     var powerUpManager: PowerUpManager!
+    private var waveRoadmap: WaveRoadmap?
     
     
     var background1: SKSpriteNode!
@@ -327,7 +328,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         scoreLabel.text = "Score: 0"
         
-        // Remove game over screen and all other nodes
+        // Cleanup the roadmap before removing all children
+        waveRoadmap?.cleanup()
+        waveRoadmap = nil
+        
+        // Remove all nodes
         removeAllChildren()
         
         // Reset game state
@@ -335,6 +340,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Reset enemy manager and wave count
         enemyManager = EnemyManager(scene: self)
+        
+        // Reset power up manager
+        powerUpManager = PowerUpManager(scene: self)
         
         // Create new content
         createContent()

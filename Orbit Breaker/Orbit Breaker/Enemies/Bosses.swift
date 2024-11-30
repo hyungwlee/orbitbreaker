@@ -48,11 +48,11 @@ enum BossType {
     var health: Int {
         switch self {
         case .anger:
-            return 500
+            return 750
         case .sadness:
-            return 750
+            return 900
         case .disgust, .love:
-            return 750
+            return 1000
             
         }
     }
@@ -509,7 +509,8 @@ class Boss: Enemy {
                     handleSadnessMovement(currentTime: currentTime, in: scene)
                 } else if bossType == .anger {
                     handleAngerMovement(currentTime: currentTime, in: scene)
-                    if currentTime - lastShootTime >= 3.0 {
+                    // Only shoot if not stomping and enough time has passed
+                    if currentTime - lastShootTime >= 3.0 && !isSwooping {
                         shootFireballPattern(in: scene)
                         lastShootTime = currentTime
                     }
@@ -717,20 +718,31 @@ class Boss: Enemy {
     }
     
     private func handleAngerMovement(currentTime: TimeInterval, in scene: SKScene) {
-        let moveSpeed: CGFloat = 2.0
-        let targetX = position.x + moveSpeed * moveDirection
-        position.x = targetX
-        
-        if position.x >= scene.size.width - 80 {
-            moveDirection = -1
-        } else if position.x <= 80 {
-            moveDirection = 1
+        // Only start stomping after entry animation
+        if currentTime - entryStartTime > 3.0 {
+            // Check if we should start a new stomp
+            if !isSwooping && currentTime - lastSwoopTime >= 5.0 { // Stomp every 5 seconds
+                startSwoop(in: scene)
+                lastSwoopTime = currentTime
+                // Reset shoot time to prevent shooting during stomp
+                lastShootTime = currentTime
+            } else if !isSwooping { // Only move and shoot when not stomping
+                let moveSpeed: CGFloat = 2.0
+                let targetX = position.x + moveSpeed * moveDirection
+                position.x = targetX
+                
+                if position.x >= scene.size.width - 80 {
+                    moveDirection = -1
+                } else if position.x <= 80 {
+                    moveDirection = 1
+                }
+                
+                let maxHeight = scene.size.height - 150
+                let minHeight = maxHeight - 30
+                verticalOffset = sin(currentTime * 2) * 15
+                position.y = min(maxHeight, max(minHeight, normalHeight + verticalOffset))
+            }
         }
-        
-        let maxHeight = scene.size.height - 150  // Increased distance from health bar
-        let minHeight = maxHeight - 30
-        verticalOffset = sin(currentTime * 2) * 15
-        position.y = min(maxHeight, max(minHeight, normalHeight + verticalOffset))
     }
     
     

@@ -25,6 +25,15 @@ class EnemyManager {
         self.scene = scene
         self.waveManager = WaveManager(scene: scene)
         self.bossAnnouncement = BossAnnouncement(scene: scene)
+        
+        // Look for existing roadmap nodes and remove them
+        scene.enumerateChildNodes(withName: "*") { node, _ in
+            if let circle = node as? SKShapeNode, circle.strokeColor == .yellow {
+                circle.removeFromParent()
+            }
+        }
+        
+        // Create new roadmap for fresh start
         self.roadmap = WaveRoadmap(scene: scene)
     }
     
@@ -367,7 +376,7 @@ class EnemyManager {
                         guard let self = self else { return }
                         
                         // 1 in 10 chance for asteroid field if not before a boss wave
-                        if Int.random(in: 1...2) == 1 && (self.currentWave + 1) % 5 != 0 {
+                        if Int.random(in: 1...3) == 1 && (self.currentWave + 1) % 5 != 0 {
                             self.setupAsteroidField()
                         } else {
                             self.setupEnemies()
