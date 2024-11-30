@@ -408,13 +408,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if enemy.takeDamage(bullet.damage) {
             // Add explosion effect
-            VisualEffects.addExplosion(at: enemy.position, in: self)
             
             // Add screen shake for boss defeats
-            if enemy is Boss {
-                VisualEffects.addScreenShake(to: self, intensity: 20)
-                updateScore(500)
+            // Check if it's a boss defeat
+                       if let boss = enemy as? Boss {
+                           // Create epic boss defeat sequence
+                           handleBossDefeat(boss)
+                           updateScore(100)
             } else {
+                // Regular enemy defeat
+                VisualEffects.addExplosion(at: enemy.position, in: self)
                 updateScore(10)
             }
             
@@ -424,6 +427,173 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    private func handleBossDefeat(_ boss: Boss) {
+            // Create multiple explosion waves
+            for i in 0...3 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.2) {
+                    // Create expanding ring
+                    let ring = SKShapeNode(circleOfRadius: 10)
+                    ring.position = boss.position
+                    ring.strokeColor = boss.bossType.color
+                    ring.lineWidth = 3
+                    ring.zPosition = 5
+                    self.addChild(ring)
+                    
+                    // Expand and fade ring
+                    let expand = SKAction.scale(to: 20, duration: 0.5)
+                    let fade = SKAction.fadeOut(withDuration: 0.5)
+                    ring.run(SKAction.sequence([
+                        SKAction.group([expand, fade]),
+                        SKAction.removeFromParent()
+                    ]))
+                }
+            }
+            
+            // Add multiple particle explosions
+            for _ in 0...8 {
+                let delay = Double.random(in: 0...0.5)
+                let position = CGPoint(
+                    x: boss.position.x + CGFloat.random(in: -50...50),
+                    y: boss.position.y + CGFloat.random(in: -50...50)
+                )
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    VisualEffects.addExplosion(at: position, in: self)
+                }
+            }
+            
+            // Add screen flash
+            let flash = SKSpriteNode(color: boss.bossType.color, size: self.size)
+            flash.position = CGPoint(x: self.size.width/2, y: self.size.height/2)
+            flash.zPosition = 100
+            flash.alpha = 0
+            addChild(flash)
+            
+            flash.run(SKAction.sequence([
+                SKAction.fadeAlpha(to: 0.3, duration: 0.1),
+                SKAction.fadeOut(withDuration: 0.2),
+                SKAction.removeFromParent()
+            ]))
+            
+            // Add boss-specific effects
+            switch boss.bossType {
+            case .anger:
+                // Add flame particles spiraling outward
+                for i in 0...12 {
+                    let angle = CGFloat(i) * .pi * 2 / 12
+                    let flame = SKSpriteNode(color: .orange, size: CGSize(width: 10, height: 10))
+                    flame.position = boss.position
+                    flame.zPosition = 4
+                    addChild(flame)
+                    
+                    let path = UIBezierPath()
+                    path.move(to: .zero)
+                    path.addCurve(
+                        to: CGPoint(x: cos(angle) * 200, y: sin(angle) * 200),
+                        controlPoint1: CGPoint(x: cos(angle) * 100, y: sin(angle) * 100),
+                        controlPoint2: CGPoint(x: cos(angle) * 150, y: sin(angle) * 150)
+                    )
+                    
+                    let follow = SKAction.follow(path.cgPath, asOffset: true, orientToPath: true, duration: 1.0)
+                    flame.run(SKAction.sequence([follow, SKAction.removeFromParent()]))
+                }
+                
+            case .sadness:
+                // Add rain drops falling upward
+                for _ in 0...20 {
+                    let raindrop = SKSpriteNode(color: .blue, size: CGSize(width: 3, height: 10))
+                    raindrop.position = CGPoint(
+                        x: boss.position.x + CGFloat.random(in: -100...100),
+                        y: boss.position.y
+                    )
+                    raindrop.zPosition = 4
+                    addChild(raindrop)
+                    
+                    let moveUp = SKAction.moveBy(x: 0, y: 200, duration: 1.0)
+                    let fade = SKAction.fadeOut(withDuration: 1.0)
+                    raindrop.run(SKAction.sequence([
+                        SKAction.group([moveUp, fade]),
+                        SKAction.removeFromParent()
+                    ]))
+                }
+                
+            case .disgust:
+                // Add toxic burst effect
+                for _ in 0...15 {
+                    let toxic = SKShapeNode(circleOfRadius: 5)
+                    toxic.fillColor = .green
+                    toxic.strokeColor = .clear
+                    toxic.position = boss.position
+                    toxic.zPosition = 4
+                    addChild(toxic)
+                    
+                    let angle = CGFloat.random(in: 0...CGFloat.pi * 2)
+                    let distance = CGFloat.random(in: 100...200)
+                    let vector = CGVector(
+                        dx: cos(angle) * distance,
+                        dy: sin(angle) * distance
+                    )
+
+                    let move = SKAction.move(by: vector, duration: 0.8)
+                    let fade = SKAction.fadeOut(withDuration: 0.8)
+                    toxic.run(SKAction.sequence([
+                        SKAction.group([move, fade]),
+                        SKAction.removeFromParent()
+                    ]))
+                }
+                
+            case .love:
+                // Add hearts bursting outward
+                for _ in 0...12 {
+                    let heart = SKSpriteNode(imageNamed: "heart")
+                    heart.size = CGSize(width: 20, height: 20)
+                    heart.position = boss.position
+                    heart.zPosition = 4
+                    addChild(heart)
+                    
+                    let angle = CGFloat.random(in: 0...CGFloat.pi * 2)
+                    let distance = CGFloat.random(in: 100...200)
+                    
+                    let moveAction = SKAction.move(
+                        by: CGVector(dx: cos(angle) * distance, dy: sin(angle) * distance),
+                        duration: 1.0
+                    )
+                    let rotateAction = SKAction.rotate(byAngle: .pi * 4, duration: 1.0)
+                    let fadeAction = SKAction.fadeOut(withDuration: 1.0)
+                    
+                    heart.run(SKAction.sequence([
+                        SKAction.group([moveAction, rotateAction, fadeAction]),
+                        SKAction.removeFromParent()
+                    ]))
+                }
+            }
+            
+            // Add intense screen shake
+            VisualEffects.addScreenShake(to: self, intensity: 30)
+            
+            // Add victory text
+            let victoryLabel = SKLabelNode(fontNamed: "Arial-Bold")
+            victoryLabel.text = "\(String(describing: boss.bossType).capitalized) Defeated!"
+            victoryLabel.fontSize = 40
+            victoryLabel.fontColor = boss.bossType.color
+            victoryLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+            victoryLabel.setScale(0)
+            victoryLabel.zPosition = 101
+            addChild(victoryLabel)
+            
+            let scaleUp = SKAction.scale(to: 1.2, duration: 0.3)
+            let scaleDown = SKAction.scale(to: 1.0, duration: 0.2)
+            let wait = SKAction.wait(forDuration: 1.0)
+            let fade = SKAction.fadeOut(withDuration: 0.3)
+            
+            victoryLabel.run(SKAction.sequence([
+                scaleUp,
+                scaleDown,
+                wait,
+                fade,
+                SKAction.removeFromParent()
+            ]))
+        }
     
 }
 

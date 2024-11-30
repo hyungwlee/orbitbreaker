@@ -32,6 +32,7 @@ class Player {
         ship.position = CGPoint(x: scene.size.width/2, y: 60)
         ship.name = "testPlayer"
         
+        
         // Add physics for enemy bullet collision
         //ship.physicsBody = SKPhysicsBody(rectangleOf: ship.size)
         ship.physicsBody = SKPhysicsBody(texture: ship.texture!, size: ship.size)
@@ -57,7 +58,7 @@ class Player {
         let bulletdamage: Int = 10 * damageMultiplier
         
         // Create new bullet with damage criteria from above
-        let bullet = Bullet(damage: bulletdamage, texture: SKTexture(imageNamed: "playerbullet"), size: CGSize(width: 6, height: 10))
+        let bullet = Bullet(damage: bulletdamage, texture: SKTexture(imageNamed: "playerBullet"), size: CGSize(width: 6, height: 10))
         
         // set bullet position
         bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height/2)

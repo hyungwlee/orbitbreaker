@@ -40,7 +40,7 @@ class BossAnnouncement {
         
         // Create boss name text
         let bossNameLabel = SKLabelNode(fontNamed: "Arial-Bold")
-        bossNameLabel.text = "\(bossType) Approaching"
+        bossNameLabel.text = "\(String(describing: bossType).capitalized) Approaching"
         bossNameLabel.fontSize = 36
         bossNameLabel.fontColor = .white
         bossNameLabel.position = CGPoint(x: scene.size.width/2, y: scene.size.height/2 - 20)

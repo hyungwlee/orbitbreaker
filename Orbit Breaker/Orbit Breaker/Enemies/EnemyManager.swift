@@ -147,6 +147,8 @@ class EnemyManager {
     private func setupRegularWave() {
         guard let scene = scene else { return }
         
+        let nextBossType = getBossType()
+        
         // Choose formation based on wave number
         let formationKeys = Array(FormationMatrix.formations.keys)
         let formationKey = formationKeys[currentWave % formationKeys.count]
@@ -162,7 +164,7 @@ class EnemyManager {
         
         var enemyQueue: [(Enemy, CGPoint)] = []
         
-        // Create enemies at calculated positions
+        // When creating enemies, set their texture based on next boss
         for (index, position) in positions.enumerated() {
             let enemyType: EnemyType = {
                 switch index % 3 {
@@ -173,6 +175,7 @@ class EnemyManager {
             }()
             
             let enemy = EnemySpawner.makeEnemy(ofType: enemyType)
+            enemy.updateTexture(forBossType: nextBossType)  // Set the appropriate texture
             enemies.append(enemy)
             enemyQueue.append((enemy, position))
         }
@@ -338,19 +341,19 @@ class EnemyManager {
         switch bossNum {
         case 1:
             boss = Boss(type: .anger)
-            bossNum += 1
+            bossNum = 2
         case 2:
             boss = Boss(type: .sadness)
-            bossNum += 1
+            bossNum = 3
         case 3:
             boss = Boss(type: .disgust)
-            bossNum += 1
+            bossNum = 4
         case 4:
             boss = Boss(type: .love)
-            bossNum += 1
-        default:
-            boss = Boss(type: .love)
             bossNum = 1
+        default:
+            boss = Boss(type: .anger)
+            bossNum = 2
         }
         
         boss.position = CGPoint(x: scene.size.width/2, y: scene.size.height * 0.8)
@@ -369,13 +372,19 @@ class EnemyManager {
     }
     func handleEnemyDestroyed(_ enemy: Enemy) {
         if let index = enemies.firstIndex(of: enemy) {
-                enemies.remove(at: index)
-                
-                if enemies.isEmpty {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-                        guard let self = self else { return }
-                        
-                        // 1 in 10 chance for asteroid field if not before a boss wave
+            enemies.remove(at: index)
+            
+            if enemies.isEmpty {
+                // If it was a boss, use a longer delay
+                let delay: TimeInterval = (enemy is Boss) ? 3.5 : 1.0
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                    guard let self = self else { return }
+                    
+                    if enemy is Boss {
+                        // After boss, go straight to next wave
+                        self.setupEnemies()
+                    } else {
+                        // Only consider asteroid field if it wasn't a boss
                         if Int.random(in: 1...3) == 1 && (self.currentWave + 1) % 5 != 0 {
                             self.setupAsteroidField()
                         } else {
@@ -384,6 +393,7 @@ class EnemyManager {
                     }
                 }
             }
+        }
     }
     func handleBulletCollision(bullet: SKNode, enemy: Enemy) {
         guard let bullet = bullet as? Bullet else { return }

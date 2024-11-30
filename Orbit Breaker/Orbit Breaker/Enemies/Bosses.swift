@@ -32,6 +32,7 @@ enum BossType {
         }
     }
     
+    
     var color: SKColor {
         switch self {
         case .anger:
@@ -47,12 +48,13 @@ enum BossType {
     
     var health: Int {
         switch self {
-        case .anger:
+        case .disgust:
             return 750
         case .sadness:
-            return 900
-        case .disgust, .love:
-            return 1000
+            return 1250
+        case .anger, .love:
+            return 1500
+            
             
         }
     }
@@ -89,6 +91,13 @@ class Boss: Enemy {
     private var shieldHealth: [SKNode: Int] = [:]
     private var shieldDamageCount: [SKNode: Int] = [:]
     private var shieldHits: [SKNode: Int] = [:]
+    private var shieldRegenerationTimer: TimeInterval = 0
+       private var isRegeneratingShields = false
+       private var lastShieldRegenTime: TimeInterval = 0
+       private let shieldRegenDelay: TimeInterval = 8.0 // Wait 8 seconds before starting regen
+       private let shieldRegenInterval: TimeInterval = 0.5 // Add one shield every 0.5 seconds
+       private let maxShields = 20
+       private var shieldsHaveBeenCreated = false
     
     
   
@@ -189,21 +198,25 @@ class Boss: Enemy {
     }
     
     private func handleLoveMovement(currentTime: TimeInterval, in scene: SKScene) {
-           let time = currentTime * 0.3
-           let radiusX: CGFloat = 150
-           let radiusY: CGFloat = 80
-           let centerX = scene.size.width / 2
-           let centerY = scene.size.height * 0.7
-           
-           let targetX = centerX + radiusX * cos(time)
-           let targetY = centerY + radiusY * sin(2 * time)
-           
-           let smoothing: CGFloat = 0.05
-           position = CGPoint(
-               x: position.x + (targetX - position.x) * smoothing,
-               y: position.y + (targetY - position.y) * smoothing
-           )
-       }
+        let time = currentTime * 0.3
+                   let radiusX: CGFloat = 150
+                   let radiusY: CGFloat = 80
+                   let centerX = scene.size.width / 2
+                   let centerY = scene.size.height * 0.7
+                   
+                   let targetX = centerX + radiusX * cos(time)
+                   let targetY = centerY + radiusY * sin(2 * time)
+                   
+                   let smoothing: CGFloat = 0.05
+                   position = CGPoint(
+                       x: position.x + (targetX - position.x) * smoothing,
+                       y: position.y + (targetY - position.y) * smoothing
+                   )
+                   
+                   
+                   // Update existing shields
+                   rotateShields(currentTime: currentTime)
+               }
        
     private func shootHomingHeart(in scene: SKScene) {
         guard let player = scene.childNode(withName: "testPlayer") else { return }
@@ -524,10 +537,10 @@ class Boss: Enemy {
                     }
                     
                     // Create shields after entry animation
-                    if timeSinceEntry > 3.0 && heartShields.isEmpty {
-                        createHeartShields()
-                    }
-                    
+                    if timeSinceEntry > 3.0 && !shieldsHaveBeenCreated {
+                                           createHeartShields()
+                                           shieldsHaveBeenCreated = true
+                                       }
                     rotateShields(currentTime: currentTime)
                 }
             }

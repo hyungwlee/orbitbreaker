@@ -153,6 +153,20 @@ class Enemy: SKSpriteNode {
                applyDivePattern()
            }
        }
+    func updateTexture(forBossType bossType: BossType) {
+        let textureName: String
+        switch bossType {
+        case .anger:
+            textureName = "angryEnemy"
+        case .sadness:
+            textureName = "sadnessEnemy"
+        case .disgust:
+            textureName = "disgustEnemy"
+        case .love:
+            textureName = "loveEnemy"
+        }
+        self.texture = SKTexture(imageNamed: textureName)
+    }
        
        private func applyOscillation() {
            let amplitude: CGFloat = 40
@@ -240,7 +254,8 @@ class Enemy: SKSpriteNode {
        }
     
     private func shoot(scene: SKScene) {
-        let bullet = SKSpriteNode(color: .red, size: CGSize(width: 4, height: 10))
+        let bullet = SKSpriteNode(texture: SKTexture(imageNamed: "enemyBullet"))
+        bullet.size = CGSize(width: 6, height: 10)
         bullet.position = CGPoint(x: position.x, y: position.y - size.height/2)
         bullet.name = "enemyBullet"
         
