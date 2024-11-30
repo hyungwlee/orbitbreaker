@@ -108,6 +108,136 @@ class Enemy: SKSpriteNode {
         
         self.run(sequence)
     }
+        func addDynamicMovement() {
+            // Side-to-side oscillation
+            let oscillate = SKAction.sequence([
+                SKAction.moveBy(x: 40, y: 0, duration: 1.0),
+                SKAction.moveBy(x: -40, y: 0, duration: 1.0)
+            ])
+            run(SKAction.repeatForever(oscillate))
+            
+            // Random diving attacks
+            if Int.random(in: 1...100) <= 15 { // 15% chance
+                let originalPosition = position
+                let diveSequence = SKAction.sequence([
+                    SKAction.wait(forDuration: Double.random(in: 1...3)),
+                    SKAction.run { [weak self] in
+                        guard let self = self else { return }
+                        let dive = SKAction.sequence([
+                            SKAction.move(to: CGPoint(x: position.x, y: position.y - 200), duration: 0.8),
+                            SKAction.move(to: originalPosition, duration: 0.8)
+                        ])
+                        self.run(dive)
+                    }
+                ])
+                run(SKAction.repeatForever(diveSequence))
+            }
+        }
+    
+    enum MovementPattern {
+           case oscillate
+           case circle
+           case figure8
+           case dive
+       }
+       
+       func addDynamicMovement(_ pattern: MovementPattern) {
+           switch pattern {
+           case .oscillate:
+               applyOscillation()
+           case .circle:
+               applyCircularMotion()
+           case .figure8:
+               applyFigure8Motion()
+           case .dive:
+               applyDivePattern()
+           }
+       }
+       
+       private func applyOscillation() {
+           let amplitude: CGFloat = 40
+           let duration: TimeInterval = 2.0
+           
+           let oscillate = SKAction.sequence([
+               SKAction.moveBy(x: amplitude, y: 0, duration: duration/2),
+               SKAction.moveBy(x: -amplitude * 2, y: 0, duration: duration),
+               SKAction.moveBy(x: amplitude, y: 0, duration: duration/2)
+           ])
+           
+           run(SKAction.repeatForever(oscillate))
+       }
+       
+       private func applyCircularMotion() {
+           let radius: CGFloat = 30
+           let duration: TimeInterval = 4.0
+           let center = position
+           
+           let circlePath = UIBezierPath(arcCenter: .zero,
+                                        radius: radius,
+                                        startAngle: 0,
+                                        endAngle: .pi * 2,
+                                        clockwise: true)
+           
+           let followPath = SKAction.follow(circlePath.cgPath, asOffset: true,
+                                          orientToPath: true, duration: duration)
+           
+           run(SKAction.repeatForever(followPath))
+       }
+       
+       private func applyFigure8Motion() {
+           let width: CGFloat = 60
+           let height: CGFloat = 30
+           let duration: TimeInterval = 6.0
+           
+           let path = UIBezierPath()
+           path.move(to: .zero)
+           
+           // Create figure-8 shape
+           let steps = 100
+           for i in 0...steps {
+               let t = CGFloat(i) / CGFloat(steps)
+               let angle = t * .pi * 2
+               
+               let x = width * sin(angle)
+               let y = height * sin(angle * 2)
+               
+               path.addLine(to: CGPoint(x: x, y: y))
+           }
+           
+           let followPath = SKAction.follow(path.cgPath, asOffset: true,
+                                          orientToPath: true, duration: duration)
+           
+           run(SKAction.repeatForever(followPath))
+       }
+       
+       private func applyDivePattern() {
+           let originalPosition = position
+           let diveDistance: CGFloat = 200
+           
+           let diveSequence = SKAction.sequence([
+               SKAction.wait(forDuration: Double.random(in: 2...5)),
+               SKAction.run { [weak self] in
+                   guard let self = self else { return }
+                   
+                   let dive = SKAction.sequence([
+                       SKAction.group([
+                           SKAction.move(to: CGPoint(x: position.x,
+                                                   y: position.y - diveDistance),
+                                      duration: 1.0),
+                           SKAction.rotate(byAngle: .pi, duration: 1.0)
+                       ]),
+                       SKAction.group([
+                           SKAction.move(to: originalPosition, duration: 1.0),
+                           SKAction.rotate(byAngle: .pi, duration: 1.0)
+                       ])
+                   ])
+                   
+                   self.run(dive)
+               }
+           ])
+           
+           run(SKAction.repeatForever(diveSequence))
+       }
     
     private func shoot(scene: SKScene) {
         let bullet = SKSpriteNode(color: .red, size: CGSize(width: 4, height: 10))

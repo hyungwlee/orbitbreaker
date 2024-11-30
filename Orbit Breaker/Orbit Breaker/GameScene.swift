@@ -20,6 +20,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let maxPowerUpsDropped = 3
     private var score: Int = 0
     private var scoreLabel: SKLabelNode!
+    var powerUpManager: PowerUpManager!
+    
     
     var background1: SKSpriteNode!
     var background2: SKSpriteNode!
@@ -27,7 +29,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
-        setupDebugControls()
+//        setupDebugControls()
+        powerUpManager = PowerUpManager(scene: self)
         if !contentCreated {
             createContent()
             contentCreated = true
@@ -115,6 +118,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Setup game elements
         setupGame()
+        
     }
     
     private func setupScoreLabel() {
@@ -142,6 +146,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // Fixed update method - removed duplicate
     override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
+        powerUpManager.update(currentTime: currentTime)
         enemyManager.update(currentTime: currentTime)
         user.update(currentTime: currentTime)
         
@@ -179,6 +184,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func didBegin(_ contact: SKPhysicsContact) {
         let nodeA = contact.bodyA.node
         let nodeB = contact.bodyB.node
+        
+        
+        // Handle asteroid collisions
+        if (contact.bodyA.categoryBitMask == 0x1 << 6 && contact.bodyB.node?.name == "testPlayer") ||
+               (contact.bodyB.categoryBitMask == 0x1 << 6 && contact.bodyA.node?.name == "testPlayer") {
+                handlePlayerHit()
+            }
         
         // Check for heart shield collision with bullets
         if let bullet = nodeA as? Bullet, let shield = nodeB as? SKSpriteNode,
@@ -290,6 +302,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         user.cleanup()
         gameOver()
     }
+    func assignEnemyMovements() {
+           guard let enemies = enemyManager?.getAllEnemies() else { return }
+           
+           for (index, enemy) in enemies.enumerated() {
+               // Skip bosses
+               guard !(enemy is Boss) else { continue }
+               
+               // Assign different movement patterns based on position or random chance
+               let pattern: Enemy.MovementPattern
+               switch index % 4 {
+               case 0: pattern = .oscillate
+               case 1: pattern = .circle
+               case 2: pattern = .figure8
+               default: pattern = .dive
+               }
+               
+               enemy.addDynamicMovement(pattern)
+           }
+       }
     
     private func restartGame() {
         // Reset score
