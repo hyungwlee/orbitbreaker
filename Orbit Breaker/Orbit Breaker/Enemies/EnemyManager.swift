@@ -38,9 +38,7 @@ class EnemyManager {
     }
     
     func setupEnemies() {
-        print("Setting up enemies...") // Debug print
         guard let scene = scene else {
-            print("No scene available")
             return
         }
         
@@ -49,7 +47,6 @@ class EnemyManager {
         enemies.removeAll()
         
         currentWave += 1
-        print("Starting wave \(currentWave)") // Debug print
         
         if currentWave % 5 == 0 {
             // Boss wave - hide roadmap
@@ -61,7 +58,6 @@ class EnemyManager {
         }
         
         if currentWave % 5 == 0 {
-            print("Setting up boss wave") // Debug print
             setupBossWave()
             return
         } else {
@@ -398,10 +394,8 @@ class EnemyManager {
     func handleBulletCollision(bullet: SKNode, enemy: Enemy) {
         guard let bullet = bullet as? Bullet else { return }
         
-        print("Bullet hit enemy with damage: \(bullet.damage)")  // Debug print
         
         if enemy.takeDamage(bullet.damage) {
-            print("Enemy died")  // Debug print
             enemy.removeFromParent()
             if let index = enemies.firstIndex(of: enemy) {
                 enemies.remove(at: index)

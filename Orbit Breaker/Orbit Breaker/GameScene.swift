@@ -287,7 +287,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func handlePlayerHit() {
-        print("Player was hit!")
         if let playerNode = childNode(withName: "testPlayer") {
             // Add explosion effect
             VisualEffects.addExplosion(at: playerNode.position, in: self)
