@@ -255,7 +255,7 @@ class Enemy: SKSpriteNode {
     
     private func shoot(scene: SKScene) {
         let bullet = SKSpriteNode(texture: SKTexture(imageNamed: "enemyBullet"))
-        bullet.size = CGSize(width: 6, height: 10)
+        bullet.size = CGSize(width: 8, height: 12)
         bullet.position = CGPoint(x: position.x, y: position.y - size.height/2)
         bullet.name = "enemyBullet"
         
