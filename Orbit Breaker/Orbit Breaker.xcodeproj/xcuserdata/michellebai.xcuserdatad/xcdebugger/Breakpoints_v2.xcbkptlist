@@ -16,7 +16,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "60"
             endingLineNumber = "60"
-            landmarkName = "init(type:)"
+            landmarkName = "startKamikazeBehavior()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -32,7 +32,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "58"
             endingLineNumber = "58"
-            landmarkName = "init(type:)"
+            landmarkName = "startKamikazeBehavior()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
