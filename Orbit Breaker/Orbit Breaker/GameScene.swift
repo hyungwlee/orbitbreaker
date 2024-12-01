@@ -275,6 +275,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private func handlePlayerBulletCollision(_ bullet: SKNode) {
         if user.hasShield {
             user.removeShield()  // This will set hasShield to false and remove the shield node
+            powerUpManager.hideShieldIndicator()  // Add this line to hide the shield indicator
             bullet.removeFromParent()
         } else {
             handlePlayerHit()
