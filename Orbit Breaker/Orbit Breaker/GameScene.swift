@@ -23,29 +23,36 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var powerUpManager: PowerUpManager!
     private var waveRoadmap: WaveRoadmap?
     
-    
+    var bossCount = 0
     var background1: SKSpriteNode!
     var background2: SKSpriteNode!
     
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
-        setupDebugControls()
+        // setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
         if !contentCreated {
             createContent()
             contentCreated = true
         }
         
+        // Initialize background
+        setupBackgroundScrolling()
         
+        
+    }
+    
+    private func setupBackgroundScrolling(){
         // Initialize and add the background nodes
-        background1 = SKSpriteNode(imageNamed: "background")
+        bossCount = 0
+        background1 = SKSpriteNode(imageNamed: "backgroundANGER")
         background1.size = CGSize(width: size.width, height: size.height)
         background1.position = CGPoint(x: size.width / 2, y: size.height / 2)
         background1.zPosition = -1
         addChild(background1)
         
-        background2 = SKSpriteNode(imageNamed: "background")
+        background2 = SKSpriteNode(imageNamed: "backgroundANGER")
         background2.size = CGSize(width: size.width, height: size.height)
         background2.position = CGPoint(x: size.width / 2, y: background1.position.y + size.height)
         background2.zPosition = -1
@@ -60,8 +67,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Apply actions to both backgrounds
         background1.run(continuousScroll)
         background2.run(continuousScroll)
-        
-        
     }
     
     private func setupDebugControls() {
@@ -86,26 +91,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func createContent() {
         
-        let background1 = SKSpriteNode(imageNamed: "background")
-        background1.size = self.size
-        background1.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        background1.zPosition = -1
-        addChild(background1)
+        setupBackgroundScrolling()
         
-        let background2 = SKSpriteNode(imageNamed: "background")
-        background2.size = self.size
-        background2.position = CGPoint(x: size.width / 2, y: background1.position.y + size.height)
-        background2.zPosition = -1
-        addChild(background2)
-        
-        // Start scrolling
-        let moveDown = SKAction.moveBy(x: 0, y: -size.height, duration: 5.0)
-        let resetPosition = SKAction.moveBy(x: 0, y: size.height, duration: 0.0)
-        let scrollLoop = SKAction.sequence([moveDown, resetPosition])
-        let continuousScroll = SKAction.repeatForever(scrollLoop)
-        
-        background1.run(continuousScroll)
-        background2.run(continuousScroll)
         // Set up physics world
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         physicsWorld.contactDelegate = self
@@ -121,6 +108,51 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setupGame()
         
     }
+    
+  
+        
+        // Call this function when the boss is defeated
+    func onBossDefeated(_ boss: Boss) {
+        let newBackground: String
+        
+        // Determine background based on the defeated boss
+        switch boss.bossType {
+            case .anger:
+                newBackground = "backgroundSAD"
+            case .sadness:
+                newBackground = "backgroundDISGUST"
+            case .disgust:
+                newBackground = "backgroundLOVE"
+            case .love:
+                newBackground = "backgroundANGER"
+           // case .neutral:
+           //         newBackground = "backgroundNEUTRAL"
+            
+        }
+        
+        // Perform the fade transition
+        let fadeOutAction = SKAction.fadeOut(withDuration: 1.0)
+        let fadeInAction = SKAction.fadeIn(withDuration: 1.0)
+        
+        // Fade out current background
+        background1.run(fadeOutAction) {
+            // Change texture after fade-out
+            self.background1.texture = SKTexture(imageNamed: newBackground)
+            
+            // Fade the new background in
+            self.background1.run(fadeInAction)
+        }
+        
+        background2.run(fadeOutAction) {
+            // Change texture after fade-out
+            self.background2.texture = SKTexture(imageNamed: newBackground)
+            
+            // Fade the new background in
+            self.background2.run(fadeInAction)
+        }
+            
+            
+        }
     
     private func setupScoreLabel() {
         scoreLabel = SKLabelNode(fontNamed: "Arial")
@@ -593,6 +625,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 fade,
                 SKAction.removeFromParent()
             ]))
+        
+        onBossDefeated(boss);
         }
     
 }
