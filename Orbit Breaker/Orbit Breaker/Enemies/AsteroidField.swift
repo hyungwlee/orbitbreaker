@@ -30,7 +30,7 @@ class AsteroidFieldAnnouncement {
         // Warning text - adjusted position and multiline
         let warningLabel = SKLabelNode(fontNamed: "Arial-Bold")
         warningLabel.numberOfLines = 2
-        warningLabel.text = "ASTEROID FIELD\nAPPROACHING!"
+        warningLabel.text = "ASTEROID FIELD\n APPROACHING!"
         warningLabel.fontSize = 40
         warningLabel.fontColor = .red
         warningLabel.position = CGPoint(x: scene.size.width/2, y: scene.size.height/2)
