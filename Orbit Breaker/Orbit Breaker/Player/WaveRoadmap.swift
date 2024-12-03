@@ -9,6 +9,7 @@ import SpriteKit
 class WaveRoadmap {
     private weak var scene: SKScene?
     private var roadmapNodes: [SKNode] = []
+    private var waveDots: [SKShapeNode] = [] // New array to track just the dots
     private var currentWaveIndicator: SKShapeNode?
     private let waveCount = 5
     
@@ -27,6 +28,7 @@ class WaveRoadmap {
             $0.removeFromParent()
         }
         roadmapNodes.removeAll()
+        waveDots.removeAll()
     }
     
     private func setupRoadmap() {
@@ -53,6 +55,7 @@ class WaveRoadmap {
             dot.zPosition = 1  // Higher zPosition for dots
             scene.addChild(dot)
             roadmapNodes.append(dot)
+            waveDots.append(dot) // Add to waveDots array
             
             if i == waveCount - 1 {
                 let label = SKLabelNode(fontNamed: "Arial")
@@ -78,8 +81,6 @@ class WaveRoadmap {
             scene.addChild(line)
             roadmapNodes.append(line)
         }
-    
-        
         
         // Create the indicator only if it doesn't exist
         if currentWaveIndicator == nil {
@@ -107,6 +108,27 @@ class WaveRoadmap {
         let topMargin: CGFloat = 50
         let startY = scene.size.height - topMargin - (CGFloat(waveCount - 1) * spacing)
         let y = startY + CGFloat(adjustedWave) * spacing
+        
+        // Update completed waves
+        for i in 0..<waveDots.count {
+            if i < adjustedWave {
+                // Color previous dots green
+                let colorizeAction = SKAction.run {
+                    self.waveDots[i].fillColor = .green
+                    self.waveDots[i].strokeColor = .green
+                    self.waveDots[i].alpha = 1.0
+                }
+                waveDots[i].run(colorizeAction)
+            } else if i > adjustedWave {
+                // Reset future dots to white
+                let resetAction = SKAction.run {
+                    self.waveDots[i].fillColor = .white
+                    self.waveDots[i].strokeColor = .gray
+                    self.waveDots[i].alpha = 0.7
+                }
+                waveDots[i].run(resetAction)
+            }
+        }
         
         currentWaveIndicator?.removeAllActions()
         

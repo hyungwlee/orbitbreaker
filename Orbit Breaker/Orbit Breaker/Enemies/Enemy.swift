@@ -277,7 +277,6 @@ class Enemy: SKSpriteNode {
         if (self.holdsPowerUp) {
             let powerUpType = PowerUps.allCases.randomElement()!
             let powerUp = PowerUp(type: powerUpType, color: .green, size: CGSize(width: 10, height: 10))
-            print("dropped powerup of type \(powerUp.type)")
             
             powerUp.name = "powerUp"
             powerUp.position = CGPoint(x: position.x, y: position.y - size.height/2)
@@ -299,7 +298,6 @@ class Enemy: SKSpriteNode {
     
     func takeDamage(_ amount: Int) -> Bool {
         health -= amount
-        print("Enemy took \(amount) damage. Health now: \(health)")  // Debug print
         
         let isDead = (health <= 0)
         
@@ -323,7 +321,6 @@ class Enemy: SKSpriteNode {
         if self.holdsDebuff {
             let debuffType = DebuffType.freeze
             let debuff = Debuffs(type: debuffType, color: .purple, size: CGSize(width: 10, height: 10))
-            print("Dropped debuff of type \(debuff.type)")
             
             debuff.name = "debuff"
             debuff.position = CGPoint(x: position.x, y: position.y - size.height / 2)

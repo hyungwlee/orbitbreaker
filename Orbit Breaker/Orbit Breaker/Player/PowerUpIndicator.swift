@@ -4,12 +4,11 @@
 //
 //  Created by August Wetterau on 11/30/24.
 //
-
 import SpriteKit
 
 class PowerUpIndicator: SKNode {
     private let backgroundCircle: SKShapeNode
-    private let iconNode: SKLabelNode  // Changed to SKLabelNode for simpler implementation initially
+    private let iconNode: SKLabelNode
     private let progressRing: SKShapeNode
     private var powerUpType: PowerUps?
     private var duration: TimeInterval = 5.0
@@ -66,6 +65,13 @@ class PowerUpIndicator: SKNode {
         isHidden = false
     }
     
+    func hideIfShield() {
+        if powerUpType == .shield {
+            isHidden = true
+            powerUpType = nil
+        }
+    }
+    
     func update(currentTime: TimeInterval) {
         guard let _ = powerUpType, !isHidden else { return }
         
@@ -101,9 +107,9 @@ class PowerUpManager {
     }
     
     func cleanup() {
-            indicators.forEach { $0.removeFromParent() }
-            indicators.removeAll()
-        }
+        indicators.forEach { $0.removeFromParent() }
+        indicators.removeAll()
+    }
     
     private func setupIndicators() {
         guard let scene = scene else { return }
@@ -133,6 +139,13 @@ class PowerUpManager {
     func showPowerUp(_ type: PowerUps) {
         if let index = PowerUps.allCases.firstIndex(of: type) {
             indicators[index].showPowerUp(type)
+        }
+    }
+    
+    func hideShieldIndicator() {
+        // Hide only the shield indicator
+        if let shieldIndex = PowerUps.allCases.firstIndex(of: .shield) {
+            indicators[shieldIndex].hideIfShield()
         }
     }
     
