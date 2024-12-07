@@ -8,6 +8,7 @@
 import SpriteKit
 import GameplayKit
 import SwiftUI
+import CoreHaptics
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     @State private var hasShield = false
@@ -26,10 +27,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var bossCount = 0
     var background1: SKSpriteNode!
     var background2: SKSpriteNode!
-    
+    var hapticsEngine: CHHapticEngine?
+
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
+        initializeHaptics()
         setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
         if !contentCreated {
@@ -279,8 +282,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Check bullet-enemy collisions
         if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
+            playHapticFeedback()
         } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
+            playHapticFeedback()
         }
         
         // Handle player collisions with enemy bullets
@@ -335,6 +340,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         user.cleanup()
         gameOver()
     }
+    
+    func initializeHaptics() {
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        do {
+            hapticsEngine = try CHHapticEngine()
+            try hapticsEngine?.start()
+        } catch {
+            print("Haptics Engine Error: \(error.localizedDescription)")
+        }
+    }
+    
+    func playHapticFeedback() {
+        guard let engine = hapticsEngine else { return }
+        
+        do {
+            let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
+            let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0)
+            
+            let event = CHHapticEvent(eventType: .hapticTransient, parameters: [sharpness, intensity], relativeTime: 0)
+            
+            let pattern = try CHHapticPattern(events: [event], parameters: [])
+            let player = try engine.makePlayer(with: pattern)
+            
+            try player.start(atTime: CHHapticTimeImmediate)
+        } catch {
+            print("Failed to play haptic feedback: \(error.localizedDescription)")
+        }
+    }
+
     func assignEnemyMovements() {
            guard let enemies = enemyManager?.getAllEnemies() else { return }
            
