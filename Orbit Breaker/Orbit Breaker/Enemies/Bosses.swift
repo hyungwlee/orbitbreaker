@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import CoreHaptics
 
 private enum BossMovementPattern: Int, CaseIterable {
     case circular = 0
@@ -92,15 +93,16 @@ class Boss: Enemy {
     private var shieldDamageCount: [SKNode: Int] = [:]
     private var shieldHits: [SKNode: Int] = [:]
     private var shieldRegenerationTimer: TimeInterval = 0
-       private var isRegeneratingShields = false
-       private var lastShieldRegenTime: TimeInterval = 0
-       private let shieldRegenDelay: TimeInterval = 8.0 // Wait 8 seconds before starting regen
-       private let shieldRegenInterval: TimeInterval = 0.5 // Add one shield every 0.5 seconds
-       private let maxShields = 20
-       private var shieldsHaveBeenCreated = false
+    private var isRegeneratingShields = false
+    private var lastShieldRegenTime: TimeInterval = 0
+    private let shieldRegenDelay: TimeInterval = 8.0 // Wait 8 seconds before starting regen
+    private let shieldRegenInterval: TimeInterval = 0.5 // Add one shield every 0.5 seconds
+    private let maxShields = 20
+    private var shieldsHaveBeenCreated = false
+    private var lastHealthPercentage: CGFloat = 1.0
+    private var healthBarContainer: SKNode?
+    private var originalFillColor: SKColor = .red  // Store the original color
     
-    
-  
     
     
     // In Boss.swift
@@ -137,37 +139,132 @@ class Boss: Enemy {
         self.canShoot = false
         self.name = "boss"
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         self.bossType = .anger  // Default value
         super.init(coder: aDecoder)
     }
+    
     func setupHealthBar(in scene: SKScene) {
-        let barWidth: CGFloat = 200
-        let barHeight: CGFloat = 20
-        let yPosition = scene.size.height - 100
+        // Clean up any existing health bar
+        healthBarContainer?.removeFromParent()
         
-        let titleLabel = SKLabelNode(fontNamed: "Arial-Bold")
-        titleLabel.text = bossType == .anger ? "Anger" : bossType == .sadness ? "Sadness" : bossType == .disgust ? "Disgust" : bossType == .love ? "Love" : "Anger"
-        titleLabel.fontSize = 24
+        // Create a container for all health bar elements
+        healthBarContainer = SKNode()
+        
+        let barWidth: CGFloat = 250
+        let barHeight: CGFloat = 35
+        
+        // Adjusted padding for Dynamic Island - lower value to position it just below
+        let topPadding: CGFloat = UIDevice.current.hasNotch ? 90 : 40
+        let yPosition = scene.size.height - topPadding - barHeight
+        
+        // Rest of the setup remains the same...
+        let titleLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        titleLabel.text = bossType == .anger ? "ANGER" :
+                         bossType == .sadness ? "SADNESS" :
+                         bossType == .disgust ? "DISGUST" :
+                         bossType == .love ? "LOVE" : "ANGER"
+        titleLabel.fontSize = 32
         titleLabel.fontColor = .white
-        titleLabel.position = CGPoint(x: scene.size.width/2, y: yPosition + 20)
+        titleLabel.position = CGPoint(x: scene.size.width/2, y: yPosition + 30)
         titleLabel.name = "bossTitle"
-        scene.addChild(titleLabel)
         
-        healthBar = SKShapeNode(rectOf: CGSize(width: barWidth, height: barHeight))
-        healthBar.fillColor = .clear
+        let shadowLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        shadowLabel.text = titleLabel.text
+        shadowLabel.fontSize = titleLabel.fontSize
+        shadowLabel.fontColor = .black
+        shadowLabel.position = CGPoint(x: 2, y: -2)
+        shadowLabel.zPosition = -1
+        titleLabel.addChild(shadowLabel)
+        
+        let cornerRadius: CGFloat = 10
+        let containerRect = CGRect(x: -barWidth/2, y: -barHeight/2, width: barWidth, height: barHeight)
+        let containerPath = CGPath(roundedRect: containerRect,
+                                 cornerWidth: cornerRadius,
+                                 cornerHeight: cornerRadius,
+                                 transform: nil)
+        
+        healthBar = SKShapeNode(path: containerPath)
+        healthBar.fillColor = SKColor(white: 0.1, alpha: 1.0)
         healthBar.strokeColor = .white
+        healthBar.lineWidth = 3.0
         healthBar.position = CGPoint(x: scene.size.width/2, y: yPosition)
         
-        healthBarFill = SKShapeNode(rectOf: CGSize(width: barWidth, height: barHeight))
-        healthBarFill.fillColor = bossType == .anger ? .red : bossType == .sadness ? .blue : bossType == .disgust ? .green : bossType == .love ? .systemPink : .red
+        originalFillColor = bossType == .anger ? SKColor(red: 0.9, green: 0.2, blue: 0.2, alpha: 1.0) :
+                           bossType == .sadness ? SKColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0) :
+                           bossType == .disgust ? SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1.0) :
+                           bossType == .love ? SKColor(red: 0.9, green: 0.2, blue: 0.5, alpha: 1.0) :
+                           SKColor.red
+        
+        healthBarFill = SKShapeNode(path: containerPath)
+        healthBarFill.fillColor = originalFillColor
         healthBarFill.strokeColor = .clear
         healthBarFill.position = CGPoint(x: scene.size.width/2, y: yPosition)
+        healthBarFill.zPosition = 1
         
-        scene.addChild(healthBar)
-        scene.addChild(healthBarFill)
+        let innerStroke = SKShapeNode(path: containerPath)
+        innerStroke.fillColor = .clear
+        innerStroke.strokeColor = .white
+        innerStroke.lineWidth = 2.0
+        innerStroke.position = CGPoint(x: scene.size.width/2, y: yPosition)
+        innerStroke.zPosition = 2
+        
+        healthBarContainer?.addChild(titleLabel)
+        healthBarContainer?.addChild(healthBar)
+        healthBarContainer?.addChild(healthBarFill)
+        healthBarContainer?.addChild(innerStroke)
+        
+        scene.addChild(healthBarContainer!)
+        
+        updateHealthBar()
     }
+
+    private func updateHealthBar() {
+        let percentage = CGFloat(health) / CGFloat(initialHealth)
+        let barWidth: CGFloat = 250
+        let barHeight: CGFloat = 35
+        let cornerRadius: CGFloat = 10
+        
+        let currentWidth = max(0, barWidth * percentage)
+        
+        let currentRect = CGRect(x: -barWidth/2, y: -barHeight/2, width: currentWidth, height: barHeight)
+        let newPath = CGPath(roundedRect: currentRect,
+                            cornerWidth: cornerRadius,
+                            cornerHeight: cornerRadius,
+                            transform: nil)
+        
+        healthBarFill.path = newPath
+        
+        // Modified damage effect to be more subtle
+        if percentage < lastHealthPercentage {
+            // Create a subtle flash overlay instead of changing the fill color
+            let flashNode = SKShapeNode(path: newPath)
+            flashNode.fillColor = .white
+            flashNode.strokeColor = .clear
+            flashNode.alpha = 0.3  // Reduced alpha for subtlety
+            healthBarFill.addChild(flashNode)
+            
+            // Quick fade out and remove
+            let fadeOut = SKAction.sequence([
+                SKAction.fadeOut(withDuration: 0.15),
+                SKAction.removeFromParent()
+            ])
+            flashNode.run(fadeOut)
+            
+            // Small scale pulse
+            let smallPulse = SKAction.sequence([
+                SKAction.scale(to: 1.02, duration: 0.05),
+                SKAction.scale(to: 1.0, duration: 0.05)
+            ])
+            healthBarFill.run(smallPulse)
+        }
+        
+        lastHealthPercentage = percentage
+    }
+
+
+
     
     
     
@@ -175,19 +272,45 @@ class Boss: Enemy {
         setupHealthBar(in: scene)
         position = CGPoint(x: scene.size.width/2, y: scene.size.height + 100)
         
-        // Disable both category and contact test masks
+        // Create intense haptic pattern for boss entry
+        if let engine = (scene as? GameScene)?.hapticsEngine {
+            do {
+                // Create a continuous haptic pattern that intensifies
+                var events = [CHHapticEvent]()
+                
+                // Start with low intensity rumble
+                for i in 0..<20 {
+                    let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(i) / 20.0)
+                    let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.3)
+                    let event = CHHapticEvent(eventType: .hapticContinuous,
+                                            parameters: [intensity, sharpness],
+                                            relativeTime: TimeInterval(i) * 0.1,
+                                            duration: 0.15)
+                    events.append(event)
+                }
+                
+                // Create and start the pattern
+                let pattern = try CHHapticPattern(events: events, parameters: [])
+                let player = try engine.makePlayer(with: pattern)
+                try player.start(atTime: CHHapticTimeImmediate)
+            } catch {
+                print("Failed to play haptic pattern: \(error.localizedDescription)")
+            }
+        }
+        
+        // Rest of the existing animation code...
         physicsBody?.categoryBitMask = 0
         physicsBody?.contactTestBitMask = 0
         alpha = 0
         
-        let moveDown = SKAction.moveTo(y: scene.size.height * 0.8, duration: 2.0)
+        let finalHeight = scene.size.height * (bossType == .anger || bossType == .love || bossType == .disgust ? 0.7 : 0.8)
+        let moveDown = SKAction.moveTo(y: finalHeight, duration: 2.0)
         moveDown.timingMode = .easeOut
         
         let sequence = SKAction.sequence([
             SKAction.group([moveDown, SKAction.fadeIn(withDuration: 2.0)]),
             SKAction.wait(forDuration: 0.5),
             SKAction.run { [weak self] in
-                // Re-enable both masks after animation
                 self?.physicsBody?.categoryBitMask = 0x1 << 4
                 self?.physicsBody?.contactTestBitMask = 0x1 << 1
                 self?.canShoot = true
@@ -199,25 +322,25 @@ class Boss: Enemy {
     
     private func handleLoveMovement(currentTime: TimeInterval, in scene: SKScene) {
         let time = currentTime * 0.3
-                   let radiusX: CGFloat = 150
-                   let radiusY: CGFloat = 80
-                   let centerX = scene.size.width / 2
-                   let centerY = scene.size.height * 0.7
-                   
-                   let targetX = centerX + radiusX * cos(time)
-                   let targetY = centerY + radiusY * sin(2 * time)
-                   
-                   let smoothing: CGFloat = 0.05
-                   position = CGPoint(
-                       x: position.x + (targetX - position.x) * smoothing,
-                       y: position.y + (targetY - position.y) * smoothing
-                   )
-                   
-                   
-                   // Update existing shields
-                   rotateShields(currentTime: currentTime)
-               }
-       
+        let radiusX: CGFloat = 150
+        let radiusY: CGFloat = 80
+        let centerX = scene.size.width / 2
+        let centerY = scene.size.height * 0.7
+        
+        let targetX = centerX + radiusX * cos(time)
+        let targetY = centerY + radiusY * sin(2 * time)
+        
+        let smoothing: CGFloat = 0.05
+        position = CGPoint(
+            x: position.x + (targetX - position.x) * smoothing,
+            y: position.y + (targetY - position.y) * smoothing
+        )
+        
+        
+        // Update existing shields
+        rotateShields(currentTime: currentTime)
+    }
+    
     private func shootHomingHeart(in scene: SKScene) {
         guard let player = scene.childNode(withName: "testPlayer") else { return }
         
@@ -260,7 +383,7 @@ class Boss: Enemy {
         
         heart.run(SKAction.sequence([initialMove, wait, homingMove, SKAction.removeFromParent()]))
     }
-
+    
     private func createHeartShields() {
         let shieldCount = 20
         let radius: CGFloat = 100
@@ -290,7 +413,7 @@ class Boss: Enemy {
             heartShields.append(shield)
         }
     }
-
+    
     private func rotateShields(currentTime: TimeInterval) {
         let radius: CGFloat = 100
         let rotationSpeed: CGFloat = 1.5
@@ -308,9 +431,9 @@ class Boss: Enemy {
             }
         }
     }
-
     
-       
+    
+    
     func handleShieldHit(_ shield: SKNode) {
         shieldDamageCount[shield, default: 0] += 1
         
@@ -325,99 +448,99 @@ class Boss: Enemy {
             ]))
         }
     }
-       
-       private func createHeartBurst(in scene: SKScene) {
-           let heartCount = 8
-           let radius: CGFloat = 100
-           
-           for i in 0..<heartCount {
-               let angle = (CGFloat(i) / CGFloat(heartCount)) * CGFloat.pi * 2
-               let position = CGPoint(
-                   x: self.position.x + radius * cos(angle),
-                   y: self.position.y + radius * sin(angle)
-               )
-               
-               let heart = SKShapeNode(rect: CGRect(x: -15, y: -15, width: 30, height: 30), cornerRadius: 7.5)
-               heart.fillColor = .systemPink
-               heart.strokeColor = .red
-               heart.name = "enemyBullet"
-               heart.position = position
-               heart.zRotation = angle + .pi / 4
-               
-               heart.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 30, height: 30))
-               heart.physicsBody?.categoryBitMask = 0x1 << 3
-               heart.physicsBody?.contactTestBitMask = 0x1 << 0
-               heart.physicsBody?.collisionBitMask = 0
-               heart.physicsBody?.affectedByGravity = false
-               
-               scene.addChild(heart)
-               
-               // Pulsing animation
-               let scale = SKAction.sequence([
-                   SKAction.scale(to: 1.2, duration: 0.3),
-                   SKAction.scale(to: 1.0, duration: 0.3)
-               ])
-               
-               let rotate = SKAction.rotate(byAngle: .pi * 2, duration: 2.0)
-               
-               heart.run(SKAction.group([
-                   SKAction.repeatForever(scale),
-                   SKAction.repeatForever(rotate)
-               ]))
-               
-               // Gradually expand outward
-               let expandDuration: TimeInterval = 3.0
-               let expandAction = SKAction.customAction(withDuration: expandDuration) { node, elapsedTime in
-                   let progress = elapsedTime / CGFloat(expandDuration)
-                   let currentRadius = radius * (1 + progress)
-                   node.position = CGPoint(
-                       x: self.position.x + currentRadius * cos(angle),
-                       y: self.position.y + currentRadius * sin(angle)
-                   )
-               }
-               
-               heart.run(SKAction.sequence([
-                   expandAction,
-                   SKAction.fadeOut(withDuration: 0.5),
-                   SKAction.removeFromParent()
-               ]))
-           }
-       }
-
     
-    private func updateHealthBar() {
-        let percentage = CGFloat(health) / CGFloat(initialHealth)
-        let barWidth: CGFloat = 200
-        healthBarFill.path = CGPath(rect: CGRect(x: -barWidth/2, y: -10, width: barWidth * percentage, height: 20), transform: nil)
+    private func createHeartBurst(in scene: SKScene) {
+        let heartCount = 8
+        let radius: CGFloat = 100
+        
+        for i in 0..<heartCount {
+            let angle = (CGFloat(i) / CGFloat(heartCount)) * CGFloat.pi * 2
+            let position = CGPoint(
+                x: self.position.x + radius * cos(angle),
+                y: self.position.y + radius * sin(angle)
+            )
+            
+            let heart = SKShapeNode(rect: CGRect(x: -15, y: -15, width: 30, height: 30), cornerRadius: 7.5)
+            heart.fillColor = .systemPink
+            heart.strokeColor = .red
+            heart.name = "enemyBullet"
+            heart.position = position
+            heart.zRotation = angle + .pi / 4
+            
+            heart.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 30, height: 30))
+            heart.physicsBody?.categoryBitMask = 0x1 << 3
+            heart.physicsBody?.contactTestBitMask = 0x1 << 0
+            heart.physicsBody?.collisionBitMask = 0
+            heart.physicsBody?.affectedByGravity = false
+            
+            scene.addChild(heart)
+            
+            // Pulsing animation
+            let scale = SKAction.sequence([
+                SKAction.scale(to: 1.2, duration: 0.3),
+                SKAction.scale(to: 1.0, duration: 0.3)
+            ])
+            
+            let rotate = SKAction.rotate(byAngle: .pi * 2, duration: 2.0)
+            
+            heart.run(SKAction.group([
+                SKAction.repeatForever(scale),
+                SKAction.repeatForever(rotate)
+            ]))
+            
+            // Gradually expand outward
+            let expandDuration: TimeInterval = 3.0
+            let expandAction = SKAction.customAction(withDuration: expandDuration) { node, elapsedTime in
+                let progress = elapsedTime / CGFloat(expandDuration)
+                let currentRadius = radius * (1 + progress)
+                node.position = CGPoint(
+                    x: self.position.x + currentRadius * cos(angle),
+                    y: self.position.y + currentRadius * sin(angle)
+                )
+            }
+            
+            heart.run(SKAction.sequence([
+                expandAction,
+                SKAction.fadeOut(withDuration: 0.5),
+                SKAction.removeFromParent()
+            ]))
+        }
     }
     
+    
+    
     func cleanup() {
-           for shield in heartShields {
-               shield.removeFromParent()
-           }
-           heartShields.removeAll()
-           shieldHealth.removeAll()
-           
-           for slime in slimeTrail {
-               slime.removeFromParent()
-           }
-           slimeTrail.removeAll()
-           
-           for cloud in miniClouds {
-               cloud.removeFromParent()
-           }
-           miniClouds.removeAll()
-           
-           healthBar?.removeFromParent()
-           healthBarFill?.removeFromParent()
-           scene?.enumerateChildNodes(withName: "bossTitle") { node, _ in
-               node.removeFromParent()
-           }
-           scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
-               node.removeFromParent()
-           }
-       }
-       
+        // Add this at the start of the existing cleanup function
+        healthBarContainer?.removeFromParent()
+        healthBarContainer = nil
+        
+        // Rest of your existing cleanup code...
+        for shield in heartShields {
+            shield.removeFromParent()
+        }
+        heartShields.removeAll()
+        shieldHealth.removeAll()
+        
+        for slime in slimeTrail {
+            slime.removeFromParent()
+        }
+        slimeTrail.removeAll()
+        
+        for cloud in miniClouds {
+            cloud.removeFromParent()
+        }
+        miniClouds.removeAll()
+        
+        healthBar?.removeFromParent()
+        healthBarFill?.removeFromParent()
+        scene?.enumerateChildNodes(withName: "bossTitle") { node, _ in
+            node.removeFromParent()
+        }
+        scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
+            node.removeFromParent()
+        }
+    }
+    
     
     private func createRaindrop(at position: CGPoint, in scene: SKScene) {
         let raindrop = SKSpriteNode(imageNamed: "raindrop")
@@ -538,9 +661,9 @@ class Boss: Enemy {
                     
                     // Create shields after entry animation
                     if timeSinceEntry > 3.0 && !shieldsHaveBeenCreated {
-                                           createHeartShields()
-                                           shieldsHaveBeenCreated = true
-                                       }
+                        createHeartShields()
+                        shieldsHaveBeenCreated = true
+                    }
                     rotateShields(currentTime: currentTime)
                 }
             }
@@ -549,7 +672,7 @@ class Boss: Enemy {
     
     func damageShield(_ shield: SKNode) {
         shieldHits[shield, default: 0] += 1
-            
+        
         if shieldHits[shield, default: 0] >= 4 {
             shield.removeFromParent()
             heartShields.removeAll { $0 == shield }
@@ -605,7 +728,7 @@ class Boss: Enemy {
             lastShootTime = currentTime
         }
     }
-
+    
     
     private func updateTargetPosition(in scene: SKScene) {
         let padding: CGFloat = 80
@@ -614,7 +737,7 @@ class Boss: Enemy {
             y: CGFloat.random(in: padding...(scene.size.height - 150))
         )
     }
-       
+    
     private func createSlimeTrail(in scene: SKScene) {
         // Create main toxic cloud
         let cloud = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
@@ -656,7 +779,7 @@ class Boss: Enemy {
             self?.slimeTrail.removeFirst()
         }
     }
-
+    
     
     private func shootToxicProjectile(in scene: SKScene) {
         guard let player = scene.childNode(withName: "testPlayer") else { return }
@@ -696,9 +819,9 @@ class Boss: Enemy {
             SKAction.removeFromParent()
         ]))
     }
-
     
-
+    
+    
     
     private func handleSadnessMovement(currentTime: TimeInterval, in scene: SKScene) {
         let time = currentTime * 0.5
@@ -731,15 +854,12 @@ class Boss: Enemy {
     }
     
     private func handleAngerMovement(currentTime: TimeInterval, in scene: SKScene) {
-        // Only start stomping after entry animation
         if currentTime - entryStartTime > 3.0 {
-            // Check if we should start a new stomp
-            if !isSwooping && currentTime - lastSwoopTime >= 5.0 { // Stomp every 5 seconds
+            if !isSwooping && currentTime - lastSwoopTime >= 5.0 {
                 startSwoop(in: scene)
                 lastSwoopTime = currentTime
-                // Reset shoot time to prevent shooting during stomp
                 lastShootTime = currentTime
-            } else if !isSwooping { // Only move and shoot when not stomping
+            } else if !isSwooping {
                 let moveSpeed: CGFloat = 2.0
                 let targetX = position.x + moveSpeed * moveDirection
                 position.x = targetX
@@ -750,7 +870,8 @@ class Boss: Enemy {
                     moveDirection = 1
                 }
                 
-                let maxHeight = scene.size.height - 150
+                // Adjusted height values
+                let maxHeight = scene.size.height * 0.7  // Lower maximum height
                 let minHeight = maxHeight - 30
                 verticalOffset = sin(currentTime * 2) * 15
                 position.y = min(maxHeight, max(minHeight, normalHeight + verticalOffset))
@@ -814,11 +935,12 @@ class Boss: Enemy {
             ]))
         }
     }
-
+    
     
     private func startSwoop(in scene: SKScene) {
         isSwooping = true
-        let moveDown = SKAction.moveTo(y: scene.size.height * 0.2, duration: 0.5)
+        // Make Anger swoop to bottom of screen
+        let moveDown = SKAction.moveTo(y: scene.size.height * 0.15, duration: 0.5)  // Lower value for bottom of screen
         let wait = SKAction.wait(forDuration: 0.3)
         let moveUp = SKAction.moveTo(y: normalHeight, duration: 0.5)
         let sequence = SKAction.sequence([moveDown, wait, moveUp, SKAction.run { [weak self] in
@@ -889,5 +1011,16 @@ class Boss: Enemy {
             let moveAction = SKAction.move(by: moveVector, duration: moveDuration)
             fireball.run(SKAction.sequence([moveAction, SKAction.removeFromParent()]))
         }
+    }
+}
+
+extension UIDevice {
+    var hasNotch: Bool {
+        if #available(iOS 11.0, *) {
+            let window = UIApplication.shared.windows.first
+            let safeAreaInsets = window?.safeAreaInsets
+            return safeAreaInsets?.top ?? 0 > 20
+        }
+        return false
     }
 }

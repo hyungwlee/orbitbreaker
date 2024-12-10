@@ -9,14 +9,207 @@ import SpriteKit
 class WaveRoadmap {
     private weak var scene: SKScene?
     private var roadmapNodes: [SKNode] = []
-    private var waveDots: [SKShapeNode] = [] // New array to track just the dots
+    private var waveDots: [SKShapeNode] = []
     private var currentWaveIndicator: SKShapeNode?
+    private var waveLabels: [SKLabelNode] = []  // To track wave labels
     private let waveCount = 5
     
     init(scene: SKScene) {
         self.scene = scene
         setupRoadmap()
     }
+    
+    private func setupRoadmap() {
+        guard let scene = scene else { return }
+        
+        cleanup()
+        
+        let spacing: CGFloat = 60  // Increased spacing
+        let dotRadius: CGFloat = 10  // Slightly larger dots
+        let topMargin: CGFloat = 30
+        let centerX: CGFloat = 45
+        
+        let startY = scene.size.height - topMargin - (CGFloat(waveCount - 1) * spacing)
+        
+        // Create dots with glow effects
+        for i in 0..<waveCount {
+            let y = startY + CGFloat(i) * spacing
+            let dotContainer = SKNode()
+            dotContainer.position = CGPoint(x: centerX, y: y)
+            
+            // Glow effect
+            let glow = SKEffectNode()
+            glow.shouldRasterize = true
+            glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 2.0])
+            
+            let glowShape = SKShapeNode(circleOfRadius: dotRadius + 2)
+            glowShape.fillColor = .white
+            glowShape.strokeColor = .clear
+            glowShape.alpha = 0.3
+            glow.addChild(glowShape)
+            dotContainer.addChild(glow)
+            
+            // Main dot
+            let dot = SKShapeNode(circleOfRadius: dotRadius)
+            dot.fillColor = .white
+            dot.strokeColor = SKColor(white: 0.8, alpha: 1.0)
+            dot.lineWidth = 2
+            dot.alpha = 0.9
+            dot.zPosition = 4
+            dotContainer.addChild(dot)
+            
+            scene.addChild(dotContainer)
+            roadmapNodes.append(dotContainer)
+            waveDots.append(dot)
+            
+            // Wave labels with new font and style
+            let label = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+            if i == waveCount - 1 {
+                label.text = "BOSS"
+                label.fontSize = 16
+                label.fontColor = getBossColor(for: i)
+            } 
+            label.horizontalAlignmentMode = .left
+            label.position = CGPoint(x: centerX + 25, y: y - 6)
+            label.alpha = 0.8
+            scene.addChild(label)
+            roadmapNodes.append(label)
+            waveLabels.append(label)
+        }
+        
+        // Create styled connecting lines
+        // Replace the line creation code in setupRoadmap() with this:
+                
+        // Create styled connecting lines
+        for i in 1..<waveCount {
+            let y = startY + CGFloat(i) * spacing
+            let dashLength: CGFloat = 4
+            let gapLength: CGFloat = 4
+            let startY = y - spacing + dotRadius
+            let endY = y - dotRadius
+            let totalLength = endY - startY
+            let dashCount = Int(totalLength / (dashLength + gapLength))
+            
+            for j in 0..<dashCount {
+                let dashY = startY + CGFloat(j) * (dashLength + gapLength)
+                let dash = SKShapeNode()
+                let path = CGMutablePath()
+                path.move(to: CGPoint(x: centerX, y: dashY))
+                path.addLine(to: CGPoint(x: centerX, y: min(dashY + dashLength, endY)))
+                dash.path = path
+                dash.strokeColor = SKColor(white: 0.6, alpha: 1.0)
+                dash.lineWidth = 2
+                dash.lineCap = .round
+                dash.zPosition = 3
+                dash.alpha = 0.4
+                
+                scene.addChild(dash)
+                roadmapNodes.append(dash)
+            }
+        }
+        
+        // Create stylized indicator
+        if currentWaveIndicator == nil {
+            let indicatorContainer = SKNode()
+            
+            // Outer ring with glow
+            let glowEffect = SKEffectNode()
+            glowEffect.shouldRasterize = true
+            glowEffect.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 3.0])
+            
+            let outerGlow = SKShapeNode(circleOfRadius: dotRadius + 6)
+            outerGlow.strokeColor = .yellow
+            outerGlow.lineWidth = 2
+            outerGlow.zPosition = 4
+            outerGlow.fillColor = .clear
+            glowEffect.addChild(outerGlow)
+            glowEffect.zPosition = 4
+            indicatorContainer.addChild(glowEffect)
+            
+            currentWaveIndicator = SKShapeNode(circleOfRadius: dotRadius + 4)
+            currentWaveIndicator?.strokeColor = .yellow
+            currentWaveIndicator?.lineWidth = 2
+            currentWaveIndicator?.fillColor = .clear
+            
+            if let indicator = currentWaveIndicator {
+                indicator.position = CGPoint(x: centerX, y: startY)
+                scene.addChild(indicator)
+                
+                let pulseAction = SKAction.sequence([
+                    SKAction.scale(to: 1.2, duration: 0.8),
+                    SKAction.scale(to: 1.0, duration: 0.8)
+                ])
+                indicator.run(SKAction.repeatForever(pulseAction))
+            }
+        }
+    }
+    
+    private func getBossColor(for wave: Int) -> SKColor {
+        // Match boss colors to their respective waves
+        switch wave {
+        case 4:  // First boss (Anger)
+            return SKColor(red: 0.9, green: 0.2, blue: 0.2, alpha: 1.0)
+        case 9:  // Second boss (Sadness)
+            return SKColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0)
+        case 14: // Third boss (Disgust)
+            return SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1.0)
+        case 19: // Fourth boss (Love)
+            return SKColor(red: 0.9, green: 0.2, blue: 0.5, alpha: 1.0)
+        default:
+            return .yellow
+        }
+    }
+    
+    func updateCurrentWave(_ wave: Int) {
+        guard let scene = scene else { return }
+        
+        let adjustedWave = (wave - 1) % waveCount
+        let spacing: CGFloat = 60  // Match the new spacing
+        let topMargin: CGFloat = 30
+        let startY = scene.size.height - topMargin - (CGFloat(waveCount - 1) * spacing)
+        let y = startY + CGFloat(adjustedWave) * spacing
+        
+        // Update completed waves with animation
+        for i in 0..<waveDots.count {
+            if i < adjustedWave {
+                let colorizeAction = SKAction.run {
+                    self.waveDots[i].fillColor = SKColor(red: 0.3, green: 0.8, blue: 0.3, alpha: 1.0)
+                    self.waveDots[i].strokeColor = SKColor(red: 0.2, green: 0.7, blue: 0.2, alpha: 1.0)
+                    self.waveDots[i].alpha = 1.0
+                    self.waveLabels[i].fontColor = SKColor(red: 0.3, green: 0.8, blue: 0.3, alpha: 1.0)
+                }
+                waveDots[i].run(colorizeAction)
+            } else if i > adjustedWave {
+                let resetAction = SKAction.run {
+                    self.waveDots[i].fillColor = .white
+                    self.waveDots[i].strokeColor = SKColor(white: 0.8, alpha: 1.0)
+                    self.waveDots[i].alpha = 0.9
+                    if i == self.waveCount - 1 {
+                        self.waveLabels[i].fontColor = self.getBossColor(for: i)
+                    } else {
+                        self.waveLabels[i].fontColor = SKColor(white: 0.8, alpha: 1.0)
+                    }
+                }
+                waveDots[i].run(resetAction)
+            }
+        }
+        
+        // Smooth indicator movement
+        currentWaveIndicator?.removeAllActions()
+        let pulseAction = SKAction.sequence([
+            SKAction.scale(to: 1.2, duration: 0.8),
+            SKAction.scale(to: 1.0, duration: 0.8)
+        ])
+        
+        let moveAction = SKAction.move(to: CGPoint(x: 45, y: y), duration: 0.5)
+        moveAction.timingMode = .easeInEaseOut
+        
+        currentWaveIndicator?.run(SKAction.group([
+            SKAction.repeatForever(pulseAction),
+            moveAction
+        ]))
+    }
+    
     
     func cleanup() {
         // Immediately remove the indicator from the scene if it exists
@@ -29,121 +222,6 @@ class WaveRoadmap {
         }
         roadmapNodes.removeAll()
         waveDots.removeAll()
-    }
-    
-    private func setupRoadmap() {
-        guard let scene = scene else { return }
-        
-        cleanup()
-        
-        let spacing: CGFloat = 50
-        let dotRadius: CGFloat = 8
-        let topMargin: CGFloat = 50
-        let centerX: CGFloat = 40
-        
-        let startY = scene.size.height - topMargin - (CGFloat(waveCount - 1) * spacing)
-        
-        // Create dots first
-        for i in 0..<waveCount {
-            let y = startY + CGFloat(i) * spacing
-            
-            let dot = SKShapeNode(circleOfRadius: dotRadius)
-            dot.fillColor = .white
-            dot.strokeColor = .gray
-            dot.position = CGPoint(x: centerX, y: y)
-            dot.alpha = 0.7
-            dot.zPosition = 1  // Higher zPosition for dots
-            scene.addChild(dot)
-            roadmapNodes.append(dot)
-            waveDots.append(dot) // Add to waveDots array
-            
-            if i == waveCount - 1 {
-                let label = SKLabelNode(fontNamed: "Arial")
-                label.text = "BOSS"
-                label.fontSize = 14
-                label.fontColor = .white
-                label.position = CGPoint(x: centerX + 20, y: y - 6)
-                label.horizontalAlignmentMode = .left
-                scene.addChild(label)
-                roadmapNodes.append(label)
-            }
-        }
-        
-        // Create lines after all dots
-        for i in 1..<waveCount {
-            let y = startY + CGFloat(i) * spacing
-            let line = SKShapeNode(rectOf: CGSize(width: 2, height: spacing - 10))
-            line.fillColor = .gray
-            line.strokeColor = .clear
-            line.zPosition = 0  // Set lowest zPosition for lines
-            line.position = CGPoint(x: centerX, y: y - spacing/2)
-            line.alpha = 0.5
-            scene.addChild(line)
-            roadmapNodes.append(line)
-        }
-        
-        // Create the indicator only if it doesn't exist
-        if currentWaveIndicator == nil {
-            currentWaveIndicator = SKShapeNode(circleOfRadius: dotRadius + 4)
-            if let indicator = currentWaveIndicator {
-                indicator.strokeColor = .yellow
-                indicator.lineWidth = 2
-                indicator.position = CGPoint(x: centerX, y: startY)
-                scene.addChild(indicator)
-                
-                let pulseAction = SKAction.sequence([
-                    SKAction.scale(to: 1.2, duration: 0.5),
-                    SKAction.scale(to: 1.0, duration: 0.5)
-                ])
-                indicator.run(SKAction.repeatForever(pulseAction))
-            }
-        }
-    }
-    
-    func updateCurrentWave(_ wave: Int) {
-        guard let scene = scene else { return }
-        
-        let adjustedWave = (wave - 1) % waveCount
-        let spacing: CGFloat = 50
-        let topMargin: CGFloat = 50
-        let startY = scene.size.height - topMargin - (CGFloat(waveCount - 1) * spacing)
-        let y = startY + CGFloat(adjustedWave) * spacing
-        
-        // Update completed waves
-        for i in 0..<waveDots.count {
-            if i < adjustedWave {
-                // Color previous dots green
-                let colorizeAction = SKAction.run {
-                    self.waveDots[i].fillColor = .green
-                    self.waveDots[i].strokeColor = .green
-                    self.waveDots[i].alpha = 1.0
-                }
-                waveDots[i].run(colorizeAction)
-            } else if i > adjustedWave {
-                // Reset future dots to white
-                let resetAction = SKAction.run {
-                    self.waveDots[i].fillColor = .white
-                    self.waveDots[i].strokeColor = .gray
-                    self.waveDots[i].alpha = 0.7
-                }
-                waveDots[i].run(resetAction)
-            }
-        }
-        
-        currentWaveIndicator?.removeAllActions()
-        
-        let pulseAction = SKAction.sequence([
-            SKAction.scale(to: 1.2, duration: 0.5),
-            SKAction.scale(to: 1.0, duration: 0.5)
-        ])
-        
-        let moveAction = SKAction.move(to: CGPoint(x: 40, y: y), duration: 0.5)
-        moveAction.timingMode = .easeInEaseOut
-        
-        currentWaveIndicator?.run(SKAction.group([
-            SKAction.repeatForever(pulseAction),
-            moveAction
-        ]))
     }
     
     func hideRoadmap() {

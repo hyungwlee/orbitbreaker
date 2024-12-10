@@ -36,12 +36,12 @@ class Player {
         // Add physics for enemy bullet collision
         //ship.physicsBody = SKPhysicsBody(rectangleOf: ship.size)
         ship.physicsBody = SKPhysicsBody(texture: ship.texture!, size: ship.size)
-           ship.physicsBody?.categoryBitMask = 0x1 << 0        // Category 0 (Player)
-           ship.physicsBody?.contactTestBitMask = 0x1 << 2 |   // Enemy (Category 2)
-                                                0x1 << 3 |      // Enemy bullets (Category 3)
-                                                0x1 << 4        // Boss (Category 4)
-           ship.physicsBody?.collisionBitMask = 0
-           ship.physicsBody?.affectedByGravity = false
+        ship.physicsBody?.categoryBitMask = 0x1 << 0        // Category 0 (Player)
+        ship.physicsBody?.contactTestBitMask = 0x1 << 2 |   // Enemy (Category 2)
+        0x1 << 3 |      // Enemy bullets (Category 3)
+        0x1 << 4        // Boss (Category 4)
+        ship.physicsBody?.collisionBitMask = 0
+        ship.physicsBody?.affectedByGravity = false
         scene.addChild(ship)
     }
     
@@ -107,7 +107,7 @@ class Player {
             shieldTimer?.invalidate()
             
             // Set new timer
-            shieldTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
+            shieldTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
                 self?.removeShield()
             }
         }

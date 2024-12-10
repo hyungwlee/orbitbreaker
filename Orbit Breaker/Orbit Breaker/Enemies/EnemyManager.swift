@@ -48,19 +48,17 @@ class EnemyManager {
         
         currentWave += 1
         
-        if currentWave % 5 == 0 {
+        // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> 1(boss) -> repeat
+        let waveType = currentWave % 5
+        
+        if waveType == 0 {
             // Boss wave - hide roadmap
             roadmap?.hideRoadmap()
+            setupBossWave()
         } else {
             // Regular wave - show and update roadmap
             roadmap?.showRoadmap()
             roadmap?.updateCurrentWave(currentWave)
-        }
-        
-        if currentWave % 5 == 0 {
-            setupBossWave()
-            return
-        } else {
             setupRegularWave()
         }
     }
@@ -380,8 +378,9 @@ class EnemyManager {
                         // After boss, go straight to next wave
                         self.setupEnemies()
                     } else {
-                        // Only consider asteroid field if it wasn't a boss
-                        if Int.random(in: 1...3) == 1 && (self.currentWave + 1) % 5 != 0 {
+                        // Check if it's time for an asteroid field
+                        // Asteroid field comes after every 2nd wave in the sequence
+                        if self.currentWave % 5 != 0 && (self.currentWave % 5) == 2 {
                             self.setupAsteroidField()
                         } else {
                             self.setupEnemies()

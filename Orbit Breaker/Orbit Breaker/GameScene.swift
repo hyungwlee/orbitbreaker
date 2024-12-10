@@ -14,7 +14,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     @State private var hasShield = false
     private var contentCreated = false
     private var enemyManager: EnemyManager!
-    private var user: Player!
+    var user: Player!
     private var PowerUp: PowerUp!
     private var debugControls: UIHostingController<DebugControls>?
     var powerUpsDropped = 0
@@ -33,7 +33,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
-        setupDebugControls()
+ //       setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
         if !contentCreated {
             createContent()
@@ -158,9 +158,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     
     private func setupScoreLabel() {
-        scoreLabel = SKLabelNode(fontNamed: "Arial")
+        scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
         scoreLabel.text = "Score: 0"
-        scoreLabel.fontSize = 24
+        scoreLabel.fontSize = 20
         scoreLabel.fontColor = .white
         scoreLabel.horizontalAlignmentMode = .right
         scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 40)
@@ -326,19 +326,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handlePlayerHit() {
         if let playerNode = childNode(withName: "testPlayer") {
-            // Add explosion effect
-            VisualEffects.addExplosion(at: playerNode.position, in: self)
-            VisualEffects.addScreenShake(to: self, intensity: 15)
-            
-            let flash = SKAction.sequence([
-                SKAction.colorize(with: .red, colorBlendFactor: 1.0, duration: 0.1),
-                SKAction.colorize(withColorBlendFactor: 0.0, duration: 0.1)
-            ])
-            playerNode.run(flash)
+            isPaused = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                self?.isPaused = false
+                if let scene = self {
+                    VisualEffects.addPlayerDeathEffect(at: playerNode.position, in: scene)
+                }
+            }
+            user.cleanup()
+            gameOver()
         }
-        
-        user.cleanup()
-        gameOver()
     }
     
     func initializeHaptics() {
@@ -666,3 +663,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 }
 
 
+extension CGPoint {
+    static func +(lhs: CGPoint, rhs: CGPoint) -> CGPoint {
+        return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+    }
+}
