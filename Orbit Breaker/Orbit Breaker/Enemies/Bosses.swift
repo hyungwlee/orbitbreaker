@@ -968,9 +968,8 @@ class Boss: Enemy {
         let bulletSpeed: CGFloat = 300
         
         for i in 0..<bulletCount {
-            let fireball = SKShapeNode(circleOfRadius: 8)
-            fireball.fillColor = SKColor.orange
-            fireball.strokeColor = SKColor.yellow
+            let fireball = SKSpriteNode(imageNamed: "Fireball")
+            fireball.size = CGSize(width: 24, height: 24)
             fireball.name = "enemyBullet"
             
             // Create glow effect
@@ -978,14 +977,17 @@ class Boss: Enemy {
             glowEffect.shouldRasterize = true
             glowEffect.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 2.0])
             
-            let glowShape = SKShapeNode(circleOfRadius: 10)
-            glowShape.fillColor = SKColor.yellow
-            glowShape.strokeColor = SKColor.clear
-            glowEffect.addChild(glowShape)
+            let glowSprite = SKSpriteNode(imageNamed: "Fireball")
+            glowSprite.size = fireball.size
+            glowSprite.color = .yellow
+            glowSprite.colorBlendFactor = 1.0
+            glowSprite.alpha = 0.6
+            glowEffect.addChild(glowSprite)
             fireball.addChild(glowEffect)
+            glowEffect.zPosition = -1
             
             fireball.position = position
-            fireball.physicsBody = SKPhysicsBody(circleOfRadius: 8)
+            fireball.physicsBody = SKPhysicsBody(circleOfRadius: 10)
             fireball.physicsBody?.categoryBitMask = 0x1 << 3
             fireball.physicsBody?.contactTestBitMask = 0x1 << 0
             fireball.physicsBody?.collisionBitMask = 0
@@ -1004,11 +1006,17 @@ class Boss: Enemy {
             let dx = sin(angle) * bulletSpeed
             let dy = -bulletSpeed
             
+            // Calculate the angle for the fireball's rotation
+            // Add π/2 because the sprite's default orientation might need adjustment
+            let moveAngle = atan2(dy, dx) + .pi/2
+            fireball.zRotation = moveAngle
+            
             let moveDistance = scene.size.height + 100
             let moveDuration = moveDistance / bulletSpeed
             
             let moveVector = CGVector(dx: dx * moveDuration, dy: -moveDistance)
             let moveAction = SKAction.move(by: moveVector, duration: moveDuration)
+            
             fireball.run(SKAction.sequence([moveAction, SKAction.removeFromParent()]))
         }
     }
