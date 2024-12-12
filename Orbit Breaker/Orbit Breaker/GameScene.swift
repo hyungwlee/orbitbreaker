@@ -28,12 +28,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var background1: SKSpriteNode!
     var background2: SKSpriteNode!
     var hapticsEngine: CHHapticEngine?
-
+    
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
- //       setupDebugControls()
+        //       setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
         if !contentCreated {
             createContent()
@@ -112,24 +112,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
-  
-        
-        // Call this function when the boss is defeated
+    
+    
+    // Call this function when the boss is defeated
     func onBossDefeated(_ boss: Boss) {
         let newBackground: String
         
         // Determine background based on the defeated boss
         switch boss.bossType {
-            case .anger:
-                newBackground = "backgroundSAD"
-            case .sadness:
-                newBackground = "backgroundDISGUST"
-            case .disgust:
-                newBackground = "backgroundLOVE"
-            case .love:
-                newBackground = "backgroundANGER"
-           // case .neutral:
-           //         newBackground = "backgroundNEUTRAL"
+        case .anger:
+            newBackground = "backgroundSAD"
+        case .sadness:
+            newBackground = "backgroundDISGUST"
+        case .disgust:
+            newBackground = "backgroundLOVE"
+        case .love:
+            newBackground = "backgroundANGER"
+            // case .neutral:
+            //         newBackground = "backgroundNEUTRAL"
             
         }
         
@@ -153,9 +153,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // Fade the new background in
             self.background2.run(fadeInAction)
         }
-            
-            
-        }
+        
+        
+    }
     
     private func setupScoreLabel() {
         scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
@@ -215,7 +215,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
     }
-
+    
     
     func didBegin(_ contact: SKPhysicsContact) {
         let nodeA = contact.bodyA.node
@@ -224,21 +224,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Handle asteroid collisions
         if (contact.bodyA.categoryBitMask == 0x1 << 6 && contact.bodyB.node?.name == "testPlayer") ||
-               (contact.bodyB.categoryBitMask == 0x1 << 6 && contact.bodyA.node?.name == "testPlayer") {
-                handlePlayerHit()
-            }
+            (contact.bodyB.categoryBitMask == 0x1 << 6 && contact.bodyA.node?.name == "testPlayer") {
+            handlePlayerHit()
+        }
         
         // Check for heart shield collision with bullets
         if let bullet = nodeA as? Bullet, let shield = nodeB as? SKSpriteNode,
-               shield.name == "heartShield" {
-                bullet.removeFromParent()
-                shieldHit(shield)
-            } else if let bullet = nodeB as? Bullet, let shield = nodeA as? SKSpriteNode,
-                      shield.name == "heartShield" {
-                bullet.removeFromParent()
-                shieldHit(shield)
-            }
-            
+           shield.name == "heartShield" {
+            bullet.removeFromParent()
+            shieldHit(shield)
+        } else if let bullet = nodeB as? Bullet, let shield = nodeA as? SKSpriteNode,
+                  shield.name == "heartShield" {
+            bullet.removeFromParent()
+            shieldHit(shield)
+        }
+        
         
         
         
@@ -253,28 +253,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             handlePlayerHit()
         }
         
-
-           
         
-            
+        
+        
+        
         // Add check for boss intro state
         if let bullet = nodeA as? Bullet, let boss = nodeB as? Boss {
-               if !boss.hasEnteredScene {
-                   bullet.removeFromParent()
-                   return
-               }
-               handleBulletEnemyCollision(bullet: bullet, enemy: boss)
-           } else if let bullet = nodeB as? Bullet, let boss = nodeA as? Boss {
-               if !boss.hasEnteredScene {
-                   bullet.removeFromParent()
-                   return
-               }
-               handleBulletEnemyCollision(bullet: bullet, enemy: boss)
-           }
+            if !boss.hasEnteredScene {
+                bullet.removeFromParent()
+                return
+            }
+            handleBulletEnemyCollision(bullet: bullet, enemy: boss)
+        } else if let bullet = nodeB as? Bullet, let boss = nodeA as? Boss {
+            if !boss.hasEnteredScene {
+                bullet.removeFromParent()
+                return
+            }
+            handleBulletEnemyCollision(bullet: bullet, enemy: boss)
+        }
         
         // Handle player collision with enemy
         if (nodeA?.name == "testPlayer" && nodeB is Enemy) ||
-           (nodeB?.name == "testPlayer" && nodeA is Enemy) {
+            (nodeB?.name == "testPlayer" && nodeA is Enemy) {
             handlePlayerHit()
             return
         }
@@ -296,7 +296,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                   bullet.name == "enemyBullet" && playerNode.name == "testPlayer" {
             handlePlayerBulletCollision(bullet)
         }
-            
+        
         
         
         // Handle power-up collisions
@@ -326,15 +326,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handlePlayerHit() {
         if let playerNode = childNode(withName: "testPlayer") {
-            isPaused = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                self?.isPaused = false
-                if let scene = self {
-                    VisualEffects.addPlayerDeathEffect(at: playerNode.position, in: scene)
-                }
-            }
+            // Disable player shooting immediately
+            user.canShoot = false
             user.cleanup()
-            gameOver()
+            // Remove the isPaused toggle before visual effects
+            VisualEffects.addPlayerDeathEffect(at: playerNode.position, in: self) { [weak self] in
+                // After effects are complete, cleanup and show game over
+                
+                self?.gameOver()
+            }
         }
     }
     
@@ -365,26 +365,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             print("Failed to play haptic feedback: \(error.localizedDescription)")
         }
     }
-
+    
     func assignEnemyMovements() {
-           guard let enemies = enemyManager?.getAllEnemies() else { return }
-           
-           for (index, enemy) in enemies.enumerated() {
-               // Skip bosses
-               guard !(enemy is Boss) else { continue }
-               
-               // Assign different movement patterns based on position or random chance
-               let pattern: Enemy.MovementPattern
-               switch index % 4 {
-               case 0: pattern = .oscillate
-               case 1: pattern = .circle
-               case 2: pattern = .figure8
-               default: pattern = .dive
-               }
-               
-               enemy.addDynamicMovement(pattern)
-           }
-       }
+        guard let enemies = enemyManager?.getAllEnemies() else { return }
+        
+        for (index, enemy) in enemies.enumerated() {
+            // Skip bosses
+            guard !(enemy is Boss) else { continue }
+            
+            // Assign different movement patterns based on position or random chance
+            let pattern: Enemy.MovementPattern
+            switch index % 4 {
+            case 0: pattern = .oscillate
+            case 1: pattern = .circle
+            case 2: pattern = .figure8
+            default: pattern = .dive
+            }
+            
+            enemy.addDynamicMovement(pattern)
+        }
+    }
     
     private func restartGame() {
         // Reset score
@@ -409,31 +409,41 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Create new content
         createContent()
+        
+        // Reset user shooting ability
+        user.canShoot = true  // Add this line
     }
     
     private func gameOver() {
-        // Stop all gameplay
-        isPaused = true
-        
-        // Clean up all game objects
-        cleanupLevel()
-        
-        // Create game over label
-        let gameOverLabel = SKLabelNode(fontNamed: "Arial")
-        gameOverLabel.text = "Game Over"
-        gameOverLabel.fontSize = 50
-        gameOverLabel.fontColor = .red
-        gameOverLabel.position = CGPoint(x: size.width/2, y: size.height/2)
-        addChild(gameOverLabel)
-        
-        // Add restart button
-        let restartLabel = SKLabelNode(fontNamed: "Arial")
-        restartLabel.text = "Tap to Restart"
-        restartLabel.fontSize = 30
-        restartLabel.fontColor = .white
-        restartLabel.position = CGPoint(x: size.width/2, y: size.height/2 - 50)
-        restartLabel.name = "restartButton"
-        addChild(restartLabel)
+        // Ensure we're on the main thread
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Clean up all game objects
+            self.cleanupLevel()
+            
+            // Create game over label
+            let gameOverLabel = SKLabelNode(fontNamed: "Arial")
+            gameOverLabel.text = "Game Over"
+            gameOverLabel.fontSize = 50
+            gameOverLabel.fontColor = .red
+            gameOverLabel.position = CGPoint(x: self.size.width/2, y: self.size.height/2)
+            gameOverLabel.zPosition = 1000  // Ensure it's above everything
+            self.addChild(gameOverLabel)
+            
+            // Add restart button
+            let restartLabel = SKLabelNode(fontNamed: "Arial")
+            restartLabel.text = "Tap to Restart"
+            restartLabel.fontSize = 30
+            restartLabel.fontColor = .white
+            restartLabel.position = CGPoint(x: self.size.width/2, y: self.size.height/2 - 50)
+            restartLabel.name = "restartButton"
+            restartLabel.zPosition = 1000  // Ensure it's above everything
+            self.addChild(restartLabel)
+            
+            // Set isPaused after adding game over UI
+            self.isPaused = true
+        }
     }
     
     private func cleanupLevel() {
@@ -456,12 +466,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         
-        // Check if game is over and restart was tapped
         if isPaused {
-            let nodes = nodes(at: location)
-            if nodes.contains(where: { $0.name == "restartButton" }) {
+            // Use converted point for better touch detection
+            let touchedNodes = nodes(at: location)
+            if touchedNodes.contains(where: { $0.name == "restartButton" }) {
+                isPaused = false  // Unpause before restart
                 restartGame()
             }
+            return
+        }
+        
+        // Only handle regular touches if not paused
+        if !isPaused {
+            user.handleTouch(touch)
         }
     }
     

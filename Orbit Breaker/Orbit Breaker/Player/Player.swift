@@ -15,12 +15,12 @@ class Player {
     private var lastFireTime: TimeInterval = 0
     public var fireRate: TimeInterval = 0.15  // Made variable to change fire rate
     private var isDragging = false
-    private var canShoot = true  // New property to control shooting
     private var shieldNode: SKShapeNode?
     var hasShield: Bool = false
     public var damageMultiplier: Int = 1
     private var shieldTimer: Timer?
     private var damageTimer: Timer?
+    var canShoot: Bool = true
     
     init(scene: SKScene) {
         self.scene = scene
@@ -46,6 +46,7 @@ class Player {
     }
     
     func update(currentTime: TimeInterval) {
+        // Only fire if canShoot is true
         if canShoot && currentTime - lastFireTime >= fireRate {
             fireBullet()
             lastFireTime = currentTime
