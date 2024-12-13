@@ -13,7 +13,7 @@ import CoreHaptics
 class GameScene: SKScene, SKPhysicsContactDelegate {
     @State private var hasShield = false
     private var contentCreated = false
-    private var enemyManager: EnemyManager!
+    var enemyManager: EnemyManager!
     var user: Player!
     private var PowerUp: PowerUp!
     private var debugControls: UIHostingController<DebugControls>?
@@ -33,7 +33,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
-        //       setupDebugControls()
+  //             setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
         if !contentCreated {
             createContent()
@@ -45,6 +45,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         
     }
+    
+    func preloadGame() {
+            // Pre-load all textures at game start
+            TextureManager.shared.preloadTextures()
+        }
     
     private func setupBackgroundScrolling(){
         // Initialize and add the background nodes
@@ -116,46 +121,36 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // Call this function when the boss is defeated
     func onBossDefeated(_ boss: Boss) {
-        let newBackground: String
-        
-        // Determine background based on the defeated boss
-        switch boss.bossType {
-        case .anger:
-            newBackground = "backgroundSAD"
-        case .sadness:
-            newBackground = "backgroundDISGUST"
-        case .disgust:
-            newBackground = "backgroundLOVE"
-        case .love:
-            newBackground = "backgroundANGER"
-            // case .neutral:
-            //         newBackground = "backgroundNEUTRAL"
+            let newBackground: String
             
-        }
-        
-        // Perform the fade transition
-        let fadeOutAction = SKAction.fadeOut(withDuration: 1.0)
-        let fadeInAction = SKAction.fadeIn(withDuration: 1.0)
-        
-        // Fade out current background
-        background1.run(fadeOutAction) {
-            // Change texture after fade-out
-            self.background1.texture = SKTexture(imageNamed: newBackground)
+            switch boss.bossType {
+            case .anger: newBackground = "backgroundSAD"
+            case .sadness: newBackground = "backgroundDISGUST"
+            case .disgust: newBackground = "backgroundLOVE"
+            case .love: newBackground = "backgroundANGER"
+            }
             
-            // Fade the new background in
-            self.background1.run(fadeInAction)
+            // Get pre-loaded texture
+            if let newTexture = TextureManager.shared.getTexture(newBackground) {
+                // Perform the fade transition
+                let fadeOutAction = SKAction.fadeOut(withDuration: 1.0)
+                let fadeInAction = SKAction.fadeIn(withDuration: 1.0)
+                
+                background1.run(fadeOutAction) {
+                    self.background1.texture = newTexture
+                    self.background1.run(fadeInAction)
+                }
+                
+                background2.run(fadeOutAction) {
+                    self.background2.texture = newTexture
+                    self.background2.run(fadeInAction)
+                }
+            } else {
+                // Fallback if texture isn't cached
+                background1.texture = SKTexture(imageNamed: newBackground)
+                background2.texture = SKTexture(imageNamed: newBackground)
+            }
         }
-        
-        background2.run(fadeOutAction) {
-            // Change texture after fade-out
-            self.background2.texture = SKTexture(imageNamed: newBackground)
-            
-            // Fade the new background in
-            self.background2.run(fadeInAction)
-        }
-        
-        
-    }
     
     private func setupScoreLabel() {
         scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")

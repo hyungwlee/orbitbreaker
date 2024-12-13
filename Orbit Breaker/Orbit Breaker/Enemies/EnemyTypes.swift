@@ -21,19 +21,19 @@ enum EnemyType {
         return "enemy"
     }
     
-    // Now color is based on health instead of type
-    static func colorForHealth(_ health: Int) -> SKColor {
+    // Get sprite name based on health and boss type
+    static func spriteForHealth(_ health: Int, bossType: BossType) -> String {
+        let prefix = bossType == .anger ? "Angry" :
+                    bossType == .disgust ? "Breathe" :
+                    bossType == .sadness ? "Sad" :
+                    "Love"
+        
         switch health {
-        case 40: return .purple    // Full health
-        case 30: return .red       // Lost some health
-        case 20: return .orange    // Half health
-        default: return .yellow         // Low health
+        case 31...40: return "\(prefix) Face UFO (Base)"    // Full health
+        case 21...30: return "\(prefix) Face UFO (Damaged 1)" // First damage state
+        case 11...20: return "\(prefix) Face UFO (Damaged 2)" // Second damage state
+        default: return "\(prefix) Face UFO (Damaged 3)"      // Final damage state
         }
-    }
-    
-    // Initial color should be purple since all start at 40 health
-    var color: SKColor {
-        return EnemyType.colorForHealth(40)
     }
     
     var initialHealth: Int {

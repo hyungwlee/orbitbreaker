@@ -102,150 +102,200 @@ class AsteroidFieldChallenge {
     private weak var scene: SKScene?
     private var asteroids: [SKNode] = []
        private var isActive = false
-    
+    private var formationFunctions: [(SKScene) -> Void] = []
+    private var isDebugging = true
+
+    private func checkPosition(node: SKNode, label: String) {
+        guard isDebugging, let scene = scene else { return }
+        if node.position.y > scene.size.height {
+            print("\(label): Above screen at y: \(node.position.y)")
+        } else if node.position.y < -100 {
+            print("\(label): Below screen at y: \(node.position.y)")
+        } else {
+            print("\(label): VISIBLE ON SCREEN at y: \(node.position.y)")
+        }
+    }
+
     init(scene: SKScene) {
         self.scene = scene
+        
+        // Initialize all formation functions
+        formationFunctions = [
+            { [weak self] scene in self?.createRotatingCross() },
+            { [weak self] scene in self?.createWavePattern() },
+            { [weak self] scene in self?.createDoubleHelix() },
+            { [weak self] scene in self?.createExpandingCircle() },
+            { [weak self] scene in self?.createSweepingGate() },
+            { [weak self] scene in self?.createSimpleSpiral() },
+            { [weak self] scene in self?.createAlternatingWalls() },
+            { [weak self] scene in self?.createSinglePendulum() }
+        ]
     }
     
     private func createAsteroid(at position: CGPoint, withMove moveAction: SKAction? = nil) -> SKNode {
-           let asteroid = SKShapeNode(circleOfRadius: 20)
-           asteroid.fillColor = .gray
-           asteroid.strokeColor = .white
-           asteroid.position = position
-           asteroid.name = "asteroid"
-           
-           asteroid.physicsBody = SKPhysicsBody(circleOfRadius: 20)
-           asteroid.physicsBody?.categoryBitMask = 0x1 << 6
-           asteroid.physicsBody?.contactTestBitMask = 0x1 << 0
-           asteroid.physicsBody?.collisionBitMask = 0
-           
-           let rotate = SKAction.rotate(byAngle: .pi * 2, duration: Double.random(in: 1.5...3.0))
-           asteroid.run(SKAction.repeatForever(rotate))
-           
-           scene?.addChild(asteroid)
-           asteroids.append(asteroid)
-           
-           if let moveAction = moveAction {
-               // Add completion handler to remove from asteroids array
-               let sequence = SKAction.sequence([
-                   moveAction,
-                   SKAction.run { [weak self] in
-                       if let index = self?.asteroids.firstIndex(of: asteroid) {
-                           self?.asteroids.remove(at: index)
-                       }
-                   },
-                   SKAction.removeFromParent()
-               ])
-               asteroid.run(sequence)
-           }
-           
-           return asteroid
-       }
+        let asteroid = SKSpriteNode(imageNamed: "Asteroid\(Int.random(in: 1...3))")
+        asteroid.size = CGSize(width: 40, height: 40) // Adjust size as needed
+        asteroid.position = position
+        asteroid.name = "asteroid"
+        
+        asteroid.physicsBody = SKPhysicsBody(circleOfRadius: 20)
+        asteroid.physicsBody?.categoryBitMask = 0x1 << 6
+        asteroid.physicsBody?.contactTestBitMask = 0x1 << 0
+        asteroid.physicsBody?.collisionBitMask = 0
+        
+        let rotate = SKAction.rotate(byAngle: .pi * 2, duration: Double.random(in: 1.5...3.0))
+        asteroid.run(SKAction.repeatForever(rotate))
+        
+        scene?.addChild(asteroid)
+        asteroids.append(asteroid)
+        
+        if let moveAction = moveAction {
+            let sequence = SKAction.sequence([
+                moveAction,
+                SKAction.run { [weak self] in
+                    if let index = self?.asteroids.firstIndex(of: asteroid) {
+                        self?.asteroids.remove(at: index)
+                    }
+                },
+                SKAction.removeFromParent()
+            ])
+            asteroid.run(sequence)
+        }
+        
+        return asteroid
+    }
     
-    // New formation: Rotating Cross
+    private func createDoubleHelix() {
+        guard let scene = scene else { return }
+        let startY = scene.size.height + 150
+        let duration = 6.0
+        let gapWidth: CGFloat = 180
+        let verticalSpacing: CGFloat = 50.0
+        let totalDistance = scene.size.height + 400
+        
+        for i in 0...12 {
+            for side in [-1, 1] {
+                let centerX = scene.size.width/2
+                let sideOffset = gapWidth/2 * CGFloat(side)
+                let x = centerX + sideOffset
+                // Calculate initial position above screen
+                let initialY = startY + CGFloat(i) * verticalSpacing
+                
+                let moveAction = SKAction.customAction(withDuration: duration) { [weak self] node, time in
+                    let timeProgress = CGFloat(time) / CGFloat(duration)
+                    // Adjust the movement speed based on initial position
+                    let adjustedProgress = timeProgress * totalDistance
+                    let currentY = initialY - adjustedProgress
+                    
+                    // Calculate wave motion
+                    let angle = timeProgress * 4 * .pi
+                    let xOffset = sin(angle) * 50
+                    node.position = CGPoint(x: x + xOffset, y: currentY)
+                    
+                    if self?.isDebugging == true {
+                        self?.checkPosition(node: node, label: "Helix \(i)")
+                    }
+                }
+                
+                // Calculate individual delay for each asteroid based on its position
+                let delayDuration = 0.0 // No delay, all asteroids move together
+                let asteroid = createAsteroid(at: CGPoint(x: x, y: initialY))
+                
+                // Create sequence with proper timing
+                let sequence = SKAction.sequence([
+                    SKAction.wait(forDuration: delayDuration),
+                    moveAction,
+                    SKAction.wait(forDuration: 0.1), // Small buffer before removal
+                    SKAction.removeFromParent()
+                ])
+                
+                asteroid.run(sequence)
+            }
+        }
+    }
+
     private func createRotatingCross() {
         guard let scene = scene else { return }
         let centerX = scene.size.width/2
         let spacing: CGFloat = 70
+        let startY = scene.size.height + 150 // Increased offset
+        let totalDistance = scene.size.height + 400 // Increased travel distance
         
         for i in -2...2 {
-            guard i != 0 else { continue } // Skip center for gap
-            // Horizontal line
-            let hAsteroid = createAsteroid(at: CGPoint(x: centerX + CGFloat(i) * spacing,
-                                                      y: scene.size.height + 50))
-            // Vertical line
-            let vAsteroid = createAsteroid(at: CGPoint(x: centerX,
-                                                      y: scene.size.height + 50 + CGFloat(i) * spacing))
+            guard i != 0 else { continue }
+            let hAsteroid = createAsteroid(at: CGPoint(x: centerX + CGFloat(i) * spacing, y: startY))
+            let vAsteroid = createAsteroid(at: CGPoint(x: centerX, y: startY + CGFloat(i) * spacing))
             
-            let rotateAroundCenter = SKAction.customAction(withDuration: 4.0) { node, time in
-                let progress = time / 4.0
+            let rotateAroundCenter = SKAction.customAction(withDuration: 6.0) { [weak self] node, time in
+                let progress = time / 6.0
                 let angle = progress * .pi * 2
                 let radius = spacing * CGFloat(abs(i))
                 node.position.x = centerX + cos(angle) * radius
-                node.position.y = (scene.size.height + 50) - time * 100 + sin(angle) * radius
+                node.position.y = startY - (time * (totalDistance / 6.0))
+                
+                if self?.isDebugging == true {
+                    self?.checkPosition(node: node, label: "Cross")
+                }
             }
             
-            hAsteroid.run(SKAction.sequence([rotateAroundCenter, SKAction.removeFromParent()]))
-            vAsteroid.run(SKAction.sequence([rotateAroundCenter, SKAction.removeFromParent()]))
+            let sequence = SKAction.sequence([rotateAroundCenter, SKAction.removeFromParent()])
+            hAsteroid.run(sequence)
+            vAsteroid.run(sequence)
         }
     }
-    
+
     private func createWavePattern() {
         guard let scene = scene else { return }
-        let startY: CGFloat = scene.size.height + 100 // Explicitly declare as CGFloat
-        let endY: CGFloat = -100.0 // Explicitly declare as CGFloat
-        let duration = 5.0
+        let startY = scene.size.height + 150 // Increased offset
+        let totalDistance = scene.size.height + 400 // Increased travel distance
+        let duration = 6.0
         
         for i in 0...8 {
             guard i < 3 || i > 5 else { continue }
             
             let x = scene.size.width * CGFloat(i) / 8.0
-            // Break up the complex expression into smaller parts
             let moveAction = SKAction.customAction(withDuration: duration) { [weak self] node, time in
                 let progress = CGFloat(time) / CGFloat(duration)
-                let totalDistance = startY - endY
                 let currentY = startY - (progress * totalDistance)
                 let waveOffset = sin(CGFloat(time) * 2.0) * 50.0
                 node.position.y = currentY
                 node.position.x = x + waveOffset
+                
+                if self?.isDebugging == true {
+                    self?.checkPosition(node: node, label: "Wave \(i)")
+                }
             }
             
             createAsteroid(at: CGPoint(x: x, y: startY), withMove: moveAction)
         }
     }
 
-    private func createDoubleHelix() {
-        guard let scene = scene else { return }
-        let startY: CGFloat = scene.size.height + 100
-        let endY: CGFloat = -100.0
-        let duration = 5.0
-        let gapWidth: CGFloat = 180
-        
-        for i in 0...12 {
-            let progress = CGFloat(i) / 12.0
-            let yOffset = CGFloat(i) * 50.0
-            
-            for side in [-1, 1] {
-                let centerX = scene.size.width/2
-                let sideOffset = gapWidth/2 * CGFloat(side)
-                let x = centerX + sideOffset
-                
-                // Break up the complex movement calculation
-                let moveAction = SKAction.customAction(withDuration: duration) { [weak self] node, time in
-                    let timeProgress = CGFloat(time) / CGFloat(duration)
-                    let distance = startY - endY + yOffset
-                    let currentY = startY + yOffset - (timeProgress * distance)
-                    let angle = (currentY + CGFloat(time) * 100) * .pi / 180
-                    let xOffset = sin(angle) * 50
-                    node.position = CGPoint(x: x + xOffset, y: currentY)
-                }
-                
-                createAsteroid(at: CGPoint(x: x, y: startY + yOffset), withMove: moveAction)
-            }
-        }
-    }
-    
-    // New formation: Expanding Circle
+
     private func createExpandingCircle() {
         guard let scene = scene else { return }
         let centerX = scene.size.width/2
         let asteroidCount = 8
         let radius: CGFloat = 100
+        let startY = scene.size.height + 150 // Increased offset
+        let totalDistance = scene.size.height + 400 // Increased travel distance
         
         for i in 0..<asteroidCount {
-            // Create a gap in the circle
             guard i != 0 else { continue }
             
             let angle = (CGFloat(i) / CGFloat(asteroidCount)) * .pi * 2
             let x = centerX + radius * cos(angle)
-            let y = scene.size.height + 50 + radius * sin(angle)
+            let y = startY + radius * sin(angle)
             
             let asteroid = createAsteroid(at: CGPoint(x: x, y: y))
             
-            let expandAndDescend = SKAction.customAction(withDuration: 4.0) { node, time in
+            let expandAndDescend = SKAction.customAction(withDuration: 6.0) { [weak self] node, time in
                 let expandingRadius = radius + (time * 50)
                 node.position.x = centerX + expandingRadius * cos(angle)
-                node.position.y = (scene.size.height + 50) - time * 100 + expandingRadius * sin(angle)
+                node.position.y = startY - (time * (totalDistance / 6.0))
+                
+                if self?.isDebugging == true {
+                    self?.checkPosition(node: node, label: "Circle \(i)")
+                }
             }
             
             asteroid.run(SKAction.sequence([expandAndDescend, SKAction.removeFromParent()]))
@@ -253,66 +303,108 @@ class AsteroidFieldChallenge {
     }
 
     private func createSweepingGate() {
-            guard let scene = scene else { return }
-            let centerX = scene.size.width/2
-            let gateWidth: CGFloat = 200 // Extra wide gap for moving formation
-            
-            // Create two groups of asteroids that sweep side to side
-            for side in [-1, 1] {
-                for i in 0...2 {
-                    let xOffset = CGFloat(i) * 60
-                    let x = centerX + (gateWidth/2 * CGFloat(side)) + (xOffset * CGFloat(side))
-                    let asteroid = createAsteroid(at: CGPoint(x: x, y: scene.size.height + 50))
-                    
-                    // Gentle sweeping motion
-                    let sweep = SKAction.sequence([
-                        SKAction.moveBy(x: -50 * CGFloat(side), y: -200, duration: 1.5),
-                        SKAction.moveBy(x: 50 * CGFloat(side), y: -200, duration: 1.5)
+        guard let scene = scene else { return }
+        let centerX = scene.size.width/2
+        let gateWidth: CGFloat = 200
+        let startY = scene.size.height + 50
+        
+        for side in [-1, 1] {
+            for i in 0...2 {
+                let xOffset = CGFloat(i) * 60
+                let x = centerX + (gateWidth/2 * CGFloat(side)) + (xOffset * CGFloat(side))
+                let asteroid = createAsteroid(at: CGPoint(x: x, y: startY))
+                
+                let moveDown = SKAction.moveBy(x: 0, y: -(scene.size.height + 200), duration: 6.0)
+                let sweep = SKAction.sequence([
+                    SKAction.moveBy(x: -50 * CGFloat(side), y: 0, duration: 1.5),
+                    SKAction.moveBy(x: 50 * CGFloat(side), y: 0, duration: 1.5)
+                ])
+                
+                asteroid.run(SKAction.group([
+                    moveDown,
+                    SKAction.repeat(sweep, count: 2),
+                    SKAction.sequence([
+                        SKAction.wait(forDuration: 6.0),
+                        SKAction.removeFromParent()
                     ])
-                    asteroid.run(sweep)
+                ]))
+            }
+        }
+    }
+
+    private func createSimpleSpiral() {
+        guard let scene = scene else { return }
+        let centerX = scene.size.width/2
+        let radius: CGFloat = 150
+        let asteroidCount = 6
+        let startY = scene.size.height + 50
+        
+        for i in 0..<asteroidCount {
+            guard i != 2 && i != 3 else { continue }
+            
+            let angle = (CGFloat(i) / CGFloat(asteroidCount)) * .pi * 2
+            let x = centerX + radius * cos(angle)
+            let y = startY + radius * sin(angle)
+            
+            let asteroid = createAsteroid(at: CGPoint(x: x, y: y))
+            
+            let moveDown = SKAction.moveBy(x: 0, y: -(scene.size.height + 200), duration: 6.0)
+            let rotate = SKAction.rotate(byAngle: .pi * 2, duration: 5.0)
+            asteroid.run(SKAction.group([
+                moveDown,
+                SKAction.repeat(rotate, count: 2),
+                SKAction.sequence([
+                    SKAction.wait(forDuration: 6.0),
+                    SKAction.removeFromParent()
+                ])
+            ]))
+        }
+    }
+
+    private func createAlternatingWalls() {
+        guard let scene = scene else { return }
+        let startY = scene.size.height + 50
+        
+        func createWall(at xPosition: CGFloat, delay: TimeInterval = 0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                for x in stride(from: xPosition - 100, through: xPosition + 100, by: 60) {
+                    let asteroid = self.createAsteroid(at: CGPoint(x: x, y: startY))
+                    let moveDown = SKAction.moveBy(x: 0, y: -(scene.size.height + 200), duration: 6.0)
+                    asteroid.run(SKAction.sequence([moveDown, SKAction.removeFromParent()]))
                 }
             }
         }
         
-        private func createSimpleSpiral() {
-            guard let scene = scene else { return }
-            let centerX = scene.size.width/2
-            let radius: CGFloat = 150 // Increased radius
-            let asteroidCount = 6 // Fewer asteroids
-            
-            for i in 0..<asteroidCount {
-                // Create a big gap in the spiral
-                guard i != 2 && i != 3 else { continue }
-                
-                let angle = (CGFloat(i) / CGFloat(asteroidCount)) * .pi * 2
-                let x = centerX + radius * cos(angle)
-                let y = scene.size.height + radius * sin(angle)
-                
-                let asteroid = createAsteroid(at: CGPoint(x: x, y: y))
-                
-                // Slower rotation
-                let moveDown = SKAction.moveBy(x: 0, y: -(scene.size.height + radius * 2), duration: 5.0)
-                let rotate = SKAction.rotate(byAngle: .pi * 2, duration: 5.0)
-                asteroid.run(SKAction.group([moveDown, rotate]))
-            }
-        }
+        createWall(at: scene.size.width * 0.25)
+        createWall(at: scene.size.width * 0.75, delay: 2.0)
+    }
+
+    private func createSinglePendulum() {
+        guard let scene = scene else { return }
+        let centerX = scene.size.width/2
+        let gapWidth: CGFloat = 200
+        let startY = scene.size.height + 50
         
-        private func createAlternatingWalls() {
-            guard let scene = scene else { return }
-            let gapWidth: CGFloat = 250 // Very wide gap
+        for side in [-1, 1] {
+            let xPos = centerX + (gapWidth/2 * CGFloat(side))
+            let asteroid = createAsteroid(at: CGPoint(x: xPos, y: startY))
             
-            // Left wall
-            let leftWall: () = createWallSection(at: scene.size.width * 0.25,
-                                           width: scene.size.width * 0.25,
-                                           spacing: 60)
+            let moveDown = SKAction.moveBy(x: 0, y: -(scene.size.height + 200), duration: 6.0)
+            let swing = SKAction.sequence([
+                SKAction.moveBy(x: 60 * CGFloat(side), y: 0, duration: 1.5),
+                SKAction.moveBy(x: -60 * CGFloat(side), y: 0, duration: 1.5)
+            ])
             
-            // Right wall offset
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                let rightWall: () = self.createWallSection(at: scene.size.width * 0.75,
-                                                     width: scene.size.width * 0.25,
-                                                     spacing: 60)
-            }
+            asteroid.run(SKAction.group([
+                moveDown,
+                SKAction.repeat(swing, count: 2),
+                SKAction.sequence([
+                    SKAction.wait(forDuration: 6.0),
+                    SKAction.removeFromParent()
+                ])
+            ]))
         }
+    }
         
         private func createWallSection(at xPosition: CGFloat, width: CGFloat, spacing: CGFloat) {
             for x in stride(from: xPosition - width/2, through: xPosition + width/2, by: spacing) {
@@ -326,63 +418,38 @@ class AsteroidFieldChallenge {
             return
         }
         
-        private func createSinglePendulum() {
-            guard let scene = scene else { return }
-            let centerX = scene.size.width/2
-            let gapWidth: CGFloat = 200 // Wide gap
-            
-            // Create just two asteroids that swing in opposite directions
-            for side in [-1, 1] {
-                let xPos = centerX + (gapWidth/2 * CGFloat(side))
-                let asteroid = createAsteroid(at: CGPoint(x: xPos, y: scene.size.height + 50))
-                
-                // Gentle swinging motion
-                let swing = SKAction.sequence([
-                    SKAction.moveBy(x: 60 * CGFloat(side), y: -150, duration: 1.5),
-                    SKAction.moveBy(x: -60 * CGFloat(side), y: -150, duration: 1.5)
-                ])
-                
-                asteroid.run(SKAction.sequence([
-                    SKAction.repeat(swing, count: 2),
-                    SKAction.removeFromParent()
-                ]))
-            }
-        }
         
     
     func startChallenge(completion: @escaping () -> Void) {
-            isActive = true
-            cleanup() // Clean up any existing asteroids
-            
-            // Disable player shields at start
-            if let gameScene = scene as? GameScene {
-                gameScene.user?.removeShield()
-            }
-            
-            let patterns = [
-                SKAction.run { [weak self] in self?.createWavePattern() },
-                SKAction.run { [weak self] in self?.createDoubleHelix() }
-                // Add other pattern functions here
-            ]
-            
-            let selectedPatterns = patterns.shuffled().prefix(4).map { pattern in
-                SKAction.sequence([
-                    pattern,
-                    SKAction.wait(forDuration: Double.random(in: 4.0...5.0))
-                ])
-            }
-            
-            let sequence = SKAction.sequence(selectedPatterns + [
-                SKAction.wait(forDuration: 2.0),
-                SKAction.run { [weak self] in
-                    self?.isActive = false
-                    self?.cleanup()
-                    completion()
-                }
-            ])
-            
-            scene?.run(sequence)
+        isActive = true
+        cleanup()
+        
+        if let gameScene = scene as? GameScene {
+            gameScene.user?.removeShield()
+            gameScene.powerUpManager?.hideShieldIndicator()
         }
+        
+        let selectedFormations = formationFunctions.shuffled().prefix(5).map { formation in
+            SKAction.sequence([
+                SKAction.run { [weak self] in
+                    guard let scene = self?.scene else { return }
+                    formation(scene)
+                },
+                SKAction.wait(forDuration: 3.5)
+            ])
+        }
+        
+        let sequence = SKAction.sequence(selectedFormations + [
+            SKAction.wait(forDuration: 1.0),
+            SKAction.run { [weak self] in
+                self?.isActive = false
+                self?.cleanup()
+                completion()
+            }
+        ])
+        
+        scene?.run(sequence)
+    }
     
     func cleanup() {
             // Remove all asteroids and their actions

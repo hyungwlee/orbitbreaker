@@ -42,6 +42,20 @@ class Enemy: SKSpriteNode {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
+    func updateSprite(forHealth health: Int, bossType: BossType) {
+        let spriteName = EnemyType.spriteForHealth(health, bossType: bossType)
+        self.texture = SKTexture(imageNamed: spriteName)
+        
+        // Flash effect
+        let flash = SKAction.sequence([
+            SKAction.colorize(with: .white, colorBlendFactor: 1.0, duration: 0.1),
+            SKAction.colorize(with: .white, colorBlendFactor: 0.0, duration: 0.1)
+        ])
+        self.run(flash)
+    }
+    
     func updateShooting(currentTime: TimeInterval, scene: SKScene, waveNumber: Int) {
         guard canShoot else { return }
         
@@ -55,88 +69,92 @@ class Enemy: SKSpriteNode {
         }
     }
     
+    
     func startKamikazeBehavior() {
-        guard let scene = scene else { return }
-        
-        // Mark this enemy as a kamikaze
-        self.name = "kamikazeEnemy"
-        
-        // Change appearance to indicate danger
-        self.run(SKAction.colorize(with: .red, colorBlendFactor: 0.7, duration: 0.3))
-        
-        // Add glowing effect
-        let glowNode = SKEffectNode()
-        glowNode.shouldRasterize = true
-        glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10.0])
-        
-        // Create a copy of the enemy sprite for the glow
-        let glowSprite = SKSpriteNode(texture: self.texture)
-        glowSprite.color = .red
-        glowSprite.colorBlendFactor = 1.0
-        glowSprite.size = self.size
-        
-        // Add the glow sprite to the effect node
-        glowNode.addChild(glowSprite)
-        
-        // Position the glow node behind the enemy
-        glowNode.zPosition = self.zPosition - 1
-        self.parent?.addChild(glowNode)
-        
-        // Make the glow node follow the enemy
-        let followConstraint = SKConstraint.distance(SKRange(constantValue: 0), to: self)
-        glowNode.constraints = [followConstraint]
-        
-        // Add pulsing warning effect to both enemy and glow
-        let pulseAction = SKAction.sequence([
-            SKAction.scale(to: 1.2, duration: 0.5),
-            SKAction.scale(to: 1.0, duration: 0.5)
-        ])
-        
-        let glowPulseAction = SKAction.sequence([
-            SKAction.scale(to: 1.4, duration: 0.5),
-            SKAction.scale(to: 1.2, duration: 0.5)
-        ])
-        
-        self.run(SKAction.repeatForever(pulseAction))
-        glowNode.run(SKAction.repeatForever(glowPulseAction))
-        
-        // Start tracking and attacking player
-        let updateInterval = 1.0 / 60.0 // 60fps
-        let trackingAction = SKAction.run { [weak self] in
-            guard let self = self,
-                  let player = scene.childNode(withName: "testPlayer") else { return }
+            guard let scene = scene else { return }
             
-            // Calculate direction to player
-            let dx = player.position.x - self.position.x
-            let dy = player.position.y - self.position.y
-            let distance = hypot(dx, dy)
+            self.name = "kamikazeEnemy"
             
-            // Normalize direction
-            let normalizedDx = dx / distance
-            let normalizedDy = dy / distance
+            // Get the boss-themed color with increased saturation
+            let glowColor: SKColor = {
+                if let gameScene = scene as? GameScene,
+                   let enemyManager = gameScene.enemyManager {
+                    switch enemyManager.getBossType() {
+                    case .anger: return .red
+                    case .sadness: return SKColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 1.0)
+                    case .disgust: return SKColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
+                    case .love: return SKColor(red: 1.0, green: 0.0, blue: 0.5, alpha: 1.0)
+                    }
+                }
+                return .white
+            }()
             
-            // Move towards player
-            let speed: CGFloat = 300.0
-            self.position.x += normalizedDx * speed * CGFloat(updateInterval)
-            self.position.y += normalizedDy * speed * CGFloat(updateInterval)
+            // Create a single optimized glow effect
+            let glowNode = SKEffectNode()
+            glowNode.name = "kamikazeGlow"
+            glowNode.shouldRasterize = true
+            glowNode.shouldEnableEffects = true
+            glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10.0])
             
-            // Rotate to face player
-            let angle = atan2(dy, dx)
-            self.zRotation = angle + .pi / 2
+            let glowSprite = SKSpriteNode(texture: self.texture)
+            glowSprite.color = glowColor
+            glowSprite.colorBlendFactor = 1.0
+            glowSprite.alpha = 0.8
+            glowSprite.size = CGSize(width: self.size.width * 1.4, height: self.size.height * 1.4)
+            glowNode.addChild(glowSprite)
+            
+            // Add glow effect after a short delay to prevent frame drops
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.addChild(glowNode)
+            }
+            
+            // Create dramatic pulse effects
+            let mainPulse = SKAction.sequence([
+                SKAction.scale(to: 1.3, duration: 0.3),
+                SKAction.scale(to: 1.0, duration: 0.3)
+            ])
+            
+            let glowPulse = SKAction.sequence([
+                SKAction.fadeAlpha(to: 0.9, duration: 0.3),
+                SKAction.fadeAlpha(to: 0.5, duration: 0.3)
+            ])
+            
+            self.run(SKAction.repeatForever(mainPulse))
+            glowNode.run(SKAction.repeatForever(glowPulse))
+            
+            // Start tracking with optimized updates
+            let updateInterval = 1.0 / 60.0
+            let trackingAction = SKAction.run { [weak self] in
+                guard let self = self,
+                      let player = scene.childNode(withName: "testPlayer") else { return }
+                
+                let dx = player.position.x - self.position.x
+                let dy = player.position.y - self.position.y
+                let distance = hypot(dx, dy)
+                
+                let normalizedDx = dx / distance
+                let normalizedDy = dy / distance
+                
+                let speed: CGFloat = 350.0
+                self.position.x += normalizedDx * speed * CGFloat(updateInterval)
+                self.position.y += normalizedDy * speed * CGFloat(updateInterval)
+                
+                let angle = atan2(dy, dx)
+                self.zRotation = angle + .pi / 2
+            }
+            
+            let sequence = SKAction.sequence([
+                SKAction.wait(forDuration: 0.5),
+                SKAction.repeatForever(
+                    SKAction.sequence([
+                        trackingAction,
+                        SKAction.wait(forDuration: updateInterval)
+                    ])
+                )
+            ])
+            
+            self.run(sequence)
         }
-        
-        let sequence = SKAction.sequence([
-            SKAction.wait(forDuration: 1.0), // Wait before charging
-            SKAction.repeatForever(
-                SKAction.sequence([
-                    trackingAction,
-                    SKAction.wait(forDuration: updateInterval)
-                ])
-            )
-        ])
-        
-        self.run(sequence)
-    }
     func addDynamicMovement() {
         // Side-to-side oscillation
         let oscillate = SKAction.sequence([
@@ -325,26 +343,88 @@ class Enemy: SKSpriteNode {
         }
     }
     
-    func takeDamage(_ amount: Int) -> Bool {
-        health -= amount
-        
-        let isDead = (health <= 0)
-        
-        if isDead {
-            return isDead
+    func createDamageEffect() {
+            // Create multiple glass-like shards
+            let shardCount = 8
+            let duration: TimeInterval = 0.4
+            
+            for _ in 0..<shardCount {
+                // Create a shard
+                let shard = SKShapeNode(rectOf: CGSize(width: 2, height: 2))
+                shard.fillColor = .white
+                shard.strokeColor = .white
+                shard.alpha = 0.8
+                shard.position = self.position
+                shard.zPosition = self.zPosition + 1
+                scene?.addChild(shard)
+                
+                // Random angle and distance for shard movement
+                let angle = CGFloat.random(in: 0...CGFloat.pi * 2)
+                let distance = CGFloat.random(in: 15...25)
+                
+                // Calculate end position
+                let endPoint = CGPoint(
+                    x: shard.position.x + cos(angle) * distance,
+                    y: shard.position.y + sin(angle) * distance
+                )
+                
+                // Create move and fade actions
+                let move = SKAction.move(to: endPoint, duration: duration)
+                move.timingMode = .easeOut
+                let fade = SKAction.fadeOut(withDuration: duration * 0.8)
+                let rotate = SKAction.rotate(byAngle: CGFloat.pi * 2, duration: duration)
+                
+                // Run actions
+                shard.run(SKAction.sequence([
+                    SKAction.group([move, fade, rotate]),
+                    SKAction.removeFromParent()
+                ]))
+            }
         }
         
-        // Update enemy color based on health
-        self.color = EnemyType.colorForHealth(health)
-        
-        // Flash effect
-        self.run(SKAction.sequence([
-            SKAction.colorize(with: .white, colorBlendFactor: 1.0, duration: 0.1),
-            SKAction.colorize(with: EnemyType.colorForHealth(health), colorBlendFactor: 1.0, duration: 0.1)
-        ]))
-        
-        return false
-    }
+    func takeDamage(_ amount: Int) -> Bool {
+            health -= amount
+            
+            let isDead = (health <= 0)
+            if isDead { return true }
+            
+            createDamageEffect()
+            
+            if let gameScene = scene as? GameScene,
+               let enemyManager = gameScene.enemyManager {
+                updateSprite(forHealth: health, bossType: enemyManager.getBossType())
+                
+                // Update kamikaze effects if needed
+                if name == "kamikazeEnemy" {
+                    let glowColor: SKColor = {
+                        switch enemyManager.getBossType() {
+                        case .anger: return .red
+                        case .sadness: return SKColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 1.0)
+                        case .disgust: return SKColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
+                        case .love: return SKColor(red: 1.0, green: 0.0, blue: 0.5, alpha: 1.0)
+                        }
+                    }()
+                    
+                    // Update all glow effects
+                    if let outerGlow = childNode(withName: "kamikazeOuterGlow") as? SKEffectNode,
+                       let outerSprite = outerGlow.children.first as? SKSpriteNode {
+                        outerSprite.color = glowColor
+                    }
+                    
+                    if let innerGlow = childNode(withName: "kamikazeInnerGlow") as? SKEffectNode,
+                       let innerSprite = innerGlow.children.first as? SKSpriteNode {
+                        innerSprite.color = glowColor
+                    }
+                    
+                    if let warning = childNode(withName: "kamikazeWarning") as? SKSpriteNode {
+                        warning.color = glowColor
+                    }
+                }
+            }
+            
+            return false
+        }
+    
     
     func dropDebuff(scene: SKScene) {
         if self.holdsDebuff {

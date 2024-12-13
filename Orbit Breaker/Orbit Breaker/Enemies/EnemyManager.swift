@@ -38,30 +38,28 @@ class EnemyManager {
     }
     
     func setupEnemies() {
-        guard let scene = scene else {
-            return
+            guard let scene = scene else { return }
+            
+            // Clear existing enemies
+            enemies.forEach { $0.removeFromParent() }
+            enemies.removeAll()
+            
+            currentWave += 1
+            
+            // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> boss -> repeat
+            let waveType = currentWave % 5
+            
+            if waveType == 0 {
+                // Boss wave
+                roadmap?.showRoadmap()
+                setupBossWave()
+            } else {
+                // Regular wave or asteroid field
+                roadmap?.showRoadmap()
+                roadmap?.updateCurrentWave(currentWave)
+                setupRegularWave()
+            }
         }
-        
-        // Clear existing enemies
-        enemies.forEach { $0.removeFromParent() }
-        enemies.removeAll()
-        
-        currentWave += 1
-        
-        // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> 1(boss) -> repeat
-        let waveType = currentWave % 5
-        
-        if waveType == 0 {
-            // Boss wave - hide roadmap
-            roadmap?.hideRoadmap()
-            setupBossWave()
-        } else {
-            // Regular wave - show and update roadmap
-            roadmap?.showRoadmap()
-            roadmap?.updateCurrentWave(currentWave)
-            setupRegularWave()
-        }
-    }
     
     private func orderEnemiesForEntry(_ enemies: [(Enemy, CGPoint)]) -> [(Enemy, CGPoint)] {
         // Sort enemies by their final X position to create a wave-like entry
@@ -320,11 +318,13 @@ class EnemyManager {
     private func setupBossWave() {
         guard let scene = scene else { return }
         
+        // Don't hide roadmap anymore
+        // roadmap?.hideRoadmap() // Remove or comment out this line
+        roadmap?.updateCurrentWave(currentWave)
+        
         bossAnnouncement?.showAnnouncement(bossType: getBossType()) { [weak self] in
             self?.spawnBoss()
         }
-        
-        
     }
     
     private func spawnBoss() {
@@ -355,41 +355,102 @@ class EnemyManager {
         enemies.append(boss)
     }
     
-    private func getBossType() -> BossType {
-        switch bossNum {
-        case 1: return .anger
-        case 2: return .sadness
-        case 3: return .disgust
-        case 4: return .love
-        default: return .love
+    func getBossType() -> BossType {
+            switch bossNum {
+            case 1: return .anger
+            case 2: return .sadness
+            case 3: return .disgust
+            case 4: return .love
+            default: return .love
+            }
         }
-    }
     func handleEnemyDestroyed(_ enemy: Enemy) {
-        if let index = enemies.firstIndex(of: enemy) {
-            enemies.remove(at: index)
+           if let index = enemies.firstIndex(of: enemy) {
+               enemies.remove(at: index)
+               
+               if enemies.isEmpty {
+                   let delay: TimeInterval = (enemy is Boss) ? 3.5 : 1.0
+                   DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                       guard let self = self else { return }
+                       
+                       if enemy is Boss {
+                           // After boss, reset to wave 0
+                           self.currentWave = 0
+                           self.roadmap?.showRoadmap()
+                           self.roadmap?.updateCurrentWave(0)
+                           self.setupEnemies()
+                       } else {
+                           // Check for asteroid field after every 2nd wave
+                           if self.currentWave % 5 != 0 && self.currentWave % 5 == 2 {
+                               self.setupAsteroidField()
+                           } else {
+                               self.setupEnemies()
+                           }
+                       }
+                   }
+               }
+           }
+       }
+    
+    
+    private var preparedEnemies: [(Enemy, CGPoint)] = []
+        
+        private func prepareNextWave() {
+            guard let scene = scene else { return }
+            preparedEnemies.removeAll()
             
-            if enemies.isEmpty {
-                // If it was a boss, use a longer delay
-                let delay: TimeInterval = (enemy is Boss) ? 3.5 : 1.0
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                    guard let self = self else { return }
-                    
-                    if enemy is Boss {
-                        // After boss, go straight to next wave
-                        self.setupEnemies()
-                    } else {
-                        // Check if it's time for an asteroid field
-                        // Asteroid field comes after every 2nd wave in the sequence
-                        if self.currentWave % 5 != 0 && (self.currentWave % 5) == 2 {
-                            self.setupAsteroidField()
-                        } else {
-                            self.setupEnemies()
-                        }
+            let nextBossType = getBossType()
+            let formationKeys = Array(FormationMatrix.formations.keys)
+            let formationKey = formationKeys[currentWave % formationKeys.count]
+            let formation = FormationMatrix.formations[formationKey] ?? FormationMatrix.formations["standard"]!
+            
+            let positions = FormationGenerator.generatePositions(
+                from: formation,
+                in: scene,
+                spacing: CGSize(width: 60, height: 50),
+                topMargin: 0.8
+            )
+            
+            for (index, position) in positions.enumerated() {
+                let enemyType: EnemyType = {
+                    switch index % 3 {
+                    case 0: return .a
+                    case 1: return .b
+                    default: return .c
                     }
+                }()
+                
+                let enemy = EnemySpawner.makeEnemy(ofType: enemyType)
+                enemy.updateTexture(forBossType: nextBossType)
+                preparedEnemies.append((enemy, position))
+            }
+        }
+    
+    private func showPreparedWave() {
+            guard !preparedEnemies.isEmpty else {
+                setupEnemies()
+                return
+            }
+            
+            for (enemy, _) in preparedEnemies {
+                enemies.append(enemy)
+            }
+            
+            let orderedQueue = orderEnemiesForEntry(preparedEnemies)
+            waveManager.startNextWave(enemies: orderedQueue)
+            
+            assignShooters()
+            assignPowerUpDroppers()
+            assignEnemyMovements()
+            
+            preparedEnemies.removeAll()
+            
+            if currentWave > 3 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                    self?.assignKamikazeEnemies()
                 }
             }
         }
-    }
     func handleBulletCollision(bullet: SKNode, enemy: Enemy) {
         guard let bullet = bullet as? Bullet else { return }
         

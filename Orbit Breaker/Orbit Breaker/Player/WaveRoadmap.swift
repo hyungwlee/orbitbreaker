@@ -110,39 +110,40 @@ class WaveRoadmap {
         
         // Create stylized indicator
         if currentWaveIndicator == nil {
-            let indicatorContainer = SKNode()
-            
-            // Outer ring with glow
-            let glowEffect = SKEffectNode()
-            glowEffect.shouldRasterize = true
-            glowEffect.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 3.0])
-            
-            let outerGlow = SKShapeNode(circleOfRadius: dotRadius + 6)
-            outerGlow.strokeColor = .yellow
-            outerGlow.lineWidth = 2
-            outerGlow.zPosition = 4
-            outerGlow.fillColor = .clear
-            glowEffect.addChild(outerGlow)
-            glowEffect.zPosition = 4
-            indicatorContainer.addChild(glowEffect)
-            
-            currentWaveIndicator = SKShapeNode(circleOfRadius: dotRadius + 4)
-            currentWaveIndicator?.strokeColor = .yellow
-            currentWaveIndicator?.lineWidth = 2
-            currentWaveIndicator?.fillColor = .clear
-            
-            if let indicator = currentWaveIndicator {
-                indicator.position = CGPoint(x: centerX, y: startY)
-                scene.addChild(indicator)
-                
-                let pulseAction = SKAction.sequence([
-                    SKAction.scale(to: 1.2, duration: 0.8),
-                    SKAction.scale(to: 1.0, duration: 0.8)
-                ])
-                indicator.run(SKAction.repeatForever(pulseAction))
+                    let indicatorContainer = SKNode()
+                    
+                    // Outer ring with glow
+                    let glowEffect = SKEffectNode()
+                    glowEffect.shouldRasterize = true
+                    glowEffect.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 3.0])
+                    glowEffect.zPosition = 10 // Ensure it's above the dots
+                    
+                    let outerGlow = SKShapeNode(circleOfRadius: dotRadius + 6)
+                    outerGlow.strokeColor = .yellow
+                    outerGlow.lineWidth = 2
+                    outerGlow.zPosition = 10
+                    outerGlow.fillColor = .clear
+                    glowEffect.addChild(outerGlow)
+                    indicatorContainer.addChild(glowEffect)
+                    
+                    currentWaveIndicator = SKShapeNode(circleOfRadius: dotRadius + 4)
+                    currentWaveIndicator?.strokeColor = .yellow
+                    currentWaveIndicator?.lineWidth = 2
+                    currentWaveIndicator?.fillColor = .clear
+                    currentWaveIndicator?.zPosition = 10 // Ensure it's above the dots
+                    
+                    if let indicator = currentWaveIndicator {
+                        indicator.position = CGPoint(x: centerX, y: startY)
+                        scene.addChild(indicator)
+                        
+                        let pulseAction = SKAction.sequence([
+                            SKAction.scale(to: 1.2, duration: 0.8),
+                            SKAction.scale(to: 1.0, duration: 0.8)
+                        ])
+                        indicator.run(SKAction.repeatForever(pulseAction))
+                    }
+                }
             }
-        }
-    }
     
     private func getBossColor(for wave: Int) -> SKColor {
         // Match boss colors to their respective waves
@@ -208,6 +209,7 @@ class WaveRoadmap {
             SKAction.repeatForever(pulseAction),
             moveAction
         ]))
+        currentWaveIndicator?.zPosition = 10
     }
     
     

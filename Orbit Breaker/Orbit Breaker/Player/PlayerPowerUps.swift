@@ -10,6 +10,13 @@ import SpriteKit
 enum PowerUps: CaseIterable {
     case shield
     case doubleDamage
+    
+    var size: CGSize {
+        switch self {
+        case .shield: return CGSize(width: 20, height: 25)  // Adjusted to be thinner
+        case .doubleDamage: return CGSize(width: 25, height: 25)
+        }
+    }
 }
 
 class PowerUp: SKSpriteNode {
@@ -18,20 +25,83 @@ class PowerUp: SKSpriteNode {
     init(type: PowerUps, color: UIColor, size: CGSize) {
         self.type = type
         
-        super.init(texture: nil, color: color, size: size)
-        self.physicsBody = SKPhysicsBody(rectangleOf: size)
+        // For double damage, create a custom node
+        if type == .doubleDamage {
+            // Create a lightning bolt shape
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: -5, y: 12))
+            path.addLine(to: CGPoint(x: 2, y: 2))
+            path.addLine(to: CGPoint(x: 8, y: 2))
+            path.addLine(to: CGPoint(x: 0, y: -12))
+            path.addLine(to: CGPoint(x: 5, y: -2))
+            path.addLine(to: CGPoint(x: -2, y: -2))
+            path.closeSubpath()
+            
+            let shape = SKShapeNode(path: path)
+            shape.fillColor = .yellow
+            shape.strokeColor = .orange
+            shape.lineWidth = 2
+            
+            // Render to texture
+            let texture = SKView().texture(from: shape)!
+            super.init(texture: texture, color: .white, size: type.size)
+        } else {
+            // Shield uses the sprite
+            let texture = SKTexture(imageNamed: "shield")
+            super.init(texture: texture, color: .white, size: type.size)
+        }
+        
+        // Physics setup
+        self.physicsBody = SKPhysicsBody(rectangleOf: type.size)
         self.physicsBody?.categoryBitMask = 0x1 << 1
         self.physicsBody?.contactTestBitMask = 0x1 << 2
         self.physicsBody?.collisionBitMask = 0
         self.physicsBody?.affectedByGravity = false
         self.name = "powerUp"
+        
+        // Add glow effect
+        let glow = SKEffectNode()
+        glow.shouldRasterize = true
+        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 2.0])
+        
+        let glowSprite = SKSpriteNode(texture: self.texture)
+        glowSprite.color = getGlowColor()
+        glowSprite.colorBlendFactor = 0.5
+        glowSprite.alpha = 0.6
+        glowSprite.size = type.size
+        
+        glow.addChild(glowSprite)
+        addChild(glow)
+        
+        // Add animations
+        let pulseAction = SKAction.sequence([
+            SKAction.scale(to: 1.2, duration: 0.5),
+            SKAction.scale(to: 1.0, duration: 0.5)
+        ])
+        run(SKAction.repeatForever(pulseAction))
+        
+        if type == .doubleDamage {
+            let rotateAction = SKAction.rotate(byAngle: .pi * 2, duration: 3.0)
+            run(SKAction.repeatForever(rotateAction))
+        }
+    }
+    
+    private func getGlowColor() -> SKColor {
+        switch type {
+        case .shield: return .cyan
+        case .doubleDamage: return .yellow
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // Rest of the PowerUp class remains the same...
     func apply(to player: Player) {
+        // Create pickup effect
+        createPickupEffect()
+        
         switch type {
         case .shield:
             player.addShield()
@@ -45,5 +115,36 @@ class PowerUp: SKSpriteNode {
             }
         }
     }
+    
+    private func createPickupEffect() {
+        guard let scene = self.scene else { return }
+        
+        let particleCount = 8
+        let duration: TimeInterval = 0.3
+        
+        for _ in 0..<particleCount {
+            let particle = SKShapeNode(circleOfRadius: 2)
+            particle.fillColor = getGlowColor()
+            particle.strokeColor = .white
+            particle.position = position
+            particle.zPosition = 3
+            scene.addChild(particle)
+            
+            let angle = CGFloat.random(in: 0...CGFloat.pi * 2)
+            let distance: CGFloat = 30
+            
+            let endPoint = CGPoint(
+                x: position.x + cos(angle) * distance,
+                y: position.y + sin(angle) * distance
+            )
+            
+            let moveAction = SKAction.move(to: endPoint, duration: duration)
+            let fadeAction = SKAction.fadeOut(withDuration: duration)
+            
+            particle.run(SKAction.sequence([
+                SKAction.group([moveAction, fadeAction]),
+                SKAction.removeFromParent()
+            ]))
+        }
+    }
 }
-
