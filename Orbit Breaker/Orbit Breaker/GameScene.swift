@@ -33,7 +33,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
-  //             setupDebugControls()
+               setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
         if !contentCreated {
             createContent()

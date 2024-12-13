@@ -168,51 +168,49 @@ class AsteroidFieldChallenge {
     private func createDoubleHelix() {
         guard let scene = scene else { return }
         let startY = scene.size.height + 150
-        let duration = 6.0
+        let duration: CGFloat = 10.0 // Increased duration for smoother descent
         let gapWidth: CGFloat = 180
         let verticalSpacing: CGFloat = 50.0
         let totalDistance = scene.size.height + 400
-        
+
         for i in 0...12 {
             for side in [-1, 1] {
-                let centerX = scene.size.width/2
-                let sideOffset = gapWidth/2 * CGFloat(side)
+                let centerX = scene.size.width / 2
+                let sideOffset = gapWidth / 2 * CGFloat(side)
                 let x = centerX + sideOffset
                 // Calculate initial position above screen
                 let initialY = startY + CGFloat(i) * verticalSpacing
-                
-                let moveAction = SKAction.customAction(withDuration: duration) { [weak self] node, time in
-                    let timeProgress = CGFloat(time) / CGFloat(duration)
-                    // Adjust the movement speed based on initial position
+
+                let moveAction = SKAction.customAction(withDuration: Double(duration)) { [weak self] node, time in
+                    let timeProgress = CGFloat(time) / duration
                     let adjustedProgress = timeProgress * totalDistance
                     let currentY = initialY - adjustedProgress
-                    
+
                     // Calculate wave motion
                     let angle = timeProgress * 4 * .pi
                     let xOffset = sin(angle) * 50
                     node.position = CGPoint(x: x + xOffset, y: currentY)
-                    
+
                     if self?.isDebugging == true {
                         self?.checkPosition(node: node, label: "Helix \(i)")
                     }
                 }
-                
-                // Calculate individual delay for each asteroid based on its position
-                let delayDuration = 0.0 // No delay, all asteroids move together
+
+                // Adjust delay for proper synchronization
+                let delayDuration = 0.1 * CGFloat(i) // Staggered delays for the helix
                 let asteroid = createAsteroid(at: CGPoint(x: x, y: initialY))
-                
-                // Create sequence with proper timing
+
                 let sequence = SKAction.sequence([
-                    SKAction.wait(forDuration: delayDuration),
+                    SKAction.wait(forDuration: Double(delayDuration)),
                     moveAction,
-                    SKAction.wait(forDuration: 0.1), // Small buffer before removal
                     SKAction.removeFromParent()
                 ])
-                
+
                 asteroid.run(sequence)
             }
         }
     }
+
 
     private func createRotatingCross() {
         guard let scene = scene else { return }

@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Image 11-30-24 at 4.46 PM.jpg",
+      "filename" : "Frame 2423.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "Frame 2423@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "Frame 2423@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

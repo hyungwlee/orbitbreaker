@@ -102,6 +102,13 @@ class BossAnnouncement {
         nameLabel.fontSize = 32
         nameLabel.fontColor = .white
         
+        
+        // Resize font based on screen size
+        let maxWidth = scene.size.width * 0.8 // Allow some padding
+               while nameLabel.frame.width > maxWidth {
+                   nameLabel.fontSize -= 1 // Reduce font size until it fits
+               }
+        
         // Calculate background size based on text
         let textWidth = nameLabel.frame.width
         let backgroundWidth = textWidth + 80

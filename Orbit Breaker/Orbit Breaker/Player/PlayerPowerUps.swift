@@ -60,18 +60,7 @@ class PowerUp: SKSpriteNode {
         self.name = "powerUp"
         
         // Add glow effect
-        let glow = SKEffectNode()
-        glow.shouldRasterize = true
-        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 2.0])
-        
-        let glowSprite = SKSpriteNode(texture: self.texture)
-        glowSprite.color = getGlowColor()
-        glowSprite.colorBlendFactor = 0.5
-        glowSprite.alpha = 0.6
-        glowSprite.size = type.size
-        
-        glow.addChild(glowSprite)
-        addChild(glow)
+        addGlowEffect()
         
         // Add animations
         let pulseAction = SKAction.sequence([
@@ -86,6 +75,21 @@ class PowerUp: SKSpriteNode {
         }
     }
     
+    private func addGlowEffect() {
+        let glow = SKEffectNode()
+        glow.shouldRasterize = true
+        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5.0])
+        
+        let glowSprite = SKSpriteNode(texture: self.texture)
+        glowSprite.color = getGlowColor()
+        glowSprite.colorBlendFactor = 0.8
+        glowSprite.alpha = 0.6
+        glowSprite.size = self.size
+        
+        glow.addChild(glowSprite)
+        addChild(glow)
+    }
+    
     private func getGlowColor() -> SKColor {
         switch type {
         case .shield: return .cyan
@@ -97,7 +101,6 @@ class PowerUp: SKSpriteNode {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // Rest of the PowerUp class remains the same...
     func apply(to player: Player) {
         // Create pickup effect
         createPickupEffect()
