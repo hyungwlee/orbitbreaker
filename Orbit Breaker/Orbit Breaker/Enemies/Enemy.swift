@@ -43,6 +43,10 @@ class Enemy: SKSpriteNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func playSoundEffect(named soundName: String) {
+        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: false)
+        self.run(soundAction)
+    }
     
     func updateSprite(forHealth health: Int, bossType: BossType) {
         let spriteName = EnemyType.spriteForHealth(health, bossType: bossType)
@@ -58,17 +62,19 @@ class Enemy: SKSpriteNode {
     
     func updateShooting(currentTime: TimeInterval, scene: SKScene, waveNumber: Int) {
         guard canShoot else { return }
-        
+
         if currentTime >= nextShootTime {
             shoot(scene: scene)
-            
+
+
             // Add randomized delay between shots
             let baseInterval = 3.0  // Base 3 second interval
             let randomVariation = Double.random(in: -0.5...0.5)  // ±0.5 second variation
+
             nextShootTime = currentTime + baseInterval + randomVariation
         }
+
     }
-    
     
     func startKamikazeBehavior() {
             guard let scene = scene else { return }
@@ -152,7 +158,8 @@ class Enemy: SKSpriteNode {
                     ])
                 )
             ])
-            
+            playSoundEffect(named: "ufo_descent.mp3")
+
             self.run(sequence)
         }
     func addDynamicMovement() {
@@ -313,7 +320,8 @@ class Enemy: SKSpriteNode {
         bullet.physicsBody?.affectedByGravity = false
         
         scene.addChild(bullet)
-        
+        playSoundEffect(named: "enemy_shot_1.mp3")
+
         // Ensure bullets travel full screen height
         let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + bullet.size.height), duration: 2.0)
         let removeAction = SKAction.removeFromParent()
@@ -344,43 +352,43 @@ class Enemy: SKSpriteNode {
     }
     
     func createDamageEffect() {
-            // Create multiple glass-like shards
-            let shardCount = 8
-            let duration: TimeInterval = 0.4
+        // Create multiple glass-like shards
+        let shardCount = 8
+        let duration: TimeInterval = 0.4
+        
+        for _ in 0..<shardCount {
+            // Create a shard
+            let shard = SKShapeNode(rectOf: CGSize(width: 2, height: 2))
+            shard.fillColor = .white
+            shard.strokeColor = .white
+            shard.alpha = 0.8
+            shard.position = self.position
+            shard.zPosition = self.zPosition + 1
+            scene?.addChild(shard)
             
-            for _ in 0..<shardCount {
-                // Create a shard
-                let shard = SKShapeNode(rectOf: CGSize(width: 2, height: 2))
-                shard.fillColor = .white
-                shard.strokeColor = .white
-                shard.alpha = 0.8
-                shard.position = self.position
-                shard.zPosition = self.zPosition + 1
-                scene?.addChild(shard)
-                
-                // Random angle and distance for shard movement
-                let angle = CGFloat.random(in: 0...CGFloat.pi * 2)
-                let distance = CGFloat.random(in: 15...25)
-                
-                // Calculate end position
-                let endPoint = CGPoint(
-                    x: shard.position.x + cos(angle) * distance,
-                    y: shard.position.y + sin(angle) * distance
-                )
-                
-                // Create move and fade actions
-                let move = SKAction.move(to: endPoint, duration: duration)
-                move.timingMode = .easeOut
-                let fade = SKAction.fadeOut(withDuration: duration * 0.8)
-                let rotate = SKAction.rotate(byAngle: CGFloat.pi * 2, duration: duration)
-                
-                // Run actions
-                shard.run(SKAction.sequence([
-                    SKAction.group([move, fade, rotate]),
-                    SKAction.removeFromParent()
-                ]))
-            }
+            // Random angle and distance for shard movement
+            let angle = CGFloat.random(in: 0...CGFloat.pi * 2)
+            let distance = CGFloat.random(in: 15...25)
+            
+            // Calculate end position
+            let endPoint = CGPoint(
+                x: shard.position.x + cos(angle) * distance,
+                y: shard.position.y + sin(angle) * distance
+            )
+            
+            // Create move and fade actions
+            let move = SKAction.move(to: endPoint, duration: duration)
+            move.timingMode = .easeOut
+            let fade = SKAction.fadeOut(withDuration: duration * 0.8)
+            let rotate = SKAction.rotate(byAngle: CGFloat.pi * 2, duration: duration)
+            
+            // Run actions
+            shard.run(SKAction.sequence([
+                SKAction.group([move, fade, rotate]),
+                SKAction.removeFromParent()
+            ]))
         }
+    }
         
     func takeDamage(_ amount: Int) -> Bool {
             health -= amount

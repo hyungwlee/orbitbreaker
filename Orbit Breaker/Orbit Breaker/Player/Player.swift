@@ -13,7 +13,7 @@ class Player {
     private weak var scene: SKScene?
     private var ship: SKSpriteNode
     private var lastFireTime: TimeInterval = 0
-    public var fireRate: TimeInterval = 0.01  // Made variable to change fire rate
+    public var fireRate: TimeInterval = 0.1  // Made variable to change fire rate
     private var isDragging = false
     private var shieldNode: SKShapeNode?
     var hasShield: Bool = false

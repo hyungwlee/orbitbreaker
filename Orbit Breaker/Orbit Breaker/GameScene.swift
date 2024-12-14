@@ -29,12 +29,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var background2: SKSpriteNode!
     var hapticsEngine: CHHapticEngine?
     
-    
+    private var didSceneLoad: Bool = false
+
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
                setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
+        super.didMove(to: view)
+        didSceneLoad = true
         if !contentCreated {
             createContent()
             contentCreated = true
@@ -278,9 +281,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
+            playSoundEffect(named: "enemy_hit_1.mp3")
         } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
+            playSoundEffect(named: "enemy_hit_1.mp3")
         }
         
         // Handle player collisions with enemy bullets
@@ -359,6 +364,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } catch {
             print("Failed to play haptic feedback: \(error.localizedDescription)")
         }
+    }
+    
+    func playSoundEffect(named soundName: String) {
+        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: false)
+        self.run(soundAction)
     }
     
     func assignEnemyMovements() {
