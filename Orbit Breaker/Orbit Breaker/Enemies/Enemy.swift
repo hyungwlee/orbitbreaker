@@ -62,19 +62,18 @@ class Enemy: SKSpriteNode {
     
     func updateShooting(currentTime: TimeInterval, scene: SKScene, waveNumber: Int) {
         guard canShoot else { return }
-
+        
         if currentTime >= nextShootTime {
+            print("Enemy shooting at time: \(currentTime)")
             shoot(scene: scene)
-
-
-            // Add randomized delay between shots
-            let baseInterval = 3.0  // Base 3 second interval
-            let randomVariation = Double.random(in: -0.5...0.5)  // ±0.5 second variation
-
+            playSoundEffect(named: "enemy_shot_1.mp3")
+            
+            let baseInterval = 3.0
+            let randomVariation = Double.random(in: -0.5...0.5)
             nextShootTime = currentTime + baseInterval + randomVariation
         }
-
     }
+
     
     func startKamikazeBehavior() {
             guard let scene = scene else { return }
@@ -320,7 +319,8 @@ class Enemy: SKSpriteNode {
         bullet.physicsBody?.affectedByGravity = false
         
         scene.addChild(bullet)
-        playSoundEffect(named: "enemy_shot_1.mp3")
+        
+
 
         // Ensure bullets travel full screen height
         let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + bullet.size.height), duration: 2.0)

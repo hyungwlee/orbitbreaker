@@ -122,7 +122,6 @@ class AsteroidFieldChallenge {
         // Initialize all formation functions
         formationFunctions = [
             { [weak self] scene in self?.createRotatingCross() },
-            { [weak self] scene in self?.createWavePattern() },
             { [weak self] scene in self?.createDoubleHelix() },
             { [weak self] scene in self?.createExpandingCircle() },
             { [weak self] scene in self?.createSweepingGate() },
@@ -242,33 +241,6 @@ class AsteroidFieldChallenge {
         }
     }
 
-    private func createWavePattern() {
-        guard let scene = scene else { return }
-        let startY = scene.size.height + 150 // Increased offset
-        let totalDistance = scene.size.height + 400 // Increased travel distance
-        let duration = 6.0
-        
-        for i in 0...8 {
-            guard i < 3 || i > 5 else { continue }
-            
-            let x = scene.size.width * CGFloat(i) / 8.0
-            let moveAction = SKAction.customAction(withDuration: duration) { [weak self] node, time in
-                let progress = CGFloat(time) / CGFloat(duration)
-                let currentY = startY - (progress * totalDistance)
-                let waveOffset = sin(CGFloat(time) * 2.0) * 50.0
-                node.position.y = currentY
-                node.position.x = x + waveOffset
-                
-                if self?.isDebugging == true {
-                    self?.checkPosition(node: node, label: "Wave \(i)")
-                }
-            }
-            
-            createAsteroid(at: CGPoint(x: x, y: startY), withMove: moveAction)
-        }
-    }
-
-
     private func createExpandingCircle() {
         guard let scene = scene else { return }
         let centerX = scene.size.width/2
@@ -362,20 +334,45 @@ class AsteroidFieldChallenge {
     private func createAlternatingWalls() {
         guard let scene = scene else { return }
         let startY = scene.size.height + 50
-        
+        let wallWidth: CGFloat = 200
+        let asteroidSpacing: CGFloat = 60
+        let gapWidth: CGFloat = 100 // Minimum guaranteed gap width
+        print("deploying alternating walls")
         func createWall(at xPosition: CGFloat, delay: TimeInterval = 0) {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                for x in stride(from: xPosition - 100, through: xPosition + 100, by: 60) {
+                print("Creating wall at xPosition: \(xPosition), delay: \(delay)")
+
+                // Calculate the range of positions where asteroids are placed
+                let startX = xPosition - wallWidth / 2
+                let endX = xPosition + wallWidth / 2
+                
+                // Randomly choose a position for the gap
+                let gapStart = CGFloat.random(in: startX...(endX - gapWidth))
+                let gapEnd = gapStart + gapWidth
+                print("Gap range: \(gapStart) to \(gapEnd)")
+
+                
+                // Place asteroids, skipping the gap
+                for x in stride(from: startX, through: endX, by: asteroidSpacing) {
+                    if x >= gapStart && x <= gapEnd {
+                        print("Skipping asteroid at x: \(x) (within gap range)")
+
+                        continue // Skip positions within the gap range
+                    }
+                    
+                    // Create and animate the asteroid
                     let asteroid = self.createAsteroid(at: CGPoint(x: x, y: startY))
                     let moveDown = SKAction.moveBy(x: 0, y: -(scene.size.height + 200), duration: 6.0)
                     asteroid.run(SKAction.sequence([moveDown, SKAction.removeFromParent()]))
                 }
             }
         }
-        
+
+        // Create alternating walls with delays
         createWall(at: scene.size.width * 0.25)
         createWall(at: scene.size.width * 0.75, delay: 2.0)
     }
+
 
     private func createSinglePendulum() {
         guard let scene = scene else { return }

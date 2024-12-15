@@ -129,7 +129,7 @@ class Player {
         damageTimer?.invalidate()
         
         // Set new timer
-        damageTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
+        damageTimer = Timer.scheduledTimer(withTimeInterval: 8.0, repeats: false) { [weak self] _ in
             self?.removeDamageBoost()
         }
     }

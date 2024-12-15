@@ -26,7 +26,7 @@ class WaveRoadmap {
         
         let spacing: CGFloat = 60  // Increased spacing
         let dotRadius: CGFloat = 10  // Slightly larger dots
-        let topMargin: CGFloat = 30
+        let topMargin: CGFloat = 70
         let centerX: CGFloat = 45
         
         let startY = scene.size.height - topMargin - (CGFloat(waveCount - 1) * spacing)
@@ -166,7 +166,7 @@ class WaveRoadmap {
         
         let adjustedWave = (wave - 1) % waveCount
         let spacing: CGFloat = 60  // Match the new spacing
-        let topMargin: CGFloat = 30
+        let topMargin: CGFloat = 70
         let startY = scene.size.height - topMargin - (CGFloat(waveCount - 1) * spacing)
         let y = startY + CGFloat(adjustedWave) * spacing
         

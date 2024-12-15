@@ -54,31 +54,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             TextureManager.shared.preloadTextures()
         }
     
-    private func setupBackgroundScrolling(){
-        // Initialize and add the background nodes
+    private func setupBackgroundScrolling() {
         bossCount = 0
+
+        // Initialize and add background 1
         background1 = SKSpriteNode(imageNamed: "backgroundANGER")
         background1.size = CGSize(width: size.width, height: size.height)
         background1.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        background1.zPosition = -1
+        background1.zPosition = -2
         addChild(background1)
         
+        // Add a dark overlay to background 1
+        let darkOverlay1 = SKSpriteNode(color: SKColor.black, size: background1.size)
+        darkOverlay1.alpha = 0.25 // Adjust opacity to control darkness
+        darkOverlay1.position = background1.position
+        darkOverlay1.zPosition = -1 // In front of the background
+        addChild(darkOverlay1)
+
+        // Initialize and add background 2
         background2 = SKSpriteNode(imageNamed: "backgroundANGER")
         background2.size = CGSize(width: size.width, height: size.height)
         background2.position = CGPoint(x: size.width / 2, y: background1.position.y + size.height)
-        background2.zPosition = -1
+        background2.zPosition = -2
         addChild(background2)
         
+        // Add a dark overlay to background 2
+        let darkOverlay2 = SKSpriteNode(color: SKColor.black, size: background2.size)
+        darkOverlay2.alpha = 0.25 // Adjust opacity to match the first overlay
+        darkOverlay2.position = background2.position
+        darkOverlay2.zPosition = -1
+        addChild(darkOverlay2)
+
         // Define scrolling actions
         let moveDown = SKAction.moveBy(x: 0, y: -size.height, duration: 5.0)
         let resetPosition = SKAction.moveBy(x: 0, y: size.height, duration: 0.0)
         let scrollLoop = SKAction.sequence([moveDown, resetPosition])
         let continuousScroll = SKAction.repeatForever(scrollLoop)
-        
-        // Apply actions to both backgrounds
+
+        // Apply actions to both backgrounds and overlays
         background1.run(continuousScroll)
         background2.run(continuousScroll)
+        darkOverlay1.run(continuousScroll)
+        darkOverlay2.run(continuousScroll)
     }
+
+
+
     
     private func setupDebugControls() {
 #if DEBUG
@@ -161,7 +182,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.fontSize = 20
         scoreLabel.fontColor = .white
         scoreLabel.horizontalAlignmentMode = .right
-        scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 40)
+        scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 80)
         addChild(scoreLabel)
     }
     

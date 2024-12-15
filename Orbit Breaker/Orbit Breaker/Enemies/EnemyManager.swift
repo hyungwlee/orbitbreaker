@@ -33,9 +33,12 @@ class EnemyManager {
             }
         }
         
+        
+        
         // Create new roadmap for fresh start
         self.roadmap = WaveRoadmap(scene: scene)
     }
+    
     
     func setupEnemies() {
             guard let scene = scene else { return }
@@ -488,7 +491,12 @@ class EnemyManager {
         // Assign different delays to each shooter
         for (index, enemyIndex) in shooterIndices.enumerated() {
             let enemy = enemies[enemyIndex]
-            enemy.canShoot = true
+            
+            // Delay activation of `canShoot` based on spawn animation duration
+            let spawnAnimationDuration: TimeInterval = 2.0 // Adjust based on your animation duration
+            DispatchQueue.main.asyncAfter(deadline: .now() + spawnAnimationDuration) {
+                enemy.canShoot = true
+            }
             
             // Stagger initial shoot times
             if let scene = scene {
