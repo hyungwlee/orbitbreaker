@@ -45,6 +45,15 @@ class Player {
         scene.addChild(ship)
     }
     
+    func playSoundEffect(named soundName: String) {
+        guard let scene = self.scene else {
+            print("Scene is not available to run the sound action.")
+            return
+        }
+        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: false)
+        scene.run(soundAction)
+    }
+    
     func update(currentTime: TimeInterval) {
         // Only fire if canShoot is true
         if canShoot && currentTime - lastFireTime >= fireRate {
@@ -144,5 +153,7 @@ class Player {
         removeShield()
         removeDamageBoost()
         ship.removeFromParent()
+        playSoundEffect(named: "playerDeath.mp3")
+        
     }
 }

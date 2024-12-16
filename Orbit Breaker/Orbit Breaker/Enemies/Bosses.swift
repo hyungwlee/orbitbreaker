@@ -263,11 +263,6 @@ class Boss: Enemy {
         lastHealthPercentage = percentage
     }
 
-
-
-    
-    
-    
     private func startEntryAnimation(in scene: SKScene) {
         setupHealthBar(in: scene)
         position = CGPoint(x: scene.size.width/2, y: scene.size.height + 100)
@@ -382,6 +377,9 @@ class Boss: Enemy {
         ), duration: screenDiagonal / homingSpeed)
         
         heart.run(SKAction.sequence([initialMove, wait, homingMove, SKAction.removeFromParent()]))
+        
+        playSoundEffect(named: "boss_shoot.mp3")
+
     }
     
     private func createHeartShields() {
@@ -818,6 +816,8 @@ class Boss: Enemy {
             SKAction.move(by: moveVector, duration: TimeInterval(screenDiagonal / speed)),
             SKAction.removeFromParent()
         ]))
+        
+        playSoundEffect(named: "boss_shoot.mp3")
     }
     
     
@@ -1018,6 +1018,8 @@ class Boss: Enemy {
             let moveAction = SKAction.move(by: moveVector, duration: moveDuration)
             
             fireball.run(SKAction.sequence([moveAction, SKAction.removeFromParent()]))
+            
+            playSoundEffect(named: "boss_shoot.mp3")
         }
     }
 }

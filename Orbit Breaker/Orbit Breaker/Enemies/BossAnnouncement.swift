@@ -8,14 +8,26 @@ import SpriteKit
 
 class BossAnnouncement {
     private weak var scene: SKScene?
-    
+
     init(scene: SKScene) {
         self.scene = scene
     }
     
+    func playSoundEffect(named soundName: String) {
+        guard let scene = self.scene else {
+            print("Scene is not available to run the sound action.")
+            return
+        }
+        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: false)
+        scene.run(soundAction)
+    }
+
+    
     func showAnnouncement(bossType: BossType, completion: @escaping () -> Void) {
         guard let scene = scene else { return }
         
+        playSoundEffect(named: "announcementSound.mp3") // Replace with your sound file name
+
         // Create container node for centering and scaling
         let container = SKNode()
         container.position = CGPoint(x: scene.size.width/2, y: scene.size.height/2)

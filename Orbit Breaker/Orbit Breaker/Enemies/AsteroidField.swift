@@ -125,7 +125,7 @@ class AsteroidFieldChallenge {
             { [weak self] scene in self?.createExpandingCircle() },
             { [weak self] scene in self?.createSweepingGate() },
             { [weak self] scene in self?.createSimpleSpiral() },
-            { [weak self] scene in self?.createAlternatingWalls() }
+            { [weak self] scene in self?.createAlternatingWalls() },
             { [weak self] scene in self?.createSinglePendulum() }
         ]
     }

@@ -66,7 +66,7 @@ class Enemy: SKSpriteNode {
         if currentTime >= nextShootTime {
             print("Enemy shooting at time: \(currentTime)")
             shoot(scene: scene)
-            playSoundEffect(named: "enemy_shot_1.mp3")
+            playSoundEffect(named: "new_enemy_shoot.mp3")
             
             let baseInterval = 3.0
             let randomVariation = Double.random(in: -0.5...0.5)

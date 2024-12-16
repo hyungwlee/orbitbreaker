@@ -302,11 +302,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
-            playSoundEffect(named: "enemy_hit_1.mp3")
+            playSoundEffect(named: "new_hit_1.m4a")
         } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
-            playSoundEffect(named: "enemy_hit_1.mp3")
+            playSoundEffect(named: "new_hit_1.m4a")
         }
         
         // Handle player collisions with enemy bullets
