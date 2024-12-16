@@ -122,11 +122,10 @@ class AsteroidFieldChallenge {
         // Initialize all formation functions
         formationFunctions = [
             { [weak self] scene in self?.createRotatingCross() },
-            { [weak self] scene in self?.createDoubleHelix() },
             { [weak self] scene in self?.createExpandingCircle() },
             { [weak self] scene in self?.createSweepingGate() },
             { [weak self] scene in self?.createSimpleSpiral() },
-            { [weak self] scene in self?.createAlternatingWalls() },
+            { [weak self] scene in self?.createAlternatingWalls() }
             { [weak self] scene in self?.createSinglePendulum() }
         ]
     }
@@ -164,51 +163,6 @@ class AsteroidFieldChallenge {
         return asteroid
     }
     
-    private func createDoubleHelix() {
-        guard let scene = scene else { return }
-        let startY = scene.size.height + 150
-        let duration: CGFloat = 10.0 // Increased duration for smoother descent
-        let gapWidth: CGFloat = 180
-        let verticalSpacing: CGFloat = 50.0
-        let totalDistance = scene.size.height + 400
-
-        for i in 0...12 {
-            for side in [-1, 1] {
-                let centerX = scene.size.width / 2
-                let sideOffset = gapWidth / 2 * CGFloat(side)
-                let x = centerX + sideOffset
-                // Calculate initial position above screen
-                let initialY = startY + CGFloat(i) * verticalSpacing
-
-                let moveAction = SKAction.customAction(withDuration: Double(duration)) { [weak self] node, time in
-                    let timeProgress = CGFloat(time) / duration
-                    let adjustedProgress = timeProgress * totalDistance
-                    let currentY = initialY - adjustedProgress
-
-                    // Calculate wave motion
-                    let angle = timeProgress * 4 * .pi
-                    let xOffset = sin(angle) * 50
-                    node.position = CGPoint(x: x + xOffset, y: currentY)
-
-                    if self?.isDebugging == true {
-                        self?.checkPosition(node: node, label: "Helix \(i)")
-                    }
-                }
-
-                // Adjust delay for proper synchronization
-                let delayDuration = 0.1 * CGFloat(i) // Staggered delays for the helix
-                let asteroid = createAsteroid(at: CGPoint(x: x, y: initialY))
-
-                let sequence = SKAction.sequence([
-                    SKAction.wait(forDuration: Double(delayDuration)),
-                    moveAction,
-                    SKAction.removeFromParent()
-                ])
-
-                asteroid.run(sequence)
-            }
-        }
-    }
 
 
     private func createRotatingCross() {
@@ -336,28 +290,48 @@ class AsteroidFieldChallenge {
         let startY = scene.size.height + 50
         let wallWidth: CGFloat = 200
         let asteroidSpacing: CGFloat = 60
-        let gapWidth: CGFloat = 100 // Minimum guaranteed gap width
+        let minGapWidth: CGFloat = 100 // Minimum guaranteed gap width
+        let maxGapWidth: CGFloat = 150 // Maximum gap width to ensure challenge
+        
         print("deploying alternating walls")
+        
         func createWall(at xPosition: CGFloat, delay: TimeInterval = 0) {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 print("Creating wall at xPosition: \(xPosition), delay: \(delay)")
-
+                
                 // Calculate the range of positions where asteroids are placed
                 let startX = xPosition - wallWidth / 2
                 let endX = xPosition + wallWidth / 2
                 
-                // Randomly choose a position for the gap
-                let gapStart = CGFloat.random(in: startX...(endX - gapWidth))
-                let gapEnd = gapStart + gapWidth
+                // Calculate available space for gap placement
+                let availableSpace = endX - startX - minGapWidth
+                guard availableSpace >= 0 else {
+                    print("Warning: Wall width too narrow for minimum gap width")
+                    return
+                }
+                
+                // Randomly choose gap width between minimum and maximum
+                let actualGapWidth = CGFloat.random(in: minGapWidth...min(maxGapWidth, availableSpace + minGapWidth))
+                
+                // Randomly choose a position for the gap, ensuring it fits within wall bounds
+                let maxGapStart = endX - actualGapWidth
+                let gapStart = CGFloat.random(in: startX...maxGapStart)
+                let gapEnd = gapStart + actualGapWidth
+                
                 print("Gap range: \(gapStart) to \(gapEnd)")
-
+                
+                // Calculate number of possible asteroid positions
+                let numberOfPossibleAsteroids = Int((wallWidth / asteroidSpacing).rounded(.down))
+                guard numberOfPossibleAsteroids > 0 else {
+                    print("Warning: Wall width too narrow for asteroid spacing")
+                    return
+                }
                 
                 // Place asteroids, skipping the gap
                 for x in stride(from: startX, through: endX, by: asteroidSpacing) {
                     if x >= gapStart && x <= gapEnd {
                         print("Skipping asteroid at x: \(x) (within gap range)")
-
-                        continue // Skip positions within the gap range
+                        continue
                     }
                     
                     // Create and animate the asteroid
@@ -367,10 +341,6 @@ class AsteroidFieldChallenge {
                 }
             }
         }
-
-        // Create alternating walls with delays
-        createWall(at: scene.size.width * 0.25)
-        createWall(at: scene.size.width * 0.75, delay: 2.0)
     }
 
 

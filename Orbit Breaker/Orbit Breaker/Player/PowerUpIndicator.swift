@@ -15,6 +15,7 @@ class PowerUpIndicator: SKNode {
     private var duration: TimeInterval = 5.0
     private var startTime: TimeInterval = 0
     private var glowNode: SKEffectNode?
+    private var sizeChanged = false
     
     init(size: CGFloat) {
         // Create rounded background using SKShapeNode
@@ -87,7 +88,11 @@ class PowerUpIndicator: SKNode {
             self.duration = 5.0
             iconNode.texture = SKTexture(imageNamed: "doubleDamage")
             textNode.text = ""
-            iconNode.size = CGSize(width: iconNode.size.width * 1.7, height: iconNode.size.height * 1.3)
+            if sizeChanged == false {
+                iconNode.size = CGSize(width: iconNode.size.width * 1.7, height: iconNode.size.height * 1.3)
+                sizeChanged = true
+            }
+        
             progressRing.strokeColor = SKColor(red: 1.0, green: 0.4, blue: 0.4, alpha: 1.0)
         }
         
