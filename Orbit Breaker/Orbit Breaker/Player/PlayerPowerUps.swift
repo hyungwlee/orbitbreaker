@@ -27,23 +27,7 @@ class PowerUp: SKSpriteNode {
         
         // For double damage, create a custom node
         if type == .doubleDamage {
-            // Create a lightning bolt shape
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: -5, y: 12))
-            path.addLine(to: CGPoint(x: 2, y: 2))
-            path.addLine(to: CGPoint(x: 8, y: 2))
-            path.addLine(to: CGPoint(x: 0, y: -12))
-            path.addLine(to: CGPoint(x: 5, y: -2))
-            path.addLine(to: CGPoint(x: -2, y: -2))
-            path.closeSubpath()
-            
-            let shape = SKShapeNode(path: path)
-            shape.fillColor = .yellow
-            shape.strokeColor = .orange
-            shape.lineWidth = 2
-            
-            // Render to texture
-            let texture = SKView().texture(from: shape)!
+            let texture = SKTexture(imageNamed: "doubleDamage")
             super.init(texture: texture, color: .white, size: type.size)
         } else {
             // Shield uses the sprite
@@ -69,10 +53,6 @@ class PowerUp: SKSpriteNode {
         ])
         run(SKAction.repeatForever(pulseAction))
         
-        if type == .doubleDamage {
-            let rotateAction = SKAction.rotate(byAngle: .pi * 2, duration: 3.0)
-            run(SKAction.repeatForever(rotateAction))
-        }
     }
     
     private func addGlowEffect() {

@@ -85,8 +85,9 @@ class PowerUpIndicator: SKNode {
             
         case .doubleDamage:
             self.duration = 5.0
-            iconNode.texture = nil
-            textNode.text = "×2"
+            iconNode.texture = SKTexture(imageNamed: "doubleDamage")
+            textNode.text = ""
+            iconNode.size = CGSize(width: iconNode.size.width * 1.7, height: iconNode.size.height * 1.3)
             progressRing.strokeColor = SKColor(red: 1.0, green: 0.4, blue: 0.4, alpha: 1.0)
         }
         
