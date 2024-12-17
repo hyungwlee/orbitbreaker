@@ -15,8 +15,7 @@ class EnemyManager {
     private var bossAnnouncement: BossAnnouncement?
     private var roadmap: WaveRoadmap?
     private var asteroidFieldAnnouncement: AsteroidFieldAnnouncement?
-       private var asteroidChallenge: AsteroidFieldChallenge?
-
+    private var asteroidChallenge: AsteroidFieldChallenge?
     
     var currentWave = 0
     private var bossNum: Int = 1

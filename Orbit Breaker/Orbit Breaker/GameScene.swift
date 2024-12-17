@@ -782,7 +782,13 @@ class SoundManager {
             "loveShield.mp3",
             "loveShield1.mp3",
             "angerDive.mp3",
-            "disgustRing.mp3"
+            "disgustRing.mp3",
+            "enemyHit.mp4a",
+            "shieldDamaged.mp3",
+            "powerUp.mp3",
+            "playerDeath.mp3",
+            "ufo_descent.mp3",
+            "new_enemy_shoot.mp3"
         ]
         
         for name in soundNames {

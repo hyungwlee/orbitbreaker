@@ -396,8 +396,10 @@ class AsteroidFieldChallenge {
         cleanup()
         
         if let gameScene = scene as? GameScene {
-            gameScene.user?.removeShield()
-            gameScene.powerUpManager?.hideShieldIndicator()
+            if gameScene.user.hasShield {
+                gameScene.user?.removeShield()
+                gameScene.powerUpManager?.hideShieldIndicator()
+            }
         }
         
         let selectedFormations = formationFunctions.shuffled().prefix(5).map { formation in

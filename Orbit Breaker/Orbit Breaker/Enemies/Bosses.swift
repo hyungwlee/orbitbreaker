@@ -161,10 +161,10 @@ class Boss: Enemy {
         
         // Rest of the setup remains the same...
         let titleLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
-        titleLabel.text = bossType == .anger ? "ANGER" :
-                         bossType == .sadness ? "SADNESS" :
-                         bossType == .disgust ? "DISGUST" :
-                         bossType == .love ? "LOVE" : "ANGER"
+        titleLabel.text = bossType == .anger ? "" :
+                         bossType == .sadness ? "" :
+                         bossType == .disgust ? "" :
+                         bossType == .love ? "" : ""
         titleLabel.fontSize = 32
         titleLabel.fontColor = .white
         titleLabel.position = CGPoint(x: scene.size.width/2, y: yPosition + 30)
