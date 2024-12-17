@@ -51,7 +51,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Start music playback
         playBackgroundMusic()
-        
+        preloadSounds()
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleAppWillResignActive),
@@ -80,6 +80,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             backgroundMusicPlayer?.play()
         } catch {
             print("Error loading background music: \(error.localizedDescription)")
+        }
+    }
+    
+    func preloadSounds() {
+        let sounds = ["backgroundMusic.mp3"]
+        for soundName in sounds {
+            if let url = Bundle.main.url(forResource: soundName, withExtension: nil) {
+                do {
+                    let audioPlayer = try AVAudioPlayer(contentsOf: url)
+                    audioPlayer.prepareToPlay()  // Prepares the player to reduce latency
+                    audioPlayers[soundName] = audioPlayer
+                } catch {
+                    print("Error loading sound: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    func playSoundEffect(named soundName: String, volume: Float = 1.0) {
+        if let audioPlayer = audioPlayers[soundName] {
+            audioPlayer.volume = volume
+            audioPlayer.currentTime = 0  // Reset playback to the start
+            audioPlayer.play()
+        } else {
+            print("Sound \(soundName) not preloaded")
         }
     }
 
@@ -326,11 +351,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
-            playSoundEffect(named: "enemyHit.m4a", volume: 15)  // Increase the volume
         } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
-            playSoundEffect(named: "enemyHit.m4a", volume: 15)  // Increase the volume
         }
         
         // Handle player collisions with enemy bullets
@@ -406,21 +429,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             try player.start(atTime: CHHapticTimeImmediate)
         } catch {
             print("Failed to play haptic feedback: \(error.localizedDescription)")
-        }
-    }
-    
-    func playSoundEffect(named soundName: String, volume: Float = 1.0) {
-        if let url = Bundle.main.url(forResource: soundName, withExtension: nil) {
-            do {
-                let audioPlayer = try AVAudioPlayer(contentsOf: url)
-                audioPlayer.volume = volume  // Set the volume (range: 0.0 to 1.0)
-                audioPlayer.play()
-                
-                // Keep a reference to the player so it doesn't get deallocated
-                audioPlayers[soundName] = audioPlayer
-            } catch {
-                print("Error loading sound effect: \(error.localizedDescription)")
-            }
         }
     }
     

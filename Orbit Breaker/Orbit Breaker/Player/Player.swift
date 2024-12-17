@@ -129,6 +129,7 @@ class Player {
         shieldNode = nil
         shieldTimer?.invalidate()
         shieldTimer = nil
+        playSoundEffect(named: "shieldDamaged.mp3")
     }
     
     func setDoubleDamage() {
