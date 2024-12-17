@@ -37,7 +37,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
-               setupDebugControls()
+        setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
         super.didMove(to: view)
         didSceneLoad = true
@@ -49,9 +49,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Initialize background
         setupBackgroundScrolling()
         
+        // Set the scene and preload sounds
+        SoundManager.shared.setScene(self)
+        SoundManager.shared.preloadSounds()
+        
         // Start music playback
         playBackgroundMusic()
         preloadSounds()
+        
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleAppWillResignActive),
@@ -98,15 +103,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    func playSoundEffect(named soundName: String, volume: Float = 1.0) {
-        if let audioPlayer = audioPlayers[soundName] {
-            audioPlayer.volume = volume
-            audioPlayer.currentTime = 0  // Reset playback to the start
-            audioPlayer.play()
-        } else {
-            print("Sound \(soundName) not preloaded")
-        }
-    }
 
     func preloadGame() {
             // Pre-load all textures at game start
@@ -377,6 +373,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handlePlayerBulletCollision(_ bullet: SKNode) {
         if user.hasShield {
+            SoundManager.shared.playSound("shieldDamaged.mp3")
             user.removeShield()  // This will set hasShield to false and remove the shield node
             powerUpManager.hideShieldIndicator()  // Add this line to hide the shield indicator
             bullet.removeFromParent()
@@ -761,5 +758,55 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 extension CGPoint {
     static func +(lhs: CGPoint, rhs: CGPoint) -> CGPoint {
         return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+    }
+}
+
+class SoundManager {
+    static let shared = SoundManager()
+    private var sounds: [String: SKAction] = [:]
+    private var scene: SKScene?
+    
+    private init() {}
+    
+    func setScene(_ scene: SKScene) {
+        self.scene = scene
+    }
+    
+    func preloadSounds() {
+        let soundNames = [
+            "announcementSound.mp3",
+            "loveShoot.mp3",
+            "sadnessShoot.mp3",
+            "disgustShoot.mp3",
+            "angerShoot.mp3",
+            "loveShield.mp3",
+            "loveShield1.mp3",
+            "angerDive.mp3",
+            "disgustRing.mp3"
+        ]
+        
+        for name in soundNames {
+            if let url = Bundle.main.url(forResource: name.replacingOccurrences(of: ".mp3", with: ""),
+                                       withExtension: "mp3") {
+                sounds[name] = SKAction.playSoundFileNamed(name, waitForCompletion: false)
+                print("Preloaded sound: \(name)")
+            } else {
+                print("Warning: Could not find sound file: \(name)")
+            }
+        }
+    }
+    
+    func playSound(_ name: String) {
+        guard let scene = scene else {
+            print("Warning: No scene set for SoundManager")
+            return
+        }
+        
+        guard let sound = sounds[name] else {
+            print("Warning: Sound \(name) not loaded")
+            return
+        }
+        
+        scene.run(sound)
     }
 }

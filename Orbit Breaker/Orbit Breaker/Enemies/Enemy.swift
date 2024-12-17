@@ -44,8 +44,7 @@ class Enemy: SKSpriteNode {
     }
     
     func playSoundEffect(named soundName: String) {
-        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: false)
-        self.run(soundAction)
+        SoundManager.shared.playSound(soundName)
     }
     
     func updateSprite(forHealth health: Int, bossType: BossType) {
