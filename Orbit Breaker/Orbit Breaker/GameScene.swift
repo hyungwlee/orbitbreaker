@@ -9,6 +9,7 @@ import SpriteKit
 import GameplayKit
 import SwiftUI
 import CoreHaptics
+import AVFoundation
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     @State private var hasShield = false
@@ -30,7 +31,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var hapticsEngine: CHHapticEngine?
     
     private var didSceneLoad: Bool = false
-
+    var backgroundMusicPlayer: AVAudioPlayer?
+    var audioPlayers: [String: AVAudioPlayer] = [:]
+    
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
@@ -46,9 +49,40 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Initialize background
         setupBackgroundScrolling()
         
+        // Start music playback
+        playBackgroundMusic()
         
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppWillResignActive),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppWillResignActive),
+            name: UIApplication.willTerminateNotification,
+            object: nil
+        )
     }
     
+    func playBackgroundMusic() {
+        guard let musicURL = Bundle.main.url(forResource: "backgroundMusic", withExtension: "mp3") else {
+            print("Background music file not found")
+            return
+        }
+        
+        do {
+            backgroundMusicPlayer = try AVAudioPlayer(contentsOf: musicURL)
+            backgroundMusicPlayer?.numberOfLoops = -1 // Loop indefinitely
+            backgroundMusicPlayer?.volume = 0.1       // Set the volume (0.0 to 1.0)
+            backgroundMusicPlayer?.play()
+        } catch {
+            print("Error loading background music: \(error.localizedDescription)")
+        }
+    }
+
     func preloadGame() {
             // Pre-load all textures at game start
             TextureManager.shared.preloadTextures()
@@ -98,9 +132,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         darkOverlay2.run(continuousScroll)
     }
 
-
-
-    
     private func setupDebugControls() {
 #if DEBUG
         let debugView = DebugControls(isVisible: .constant(true)) { [weak self] in
@@ -118,6 +149,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     deinit {
         debugControls?.view.removeFromSuperview()
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+            NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
     }
     
     
@@ -140,8 +173,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setupGame()
         
     }
-    
-    
     
     // Call this function when the boss is defeated
     func onBossDefeated(_ boss: Boss) {
@@ -258,9 +289,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             shieldHit(shield)
         }
         
-        
-        
-        
         // Check for slime trail collision with player
         if let cloud = nodeA as? SKShapeNode, let player = nodeB as? SKSpriteNode,
            cloud.fillColor == .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5),
@@ -271,11 +299,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                   player.name == "testPlayer" {
             handlePlayerHit()
         }
-        
-        
-        
-        
-        
+
         // Add check for boss intro state
         if let bullet = nodeA as? Bullet, let boss = nodeB as? Boss {
             if !boss.hasEnteredScene {
@@ -302,11 +326,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
-            playSoundEffect(named: "new_hit_1.m4a")
+            playSoundEffect(named: "enemyHit.m4a", volume: 15)  // Increase the volume
         } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
-            playSoundEffect(named: "new_hit_1.m4a")
+            playSoundEffect(named: "enemyHit.m4a", volume: 15)  // Increase the volume
         }
         
         // Handle player collisions with enemy bullets
@@ -317,8 +341,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                   bullet.name == "enemyBullet" && playerNode.name == "testPlayer" {
             handlePlayerBulletCollision(bullet)
         }
-        
-        
         
         // Handle power-up collisions
         if let powerUp = nodeA as? PowerUp, let playerNode = nodeB as? SKSpriteNode,
@@ -387,9 +409,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    func playSoundEffect(named soundName: String) {
-        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: false)
-        self.run(soundAction)
+    func playSoundEffect(named soundName: String, volume: Float = 1.0) {
+        if let url = Bundle.main.url(forResource: soundName, withExtension: nil) {
+            do {
+                let audioPlayer = try AVAudioPlayer(contentsOf: url)
+                audioPlayer.volume = volume  // Set the volume (range: 0.0 to 1.0)
+                audioPlayer.play()
+                
+                // Keep a reference to the player so it doesn't get deallocated
+                audioPlayers[soundName] = audioPlayer
+            } catch {
+                print("Error loading sound effect: \(error.localizedDescription)")
+            }
+        }
     }
     
     func assignEnemyMovements() {
@@ -438,6 +470,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Reset user shooting ability
         user.canShoot = true  // Add this line
+        
+        // Restart background music
+        backgroundMusicPlayer?.stop()           // Stop playback if it's still playing
+        backgroundMusicPlayer?.currentTime = 0  // Reset playback position to the beginning
+        backgroundMusicPlayer?.play()           // Start playback from the beginning
     }
     
     private func gameOver() {
@@ -469,6 +506,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             // Set isPaused after adding game over UI
             self.isPaused = true
+            
+            backgroundMusicPlayer?.stop()
+
         }
     }
     
@@ -486,6 +526,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Remove all enemies through enemy manager
         enemyManager.cleanupAllEnemies()
+    }
+    
+    @objc private func handleAppWillResignActive() {
+        backgroundMusicPlayer?.stop()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
