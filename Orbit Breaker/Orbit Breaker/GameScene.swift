@@ -57,19 +57,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         playBackgroundMusic()
         preloadSounds()
         
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAppWillResignActive),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAppWillResignActive),
-            name: UIApplication.willTerminateNotification,
-            object: nil
-        )
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillResignActive), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+
     }
     
     func playBackgroundMusic() {
@@ -77,7 +67,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             print("Background music file not found")
             return
         }
-        
         do {
             backgroundMusicPlayer = try AVAudioPlayer(contentsOf: musicURL)
             backgroundMusicPlayer?.numberOfLoops = -1 // Loop indefinitely
@@ -103,7 +92,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-
     func preloadGame() {
             // Pre-load all textures at game start
             TextureManager.shared.preloadTextures()
@@ -534,7 +522,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     @objc private func handleAppWillResignActive() {
-        backgroundMusicPlayer?.stop()
+        backgroundMusicPlayer?.pause()
+    }
+    
+    @objc private func handleAppWillEnterForeground() {
+        if let musicPlayer = backgroundMusicPlayer, !musicPlayer.isPlaying {
+            musicPlayer.play()  // Resume the music if it’s not already playing
+            print("App has come to the foreground, music resumed.")
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
