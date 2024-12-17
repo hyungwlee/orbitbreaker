@@ -378,7 +378,7 @@ class Boss: Enemy {
         
         heart.run(SKAction.sequence([initialMove, wait, homingMove, SKAction.removeFromParent()]))
         
-        playSoundEffect(named: "boss_shoot.mp3")
+        playSoundEffect(named: "loveShoot.mp3")
 
     }
     
@@ -430,13 +430,12 @@ class Boss: Enemy {
         }
     }
     
-    
-    
     func handleShieldHit(_ shield: SKNode) {
         shieldDamageCount[shield, default: 0] += 1
         
         if shieldDamageCount[shield, default: 0] >= 2 {
             shield.removeFromParent()
+            playSoundEffect(named: "loveShield.mp3")
             heartShields.removeAll { $0 == shield }
             shieldDamageCount.removeValue(forKey: shield)
         } else {
@@ -444,6 +443,8 @@ class Boss: Enemy {
                 SKAction.scale(to: 1.2, duration: 0.1),
                 SKAction.scale(to: 1.0, duration: 0.1)
             ]))
+            playSoundEffect(named: "loveShield.mp3")
+
         }
     }
     
@@ -505,8 +506,6 @@ class Boss: Enemy {
         }
     }
     
-    
-    
     func cleanup() {
         // Add this at the start of the existing cleanup function
         healthBarContainer?.removeFromParent()
@@ -515,6 +514,7 @@ class Boss: Enemy {
         // Rest of your existing cleanup code...
         for shield in heartShields {
             shield.removeFromParent()
+
         }
         heartShields.removeAll()
         shieldHealth.removeAll()
@@ -561,7 +561,7 @@ class Boss: Enemy {
         let terminalSpeed: CGFloat = 300
         let accelerationTime: TimeInterval = 1.0
         let moveDistance = scene.size.height + 50
-        
+        playSoundEffect(named: "sadnessShoot.mp3") // maybe replace this one
         let accelerate = SKAction.customAction(withDuration: accelerationTime) { node, elapsedTime in
             let progress = elapsedTime / CGFloat(accelerationTime)
             let currentSpeed = initialSpeed + (terminalSpeed - initialSpeed) * progress
@@ -673,6 +673,8 @@ class Boss: Enemy {
         
         if shieldHits[shield, default: 0] >= 4 {
             shield.removeFromParent()
+            playSoundEffect(named: "loveShield1.mp3")
+
             heartShields.removeAll { $0 == shield }
             shieldHits.removeValue(forKey: shield)
         } else {
@@ -817,7 +819,7 @@ class Boss: Enemy {
             SKAction.removeFromParent()
         ]))
         
-        playSoundEffect(named: "boss_shoot.mp3")
+        playSoundEffect(named: "disgustShoot.mp3")
     }
     
     
@@ -857,6 +859,7 @@ class Boss: Enemy {
         if currentTime - entryStartTime > 3.0 {
             if !isSwooping && currentTime - lastSwoopTime >= 5.0 {
                 startSwoop(in: scene)
+                playSoundEffect(named: "angerDive.mp3")
                 lastSwoopTime = currentTime
                 lastShootTime = currentTime
             } else if !isSwooping {
@@ -878,8 +881,6 @@ class Boss: Enemy {
             }
         }
     }
-    
-    
     
     override func takeDamage(_ amount: Int) -> Bool {
         health -= amount
@@ -904,7 +905,7 @@ class Boss: Enemy {
     private func createPoisonBurst(in scene: SKScene) {
         let bulletCount = 12
         let bulletSpeed: CGFloat = 300
-        
+        playSoundEffect(named: "disgustRing.mp3")
         for i in 0..<bulletCount {
             let angle = (CGFloat(i) / CGFloat(bulletCount)) * CGFloat.pi * 2
             
@@ -958,9 +959,6 @@ class Boss: Enemy {
             moveDirection = 1
         }
     }
-    
-    
-    
     
     private func shootFireballPattern(in scene: SKScene) {
         let bulletCount = 3
@@ -1019,7 +1017,7 @@ class Boss: Enemy {
             
             fireball.run(SKAction.sequence([moveAction, SKAction.removeFromParent()]))
             
-            playSoundEffect(named: "boss_shoot.mp3")
+            playSoundEffect(named: "angerShoot.mp3")
         }
     }
 }

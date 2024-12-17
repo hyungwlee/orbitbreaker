@@ -13,8 +13,8 @@ enum PowerUps: CaseIterable {
     
     var size: CGSize {
         switch self {
-        case .shield: return CGSize(width: 20, height: 25)  // Adjusted to be thinner
-        case .doubleDamage: return CGSize(width: 25, height: 25)
+        case .shield: return CGSize(width: 25, height: 30)  // Adjusted to be thinner
+        case .doubleDamage: return CGSize(width: 30, height: 30)
         }
     }
 }
@@ -55,6 +55,15 @@ class PowerUp: SKSpriteNode {
         
     }
     
+    func playSoundEffect(named soundName: String) {
+        guard let scene = self.scene else {
+            print("Scene is not available to run the sound action.")
+            return
+        }
+        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: false)
+        scene.run(soundAction)
+    }
+    
     private func addGlowEffect() {
         let glow = SKEffectNode()
         glow.shouldRasterize = true
@@ -64,8 +73,8 @@ class PowerUp: SKSpriteNode {
         glowSprite.color = getGlowColor()
         glowSprite.colorBlendFactor = 0.8
         glowSprite.alpha = 0.6
-        glowSprite.size = self.size
-        
+        glowSprite.size = CGSize(width: self.size.width * 1.5, height: self.size.height * 1.5)
+
         glow.addChild(glowSprite)
         addChild(glow)
     }
@@ -84,7 +93,7 @@ class PowerUp: SKSpriteNode {
     func apply(to player: Player) {
         // Create pickup effect
         createPickupEffect()
-        
+        playSoundEffect(named: "powerUp.mp3")
         switch type {
         case .shield:
             player.addShield()
