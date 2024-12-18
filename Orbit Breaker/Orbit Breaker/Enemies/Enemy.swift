@@ -431,41 +431,7 @@ class Enemy: SKSpriteNode {
             }
             
             return false
-        }
-    
-    
-    func dropDebuff(scene: SKScene) {
-        if self.holdsDebuff {
-            let debuffType = DebuffType.freeze
-            let debuff = Debuffs(type: debuffType, color: .purple, size: CGSize(width: 10, height: 10))
-            
-            debuff.name = "debuff"
-            debuff.position = CGPoint(x: position.x, y: position.y - size.height / 2)
-            
-            debuff.physicsBody = SKPhysicsBody(rectangleOf: debuff.size)
-            debuff.physicsBody?.categoryBitMask = 0x1 << 4 // Use a unique bitmask for debuffs
-            debuff.physicsBody?.contactTestBitMask = 0x1 << 0 // Player category
-            debuff.physicsBody?.collisionBitMask = 0
-            debuff.physicsBody?.affectedByGravity = false
-            
-            scene.addChild(debuff)
-            
-            let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + debuff.size.height), duration: 6.5)
-            
-            let removeAction = SKAction.removeFromParent()
-            debuff.run(SKAction.sequence([moveAction, removeAction]))
-        }
+        }     
     }
-    
-    
-    func applyFreezeDebuff(to enemies: [Enemy]) {
-        for enemy in enemies {
-            enemy.canShoot = false
-        }
-        
-        
-        
-        
-    }
-}
+
 
