@@ -191,9 +191,14 @@ class WaveRoadmap {
     
     
     private func setupPlayerIndicator(startY: CGFloat, centerX: CGFloat) {
+        // Remove any existing indicator first
+        currentStageIndicator?.removeAllActions()
+        currentStageIndicator?.removeFromParent()
+        currentStageIndicator = nil
+        
         // Create triangular ship shape
         let shipPath = CGMutablePath()
-        shipPath.move(to: CGPoint(x: 0, y: 12))  // Top point
+        shipPath.move(to: CGPoint(x: 0, y: 12))      // Top point
         shipPath.addLine(to: CGPoint(x: -8, y: -6))  // Bottom left
         shipPath.addLine(to: CGPoint(x: 8, y: -6))   // Bottom right
         shipPath.closeSubpath()
@@ -203,6 +208,7 @@ class WaveRoadmap {
         ship.strokeColor = SKColor(red: 1.0, green: 0.9, blue: 0.3, alpha: 1.0)
         ship.lineWidth = 2
         ship.zPosition = 10
+        ship.name = "playerIndicator"  // Add a name to help with cleanup
         
         // Add engine glow
         let engineGlow = SKShapeNode(path: CGMutablePath())
@@ -224,7 +230,6 @@ class WaveRoadmap {
             scene?.addChild(indicator)
             roadmapNodes.append(indicator)
             
-            // Add hover animation
             let hover = SKAction.sequence([
                 SKAction.moveBy(x: 0, y: 3, duration: 1.0),
                 SKAction.moveBy(x: 0, y: -3, duration: 1.0)
@@ -236,23 +241,18 @@ class WaveRoadmap {
     func updateCurrentWave(_ wave: Int) {
         guard let scene = scene else { return }
         
-        // Ensure we don't create duplicate indicators during reset
-        if wave == 0 {
-            // Remove existing indicator before creating a new one
-            currentStageIndicator?.removeAllActions()
-            currentStageIndicator?.removeFromParent()
-            currentStageIndicator = nil
-            
-            // Create new indicator at starting position
-            let startY = scene.size.height - 80 - (CGFloat(stageCount - 1) * 50)
-            setupPlayerIndicator(startY: startY, centerX: 45)
-        }
-        
         let spacing: CGFloat = 50
         let topMargin: CGFloat = 80
         let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
         let currentStage = wave == 0 ? 0 : (wave - 1) % stageCount
         let y = startY + CGFloat(currentStage) * spacing
+        
+        // Only move the existing indicator, don't create a new one
+        if let indicator = currentStageIndicator {
+            let moveAction = SKAction.move(to: CGPoint(x: 45, y: y), duration: 0.8)
+            moveAction.timingMode = .easeInEaseOut
+            indicator.run(moveAction)
+        }
         
         // Update completed stages
         for i in 0..<stageDots.count {
@@ -321,18 +321,22 @@ class WaveRoadmap {
     }
     
     func cleanup() {
-        // First remove the current stage indicator and its actions
+        // Remove every node in the roadmap including the pointer
+        for node in roadmapNodes {
+            node.removeAllActions()
+            node.removeFromParent()
+        }
         currentStageIndicator?.removeAllActions()
         currentStageIndicator?.removeFromParent()
         currentStageIndicator = nil
-
-        // Then clean up all roadmap nodes and their actions
-        roadmapNodes.forEach {
-            $0.removeAllActions()
-            $0.removeFromParent()
-        }
         roadmapNodes.removeAll()
         stageDots.removeAll()
+        
+        // Also remove any nodes that might have the player indicator name
+        scene?.enumerateChildNodes(withName: "playerIndicator") { node, _ in
+            node.removeAllActions()
+            node.removeFromParent()
+        }
     }
 
     
