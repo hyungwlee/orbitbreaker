@@ -588,6 +588,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handleBossDefeat(_ boss: Boss) {
             // Create multiple explosion waves
+        SoundManager.shared.playSound("bossDeath.mp3")
             for i in 0...3 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.2) {
                     // Create expanding ring
@@ -792,7 +793,8 @@ class SoundManager {
             "powerUp.mp3",
             "playerDeath.mp3",
             "ufo_descent.mp3",
-            "new_enemy_shoot.mp3"
+            "new_enemy_shoot.mp3",
+            "bossDeath.mp3"
         ]
         
         for name in soundNames {
