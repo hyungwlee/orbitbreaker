@@ -5,6 +5,7 @@
 //  Created by August Wetterau on 11/30/24.
 //
 import SpriteKit
+import UIKit
 
 class WaveRoadmap {
     private weak var scene: SKScene?
@@ -13,10 +14,15 @@ class WaveRoadmap {
     private var currentStageIndicator: SKShapeNode?
     private let stageCount = 6  // 5 stages + boss
     private var enemyManager: EnemyManager
+    var screenHeight: Int
+    var isiPhoneSE: Bool // SE (2nd gen) has 667 points height
+    
     
     init(scene: SKScene, enemyManager: EnemyManager) {
         self.scene = scene
         self.enemyManager = enemyManager
+        self.screenHeight = Int(UIScreen.main.bounds.height)
+        self.isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
         setupRoadmap()
     }
     
@@ -26,12 +32,21 @@ class WaveRoadmap {
         // Ensure thorough cleanup before setting up
         cleanup()
         
+        
         let spacing: CGFloat = 50
         let dotRadius: CGFloat = 15
-        let topMargin: CGFloat = 80
         let centerX: CGFloat = 45
-        let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
+        var topMargin = 0.0
         
+        
+        if self.isiPhoneSE {
+            topMargin = 30
+        } else {
+            topMargin = 80
+        }
+
+        
+        let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
         // Create connecting "space path" with enhanced visibility
         let path = CGMutablePath()
         path.move(to: CGPoint(x: centerX, y: startY))
