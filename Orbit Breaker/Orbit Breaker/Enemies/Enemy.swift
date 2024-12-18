@@ -345,7 +345,7 @@ class Enemy: SKSpriteNode {
             scene.addChild(powerUp)
             
             // Ensure powerUps travel full screen height
-            let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + powerUp.size.height), duration: 7)
+            let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + powerUp.size.height), duration: 5)
             let removeAction = SKAction.removeFromParent()
             powerUp.run(SKAction.sequence([moveAction, removeAction]))
         }
