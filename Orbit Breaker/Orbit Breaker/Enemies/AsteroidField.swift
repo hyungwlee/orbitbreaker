@@ -10,21 +10,22 @@ import SpriteKit
 
 class AsteroidFieldAnnouncement {
     private weak var scene: SKScene?
-    
+    let powerUpManager: PowerUpManager
     
     init(scene: SKScene) {
         self.scene = scene
+        self.powerUpManager = PowerUpManager(scene: scene)
     }
     
     func playSoundEffect(named soundName: String) {
         SoundManager.shared.playSound(soundName)
     }
     
-    
     func showAnnouncement(completion: @escaping () -> Void) {
         guard let scene = scene else { return }
         playSoundEffect(named: "announcementSound.mp3") // Replace with your sound file name
-
+        powerUpManager.cleanup()
+        
         // Create dark overlay
         let overlay = SKShapeNode(rectOf: scene.size)
         overlay.fillColor = .black

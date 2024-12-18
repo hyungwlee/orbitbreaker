@@ -148,6 +148,7 @@ class PowerUpIndicator: SKNode {
 
 class PowerUpManager {
     private var indicators: [PowerUpIndicator] = []
+    private var droppedPowerUps: [PowerUp] = []
     private weak var scene: SKScene?
     
     init(scene: SKScene) {
@@ -156,35 +157,42 @@ class PowerUpManager {
     }
     
     private func setupIndicators() {
-            guard let scene = scene else { return }
+        guard let scene = scene else { return }
+        
+        let size: CGFloat = 50  // Back to original size
+        let spacing: CGFloat = 10
+        let leftMargin: CGFloat = 15
+        let bottomMargin: CGFloat = 20
+        
+        let orderedPowerUps = [PowerUps.shield, PowerUps.doubleDamage]
+        
+        for (index, type) in orderedPowerUps.enumerated() {
+            let indicator = PowerUpIndicator(size: size)
+            let xPosition = leftMargin + (size / 2) + (CGFloat(index) * (size + spacing))
             
-            let size: CGFloat = 50  // Back to original size
-            let spacing: CGFloat = 10
-            let leftMargin: CGFloat = 15
-            let bottomMargin: CGFloat = 20
+            indicator.position = CGPoint(
+                x: xPosition,
+                y: size/2 + bottomMargin
+            )
             
-            let orderedPowerUps = [PowerUps.shield, PowerUps.doubleDamage]
-            
-            for (index, type) in orderedPowerUps.enumerated() {
-                let indicator = PowerUpIndicator(size: size)
-                let xPosition = leftMargin + (size / 2) + (CGFloat(index) * (size + spacing))
-                
-                indicator.position = CGPoint(
-                    x: xPosition,
-                    y: size/2 + bottomMargin
-                )
-                
-                scene.addChild(indicator)
-                indicators.append(indicator)
-            }
+            scene.addChild(indicator)
+            indicators.append(indicator)
         }
-
-    
-    func cleanup() {
-        indicators.forEach { $0.removeFromParent() }
-        indicators.removeAll()
     }
     
+    func trackDroppedPowerUp(_ powerUp: PowerUp) {
+        droppedPowerUps.append(powerUp)
+    }
+    
+    func cleanup() {
+        // Remove all indicators
+        indicators.forEach { $0.removeFromParent() }
+        indicators.removeAll()
+        
+        // Remove all dropped power-ups
+        droppedPowerUps.forEach { $0.removeFromParent() }
+        droppedPowerUps.removeAll()
+    }
     
     func showPowerUp(_ type: PowerUps) {
         if let index = PowerUps.allCases.firstIndex(of: type) {

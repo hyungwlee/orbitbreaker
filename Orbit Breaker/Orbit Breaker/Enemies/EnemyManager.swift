@@ -16,7 +16,7 @@ class EnemyManager {
     private var roadmap: WaveRoadmap?
     private var asteroidFieldAnnouncement: AsteroidFieldAnnouncement?
     private var asteroidChallenge: AsteroidFieldChallenge?
-    
+
     var currentWave = 0
     var bossNum: Int = 1
     
@@ -24,15 +24,13 @@ class EnemyManager {
         self.scene = scene
         self.waveManager = WaveManager(scene: scene)
         self.bossAnnouncement = BossAnnouncement(scene: scene)
-        
+
         // Look for existing roadmap nodes and remove them
         scene.enumerateChildNodes(withName: "*") { node, _ in
             if let circle = node as? SKShapeNode, circle.strokeColor == .yellow {
                 circle.removeFromParent()
             }
         }
-        
-        
         
         // Create new roadmap for fresh start
         self.roadmap = WaveRoadmap(scene: scene, enemyManager: self)
@@ -124,7 +122,6 @@ class EnemyManager {
         roadmap?.updateCurrentWave(currentWave)
     }
     
-    
     func forceCleanup() {
         // Remove all existing enemies
         enemies.forEach {
@@ -138,6 +135,7 @@ class EnemyManager {
         waveManager.reset()
         asteroidChallenge?.cleanup()
     }
+    
     private func setupRegularWave() {
         guard let scene = scene else { return }
         
@@ -187,7 +185,6 @@ class EnemyManager {
             }
         }
     }
-    
     
     func assignEnemyMovements() {
             guard let scene = scene else { return }
@@ -275,7 +272,6 @@ class EnemyManager {
         default: return .oscillate   // Default to simple pattern
         }
     }
-    
     
     private func setupFormationChanges() {
         let formationChange = SKAction.run { [weak self] in

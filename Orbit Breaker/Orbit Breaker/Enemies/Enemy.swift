@@ -15,14 +15,14 @@ class Enemy: SKSpriteNode {
     var canShoot: Bool
     var holdsPowerUp: Bool
     var holdsDebuff: Bool
-    
+
     init(type: EnemyType) {
         self.initialHealth = type.initialHealth
         self.health = type.initialHealth
         self.canShoot = false
         self.holdsPowerUp = false
         self.holdsDebuff = false
-        
+
         super.init(texture: SKTexture(imageNamed: "enemy"), color: .white,
                    size: CGSize(width: EnemyType.size.width * 2, height: EnemyType.size.height * 2.3))
         
@@ -75,91 +75,92 @@ class Enemy: SKSpriteNode {
 
     
     func startKamikazeBehavior() {
-            guard let scene = scene else { return }
-            
-            self.name = "kamikazeEnemy"
-            
-            // Get the boss-themed color with increased saturation
-            let glowColor: SKColor = {
-                if let gameScene = scene as? GameScene,
-                   let enemyManager = gameScene.enemyManager {
-                    switch enemyManager.getBossType() {
-                    case .anger: return .red
-                    case .sadness: return SKColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 1.0)
-                    case .disgust: return SKColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
-                    case .love: return SKColor(red: 1.0, green: 0.0, blue: 0.5, alpha: 1.0)
-                    }
+        guard let scene = scene else { return }
+        
+        self.name = "kamikazeEnemy"
+        
+        // Get the boss-themed color with increased saturation
+        let glowColor: SKColor = {
+            if let gameScene = scene as? GameScene,
+               let enemyManager = gameScene.enemyManager {
+                switch enemyManager.getBossType() {
+                case .anger: return .red
+                case .sadness: return SKColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 1.0)
+                case .disgust: return SKColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
+                case .love: return SKColor(red: 1.0, green: 0.0, blue: 0.5, alpha: 1.0)
                 }
-                return .white
-            }()
-            
-            // Create a single optimized glow effect
-            let glowNode = SKEffectNode()
-            glowNode.name = "kamikazeGlow"
-            glowNode.shouldRasterize = true
-            glowNode.shouldEnableEffects = true
-            glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10.0])
-            
-            let glowSprite = SKSpriteNode(texture: self.texture)
-            glowSprite.color = glowColor
-            glowSprite.colorBlendFactor = 1.0
-            glowSprite.alpha = 0.8
-            glowSprite.size = CGSize(width: self.size.width * 1.4, height: self.size.height * 1.4)
-            glowNode.addChild(glowSprite)
-            
-            // Add glow effect after a short delay to prevent frame drops
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.addChild(glowNode)
             }
-            
-            // Create dramatic pulse effects
-            let mainPulse = SKAction.sequence([
-                SKAction.scale(to: 1.3, duration: 0.3),
-                SKAction.scale(to: 1.0, duration: 0.3)
-            ])
-            
-            let glowPulse = SKAction.sequence([
-                SKAction.fadeAlpha(to: 0.9, duration: 0.3),
-                SKAction.fadeAlpha(to: 0.5, duration: 0.3)
-            ])
-            
-            self.run(SKAction.repeatForever(mainPulse))
-            glowNode.run(SKAction.repeatForever(glowPulse))
-            
-            // Start tracking with optimized updates
-            let updateInterval = 1.0 / 60.0
-            let trackingAction = SKAction.run { [weak self] in
-                guard let self = self,
-                      let player = scene.childNode(withName: "testPlayer") else { return }
-                
-                let dx = player.position.x - self.position.x
-                let dy = player.position.y - self.position.y
-                let distance = hypot(dx, dy)
-                
-                let normalizedDx = dx / distance
-                let normalizedDy = dy / distance
-                
-                let speed: CGFloat = 350.0
-                self.position.x += normalizedDx * speed * CGFloat(updateInterval)
-                self.position.y += normalizedDy * speed * CGFloat(updateInterval)
-                
-                let angle = atan2(dy, dx)
-                self.zRotation = angle + .pi / 2
-            }
-            
-            let sequence = SKAction.sequence([
-                SKAction.wait(forDuration: 0.5),
-                SKAction.repeatForever(
-                    SKAction.sequence([
-                        trackingAction,
-                        SKAction.wait(forDuration: updateInterval)
-                    ])
-                )
-            ])
-            playSoundEffect(named: "ufo_descent.mp3")
-
-            self.run(sequence)
+            return .white
+        }()
+        
+        // Create a single optimized glow effect
+        let glowNode = SKEffectNode()
+        glowNode.name = "kamikazeGlow"
+        glowNode.shouldRasterize = true
+        glowNode.shouldEnableEffects = true
+        glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10.0])
+        
+        let glowSprite = SKSpriteNode(texture: self.texture)
+        glowSprite.color = glowColor
+        glowSprite.colorBlendFactor = 1.0
+        glowSprite.alpha = 0.8
+        glowSprite.size = CGSize(width: self.size.width * 1.4, height: self.size.height * 1.4)
+        glowNode.addChild(glowSprite)
+        
+        // Add glow effect after a short delay to prevent frame drops
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.addChild(glowNode)
         }
+        
+        // Create dramatic pulse effects
+        let mainPulse = SKAction.sequence([
+            SKAction.scale(to: 1.3, duration: 0.3),
+            SKAction.scale(to: 1.0, duration: 0.3)
+        ])
+        
+        let glowPulse = SKAction.sequence([
+            SKAction.fadeAlpha(to: 0.9, duration: 0.3),
+            SKAction.fadeAlpha(to: 0.5, duration: 0.3)
+        ])
+        
+        self.run(SKAction.repeatForever(mainPulse))
+        glowNode.run(SKAction.repeatForever(glowPulse))
+        
+        // Start tracking with optimized updates
+        let updateInterval = 1.0 / 60.0
+        let trackingAction = SKAction.run { [weak self] in
+            guard let self = self,
+                  let player = scene.childNode(withName: "testPlayer") else { return }
+            
+            let dx = player.position.x - self.position.x
+            let dy = player.position.y - self.position.y
+            let distance = hypot(dx, dy)
+            
+            let normalizedDx = dx / distance
+            let normalizedDy = dy / distance
+            
+            let speed: CGFloat = 350.0
+            self.position.x += normalizedDx * speed * CGFloat(updateInterval)
+            self.position.y += normalizedDy * speed * CGFloat(updateInterval)
+            
+            let angle = atan2(dy, dx)
+            self.zRotation = angle + .pi / 2
+        }
+        
+        let sequence = SKAction.sequence([
+            SKAction.wait(forDuration: 0.5),
+            SKAction.repeatForever(
+                SKAction.sequence([
+                    trackingAction,
+                    SKAction.wait(forDuration: updateInterval)
+                ])
+            )
+        ])
+        playSoundEffect(named: "ufo_descent.mp3")
+
+        self.run(sequence)
+    }
+    
     func addDynamicMovement() {
         // Side-to-side oscillation
         let oscillate = SKAction.sequence([
@@ -344,7 +345,7 @@ class Enemy: SKSpriteNode {
             scene.addChild(powerUp)
             
             // Ensure powerUps travel full screen height
-            let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + powerUp.size.height), duration: 6.5)
+            let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + powerUp.size.height), duration: 7)
             let removeAction = SKAction.removeFromParent()
             powerUp.run(SKAction.sequence([moveAction, removeAction]))
         }
