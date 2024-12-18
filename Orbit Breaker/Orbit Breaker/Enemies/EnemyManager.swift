@@ -18,7 +18,7 @@ class EnemyManager {
     private var asteroidChallenge: AsteroidFieldChallenge?
     
     var currentWave = 0
-    private var bossNum: Int = 1
+    var bossNum: Int = 1
     
     init(scene: SKScene) {
         self.scene = scene
@@ -35,7 +35,7 @@ class EnemyManager {
         
         
         // Create new roadmap for fresh start
-        self.roadmap = WaveRoadmap(scene: scene)
+        self.roadmap = WaveRoadmap(scene: scene, enemyManager: self)
     }
     
     
@@ -49,7 +49,7 @@ class EnemyManager {
             currentWave += 1
             
             // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> boss -> repeat
-            let waveType = currentWave % 5
+            let waveType = currentWave % 6
             
             if waveType == 0 {
                 // Boss wave
@@ -72,7 +72,7 @@ class EnemyManager {
     }
     
     private func assignKamikazeEnemies() {
-        guard currentWave > 3 && currentWave % 5 != 0 else { return }
+        guard currentWave > 3 && currentWave % 6 != 0 else { return }
         
         // Determine number of kamikaze enemies based on wave
         let maxKamikazeCount = min(2, enemies.count - 1) // Never convert all enemies
@@ -383,7 +383,9 @@ class EnemyManager {
                            self.setupEnemies()
                        } else {
                            // Check for asteroid field after every 2nd wave
-                           if self.currentWave % 5 != 0 && self.currentWave % 5 == 2 {
+                           if self.currentWave % 6 != 0 && self.currentWave % 6 == 2 {
+                               self.currentWave += 1
+                               roadmap?.updateCurrentWave(currentWave)
                                self.setupAsteroidField()
                            } else {
                                self.setupEnemies()
