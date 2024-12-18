@@ -57,19 +57,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         playBackgroundMusic()
         preloadSounds()
         
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAppWillResignActive),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAppWillResignActive),
-            name: UIApplication.willTerminateNotification,
-            object: nil
-        )
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillResignActive), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+
     }
     
     func playBackgroundMusic() {
@@ -77,7 +67,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             print("Background music file not found")
             return
         }
-        
         do {
             backgroundMusicPlayer = try AVAudioPlayer(contentsOf: musicURL)
             backgroundMusicPlayer?.numberOfLoops = -1 // Loop indefinitely
@@ -103,7 +92,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-
     func preloadGame() {
             // Pre-load all textures at game start
             TextureManager.shared.preloadTextures()
@@ -234,7 +222,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.fontSize = 20
         scoreLabel.fontColor = .white
         scoreLabel.horizontalAlignmentMode = .right
-        scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 80)
+        
+        let screenHeight = UIScreen.main.bounds.height
+        let isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
+        
+        if isiPhoneSE {
+            // Specific padding adjustment for iPhone SE
+            scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 30)
+        } else {
+            scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 80)
+        }
         addChild(scoreLabel)
     }
     
@@ -534,7 +531,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     @objc private func handleAppWillResignActive() {
-        backgroundMusicPlayer?.stop()
+        backgroundMusicPlayer?.pause()
+    }
+    
+    @objc private func handleAppWillEnterForeground() {
+        if let musicPlayer = backgroundMusicPlayer, !musicPlayer.isPlaying {
+            musicPlayer.play()  // Resume the music if it’s not already playing
+            print("App has come to the foreground, music resumed.")
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -584,6 +588,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handleBossDefeat(_ boss: Boss) {
             // Create multiple explosion waves
+        SoundManager.shared.playSound("bossDeath.mp3")
             for i in 0...3 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.2) {
                     // Create expanding ring
@@ -788,7 +793,8 @@ class SoundManager {
             "powerUp.mp3",
             "playerDeath.mp3",
             "ufo_descent.mp3",
-            "new_enemy_shoot.mp3"
+            "new_enemy_shoot.mp3",
+            "bossDeath.mp3"
         ]
         
         for name in soundNames {
