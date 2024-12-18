@@ -7,6 +7,7 @@
 
 import SpriteKit
 import CoreHaptics
+import UIKit
 
 private enum BossMovementPattern: Int, CaseIterable {
     case circular = 0
@@ -152,12 +153,24 @@ class Boss: Enemy {
         // Create a container for all health bar elements
         healthBarContainer = SKNode()
         
-        let barWidth: CGFloat = 250
-        let barHeight: CGFloat = 35
+        let barWidth: CGFloat = 200
+        let barHeight: CGFloat = 15
         
         // Adjusted padding for Dynamic Island - lower value to position it just below
         let topPadding: CGFloat = UIDevice.current.hasNotch ? 90 : 40
-        let yPosition = scene.size.height - topPadding - barHeight
+        
+        // Check screen size to identify iPhone SE (2nd gen or earlier)
+        let screenHeight = UIScreen.main.bounds.height
+        let isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
+        
+        let yPosition: CGFloat
+        
+        if isiPhoneSE {
+            // Specific padding adjustment for iPhone SE
+            yPosition = scene.size.height - topPadding - barHeight - 10
+        } else {
+            yPosition = scene.size.height - topPadding - barHeight
+        }
         
         // Rest of the setup remains the same...
         let titleLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
@@ -165,6 +178,7 @@ class Boss: Enemy {
                          bossType == .sadness ? "" :
                          bossType == .disgust ? "" :
                          bossType == .love ? "" : ""
+        
         titleLabel.fontSize = 32
         titleLabel.fontColor = .white
         titleLabel.position = CGPoint(x: scene.size.width/2, y: yPosition + 30)
@@ -222,8 +236,8 @@ class Boss: Enemy {
 
     private func updateHealthBar() {
         let percentage = CGFloat(health) / CGFloat(initialHealth)
-        let barWidth: CGFloat = 250
-        let barHeight: CGFloat = 35
+        let barWidth: CGFloat = 200
+        let barHeight: CGFloat = 15
         let cornerRadius: CGFloat = 10
         
         let currentWidth = max(0, barWidth * percentage)
@@ -317,10 +331,10 @@ class Boss: Enemy {
     
     private func handleLoveMovement(currentTime: TimeInterval, in scene: SKScene) {
         let time = currentTime * 0.3
-        let radiusX: CGFloat = 150
-        let radiusY: CGFloat = 80
+        let radiusX: CGFloat = 100
+        let radiusY: CGFloat = 50
         let centerX = scene.size.width / 2
-        let centerY = scene.size.height * 0.7
+        let centerY = scene.size.height * 0.6
         
         let targetX = centerX + radiusX * cos(time)
         let targetY = centerY + radiusY * sin(2 * time)
@@ -633,7 +647,7 @@ class Boss: Enemy {
         let timeSinceEntry = currentTime - entryStartTime
         
         if normalHeight == 0 {
-            normalHeight = scene.size.height * 0.8
+            normalHeight = scene.size.height * 0.7
         }
         
         // Remove the collision enabling code from here since it's now in the animation sequence

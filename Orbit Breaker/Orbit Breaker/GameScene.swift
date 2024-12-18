@@ -222,7 +222,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.fontSize = 20
         scoreLabel.fontColor = .white
         scoreLabel.horizontalAlignmentMode = .right
-        scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 80)
+        
+        let screenHeight = UIScreen.main.bounds.height
+        let isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
+        
+        if isiPhoneSE {
+            // Specific padding adjustment for iPhone SE
+            scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 30)
+        } else {
+            scoreLabel.position = CGPoint(x: size.width - 20, y: size.height - 80)
+        }
         addChild(scoreLabel)
     }
     
