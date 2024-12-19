@@ -396,6 +396,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 // Do thorough cleanup after death animation
                 self.cleanupLevel()
                 
+                enumerateChildNodes(withName: "boss") { node, _ in
+                    if let boss = node as? Boss {
+                        boss.cleanup()
+                    }
+                }
+                
                 // Additional thorough cleanup for any remaining effects
                 self.enumerateChildNodes(withName: "//*") { node, _ in
                     if let sprite = node as? SKSpriteNode,
@@ -542,20 +548,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func cleanupLevel() {
-        // Remove all bullets
-        enumerateChildNodes(withName: "testBullet") { node, _ in
-            node.removeFromParent()
+            // Remove all bullets
+            enumerateChildNodes(withName: "testBullet") { node, _ in
+                node.removeFromParent()
+            }
+            enumerateChildNodes(withName: "enemyBullet") { node, _ in
+                node.removeFromParent()
+            }
+            enumerateChildNodes(withName: "powerUp") { node, _ in
+                node.removeFromParent()
+            }
+            
+            // Remove all heart shields
+            enumerateChildNodes(withName: "heartShield") { node, _ in
+                node.physicsBody = nil
+                node.removeFromParent()
+            }
+            
+            // Remove all toxic trails (slime nodes)
+            enumerateChildNodes(withName: "//*") { node, _ in
+                if let cloud = node as? SKShapeNode,
+                   cloud.physicsBody?.categoryBitMask == 0x1 << 3,  // Check for enemy bullet category
+                   cloud.fillColor == .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5),
+                   cloud.strokeColor == .green {
+                    // First remove any glow effects
+                    cloud.removeAllChildren()
+                    // Remove physics body
+                    cloud.physicsBody = nil
+                    // Remove any remaining actions
+                    cloud.removeAllActions()
+                    // Finally remove the node
+                    cloud.removeFromParent()
+                }
+            }
+            
+            // Remove all enemies through enemy manager
+            enemyManager.cleanupAllEnemies()
         }
-        enumerateChildNodes(withName: "enemyBullet") { node, _ in
-            node.removeFromParent()
-        }
-        enumerateChildNodes(withName: "powerUp") { node, _ in
-            node.removeFromParent()
-        }
-        
-        // Remove all enemies through enemy manager
-        enemyManager.cleanupAllEnemies()
-    }
     
     @objc private func handleAppWillResignActive() {
         backgroundMusicPlayer?.pause()

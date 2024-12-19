@@ -525,55 +525,39 @@ class Boss: Enemy {
         healthBarContainer?.removeFromParent()
         healthBarContainer = nil
         
-        // Clean up heart shields
+        // Clean up heart shields and their state
         for shield in heartShields {
+            shield.removeAllActions()
             shield.removeFromParent()
         }
         heartShields.removeAll()
         shieldHealth.removeAll()
+        shieldDamageCount.removeAll()
+        shieldHits.removeAll()
         
-        // Clean up slime trail
+        // Clean up slime trail with physics bodies
         for slime in slimeTrail {
+            slime.physicsBody = nil  // Remove physics body first
+            slime.removeAllActions()
             slime.removeFromParent()
         }
         slimeTrail.removeAll()
         
-        // Clean up rain clouds and their actions
-        for cloud in miniClouds {
-            cloud.removeAllActions() // Stop any ongoing actions first
-            cloud.removeFromParent()
-        }
-        miniClouds.removeAll()
-        
-        // Clean up raindrops
-        for raindrop in raindrops {
-            raindrop.removeAllActions()
-            raindrop.removeFromParent()
-        }
-        raindrops.removeAll()
-        
-        // Clean up health bar elements
-        healthBar?.removeFromParent()
-        healthBarFill?.removeFromParent()
-        
-        // Clean up any remaining nodes with specific names
-        scene?.enumerateChildNodes(withName: "bossTitle") { node, _ in
-            node.removeAllActions()
-            node.removeFromParent()
-        }
-        
-        scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
-            node.removeAllActions()
-            node.removeFromParent()
-        }
-        
-        // Specific cleanup for raincloud objects that might have been missed
+        // Enumerate and clean up any remaining slime nodes in the scene
         scene?.enumerateChildNodes(withName: "//*") { node, _ in
-            if let sprite = node as? SKSpriteNode,
-               sprite.texture?.description.contains("raincloud") == true {
-                sprite.removeAllActions()
-                sprite.removeFromParent()
+            if let shape = node as? SKShapeNode,
+               shape.fillColor == .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5) {
+                shape.physicsBody = nil
+                shape.removeAllActions()
+                shape.removeFromParent()
             }
+        }
+        
+        // Clean up all heart shields in the scene
+        scene?.enumerateChildNodes(withName: "heartShield") { node, _ in
+            node.physicsBody = nil
+            node.removeAllActions()
+            node.removeFromParent()
         }
         
         // Reset all timers
@@ -589,7 +573,12 @@ class Boss: Enemy {
         hasEnteredScene = false
         isSwooping = false
         shieldsHaveBeenCreated = false
+        
+        // Remove any remaining physics bodies
+        removeAllActions()
+        physicsBody = nil
     }
+
     
     
     private func createRaindrop(at position: CGPoint, in scene: SKScene) {
@@ -782,7 +771,7 @@ class Boss: Enemy {
         position.y += velocityY * 1/60
         
         if currentTime - lastSlimeTime >= 0.05 {  // More frequent trail
-            createSlimeTrail(in: scene)
+ //           createSlimeTrail(in: scene)
             lastSlimeTime = currentTime
         }
         
@@ -801,47 +790,47 @@ class Boss: Enemy {
         )
     }
     
-    private func createSlimeTrail(in scene: SKScene) {
-        // Create main toxic cloud
-        let cloud = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
-        cloud.fillColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5)
-        cloud.strokeColor = .green
-        cloud.alpha = 0.7
-        cloud.position = position
-        cloud.zPosition = 1
-        
-        // Add toxic effect
-        let glow = SKEffectNode()
-        glow.shouldRasterize = true
-        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5.0])
-        
-        let glowShape = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
-        glowShape.fillColor = .green
-        glowShape.strokeColor = .clear
-        glow.addChild(glowShape)
-        cloud.addChild(glow)
-        
-        scene.addChild(cloud)
-        slimeTrail.append(cloud)
-        
-        // Deadly collision
-        cloud.physicsBody = SKPhysicsBody(circleOfRadius: 25)  // Smaller collision radius
-        cloud.physicsBody?.categoryBitMask = 0x1 << 3  // Same as enemy bullets
-        cloud.physicsBody?.contactTestBitMask = 0x1 << 0  // Player category
-        cloud.physicsBody?.collisionBitMask = 0
-        cloud.physicsBody?.isDynamic = false
-        
-        // Animation
-        let sequence = SKAction.sequence([
-            SKAction.wait(forDuration: 2.5),
-            SKAction.fadeOut(withDuration: 1.0),
-            SKAction.removeFromParent()
-        ])
-        
-        cloud.run(sequence) { [weak self] in
-            self?.slimeTrail.removeFirst()
-        }
-    }
+//    private func createSlimeTrail(in scene: SKScene) {
+//        // Create main toxic cloud
+//        let cloud = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
+//        cloud.fillColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5)
+//        cloud.strokeColor = .green
+//        cloud.alpha = 0.7
+//        cloud.position = position
+//        cloud.zPosition = 1
+//        
+//        // Add toxic effect
+//        let glow = SKEffectNode()
+//        glow.shouldRasterize = true
+//        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5.0])
+//        
+//        let glowShape = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
+//        glowShape.fillColor = .green
+//        glowShape.strokeColor = .clear
+//        glow.addChild(glowShape)
+//        cloud.addChild(glow)
+//        
+//        scene.addChild(cloud)
+//        slimeTrail.append(cloud)
+//        
+//        // Deadly collision
+//        cloud.physicsBody = SKPhysicsBody(circleOfRadius: 25)  // Smaller collision radius
+//        cloud.physicsBody?.categoryBitMask = 0x1 << 3  // Same as enemy bullets
+//        cloud.physicsBody?.contactTestBitMask = 0x1 << 0  // Player category
+//        cloud.physicsBody?.collisionBitMask = 0
+//        cloud.physicsBody?.isDynamic = false
+//        
+//        // Animation
+//        let sequence = SKAction.sequence([
+//            SKAction.wait(forDuration: 2.5),
+//            SKAction.fadeOut(withDuration: 1.0),
+//            SKAction.removeFromParent()
+//        ])
+//        
+//        cloud.run(sequence) { [weak self] in
+//            self?.slimeTrail.removeFirst()
+//        }
+//    }
     
     
     private func shootToxicProjectile(in scene: SKScene) {
