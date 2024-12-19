@@ -966,7 +966,7 @@ class Boss: Enemy {
     private func startSwoop(in scene: SKScene) {
         isSwooping = true
         // Make Anger swoop to bottom of screen
-        let moveDown = SKAction.moveTo(y: scene.size.height * 0.15, duration: 0.5)  // Lower value for bottom of screen
+        let moveDown = SKAction.moveTo(y: scene.size.height * 0.1, duration: 0.5)  // Lower value for bottom of screen
         let wait = SKAction.wait(forDuration: 0.3)
         let moveUp = SKAction.moveTo(y: normalHeight, duration: 0.5)
         let sequence = SKAction.sequence([moveDown, wait, moveUp, SKAction.run { [weak self] in

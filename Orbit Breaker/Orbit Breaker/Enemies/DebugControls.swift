@@ -13,25 +13,28 @@ struct DebugControls: View {
     @State var currentWave = 1
     
     var body: some View {
-        VStack {
-            if isVisible {
-                VStack {
-                    Text("Wave: \(currentWave)")
-                        .foregroundColor(.white)
-                        .padding(.bottom, 4)
-                    
-                    Button(action: {
-                        currentWave += 1
-                        nextWave()
-                    }) {
-                        Text("Next Wave")
-                            .padding()
-                            .background(Color.blue)
+        HStack {
+            Spacer()
+            VStack {
+                if isVisible {
+                    VStack {
+                        Text("Wave: \(currentWave)")
                             .foregroundColor(.white)
-                            .cornerRadius(8)
+                            .padding(.bottom, 4)
+                        
+                        Button(action: {
+                            currentWave += 1
+                            nextWave()
+                        }) {
+                            Text("Next Wave")
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
                     }
+                    .padding(.leading, 100)
                 }
-                .padding()
             }
         }
     }

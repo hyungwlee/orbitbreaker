@@ -19,38 +19,32 @@ class WaveRoadmap {
     
     
     init(scene: SKScene, enemyManager: EnemyManager) {
-        self.scene = scene
-        self.enemyManager = enemyManager
-        self.screenHeight = Int(UIScreen.main.bounds.height)
-        self.isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
-        setupRoadmap()
-    }
-    
-    private func setupRoadmap() {
-        guard let scene = scene else { return }
+           self.scene = scene
+           self.enemyManager = enemyManager
+           self.screenHeight = Int(UIScreen.main.bounds.height)
+           self.isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
+           setupRoadmap()
+       }
         
-        // Ensure thorough cleanup before setting up
-        cleanup()
-        
-        
-        let spacing: CGFloat = 50
-        let dotRadius: CGFloat = 15
-        let centerX: CGFloat = 45
-        var topMargin = 0.0
-        
-        
-        if self.isiPhoneSE {
-            topMargin = 30
-        } else {
-            topMargin = 80
-        }
-
-        
-        let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
-        // Create connecting "space path" with enhanced visibility
-        let path = CGMutablePath()
-        path.move(to: CGPoint(x: centerX, y: startY))
-        path.addLine(to: CGPoint(x: centerX, y: startY + CGFloat(stageCount - 1) * spacing))
+        private func setupRoadmap() {
+            guard let scene = scene else { return }
+            
+            // Ensure thorough cleanup before setting up
+            cleanup()
+            
+            let spacing: CGFloat = 50
+            let dotRadius: CGFloat = 15
+            let centerX: CGFloat = 45
+            
+            // Adjust margins based on device
+            let topMargin: CGFloat = isiPhoneSE ? 30 : 80
+            let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
+            
+            // Create connecting "space path" with enhanced visibility
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: centerX, y: startY))
+            path.addLine(to: CGPoint(x: centerX, y: scene.size.height - topMargin))
+            
         
         // Add glowing background to path
         let glowPath = SKShapeNode(path: path)
@@ -106,7 +100,7 @@ class WaveRoadmap {
             roadmapNodes.append(stageContainer)
         }
         
-        setupPlayerIndicator(startY: startY, centerX: centerX)
+            setupPlayerIndicator(startY: startY, centerX: centerX)
     }
     
     private func createStageMarker(for stage: Int, radius: CGFloat) -> SKShapeNode {
@@ -115,26 +109,34 @@ class WaveRoadmap {
         marker.zPosition = 3
         
         if stage == stageCount - 1 {  // Boss stage
-            switch enemyManager.bossNum {
-            case 2: // Sadness
-                marker.fillColor = SKColor(red: 0.4, green: 0.6, blue: 0.9, alpha: 0.9)
-                marker.strokeColor = SKColor(red: 0.5, green: 0.7, blue: 1.0, alpha: 1.0)
-            case 3: // Disgust
-                marker.fillColor = SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.9)
-                marker.strokeColor = SKColor(red: 0.3, green: 0.9, blue: 0.3, alpha: 1.0)
-            case 4: // Love
-                marker.fillColor = SKColor(red: 1.0, green: 0.4, blue: 0.7, alpha: 0.9)
-                marker.strokeColor = SKColor(red: 1.0, green: 0.5, blue: 0.8, alpha: 1.0)
-            default: // Anger (case 1)
-                marker.fillColor = SKColor(red: 0.9, green: 0.2, blue: 0.2, alpha: 0.9)
-                marker.strokeColor = SKColor(red: 1.0, green: 0.3, blue: 0.3, alpha: 1.0)
+            // Base marker for consistent hit detection
+            marker.fillColor = .clear
+            marker.strokeColor = .clear
+            
+            // Create boss sprite
+            let spriteName = switch enemyManager.bossNum {
+            case 2: "SadnessIcon"
+            case 3: "DisgustIcon"
+            case 4: "LoveIcon"
+            default: "AngerIcon"
             }
             
+            let bossSprite = SKSpriteNode(imageNamed: spriteName)
+            bossSprite.size = switch enemyManager.bossNum {
+            case 2: CGSize(width: radius * 2.5, height: radius * 2)
+            case 3: CGSize(width: radius * 2, height: radius * 2)
+            case 4: CGSize(width: radius * 2, height: radius * 2)
+            default: CGSize(width: radius * 3, height: radius * 2)
+            }
+            bossSprite.position = .zero
+            marker.addChild(bossSprite)
+            
+            // Add pulsing animation
             let pulse = SKAction.sequence([
                 SKAction.scale(to: 1.1, duration: 1.0),
                 SKAction.scale(to: 1.0, duration: 1.0)
             ])
-            marker.run(SKAction.repeatForever(pulse))
+            bossSprite.run(SKAction.repeatForever(pulse))
         } else if stage == 2 {  // Asteroid field
             let asteroidPath = CGMutablePath()
             let points = 12
@@ -254,13 +256,13 @@ class WaveRoadmap {
     }
     
     func updateCurrentWave(_ wave: Int) {
-        guard let scene = scene else { return }
-        
-        let spacing: CGFloat = 50
-        let topMargin: CGFloat = 80
-        let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
-        let currentStage = wave == 0 ? 0 : (wave - 1) % stageCount
-        let y = startY + CGFloat(currentStage) * spacing
+            guard let scene = scene else { return }
+            
+            let spacing: CGFloat = 50
+            let topMargin: CGFloat = isiPhoneSE ? 30 : 80
+            let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
+            let currentStage = wave == 0 ? 0 : (wave - 1) % stageCount
+            let y = startY + CGFloat(currentStage) * spacing
         
         // Only move the existing indicator, don't create a new one
         if let indicator = currentStageIndicator {
@@ -319,21 +321,47 @@ class WaveRoadmap {
     }
 
     private func updateBossStageColor(_ marker: SKShapeNode) {
-        switch enemyManager.bossNum {
-        case 2: // Sadness
-            marker.fillColor = SKColor(red: 0.4, green: 0.6, blue: 0.9, alpha: 0.9)
-            marker.strokeColor = SKColor(red: 0.5, green: 0.7, blue: 1.0, alpha: 1.0)
-        case 3: // Disgust
-            marker.fillColor = SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.9)
-            marker.strokeColor = SKColor(red: 0.3, green: 0.9, blue: 0.3, alpha: 1.0)
-        case 4: // Love
-            marker.fillColor = SKColor(red: 1.0, green: 0.4, blue: 0.7, alpha: 0.9)
-            marker.strokeColor = SKColor(red: 1.0, green: 0.5, blue: 0.8, alpha: 1.0)
-        default: // Anger (case 1)
-            marker.fillColor = SKColor(red: 0.9, green: 0.2, blue: 0.2, alpha: 0.9)
-            marker.strokeColor = SKColor(red: 1.0, green: 0.3, blue: 0.3, alpha: 1.0)
+            // First, remove all existing children with fade out animation
+            marker.children.forEach { child in
+                let fadeOut = SKAction.sequence([
+                    SKAction.fadeOut(withDuration: 0.3),
+                    SKAction.removeFromParent()
+                ])
+                child.run(fadeOut)
+            }
+            
+            // Create new boss sprite after a short delay to ensure clean transition
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                let spriteName = switch self.enemyManager.bossNum {
+                case 2: "SadnessIcon"
+                case 3: "DisgustIcon"
+                case 4: "LoveIcon"
+                default: "AngerIcon"
+                }
+                
+                let bossSprite = SKSpriteNode(imageNamed: spriteName)
+                bossSprite.alpha = 0 // Start invisible for fade in
+                bossSprite.size = switch self.enemyManager.bossNum {
+                case 2: CGSize(width: 50, height: 30)
+                case 3: CGSize(width: 30, height: 30)
+                case 4: CGSize(width: 30, height: 30)
+                default: CGSize(width: 45, height: 30)
+                }
+                bossSprite.position = .zero
+                marker.addChild(bossSprite)
+                
+                // Fade in the new sprite
+                let fadeIn = SKAction.fadeIn(withDuration: 0.3)
+                bossSprite.run(fadeIn)
+                
+                // Add pulsing animation
+                let pulse = SKAction.sequence([
+                    SKAction.scale(to: 1.1, duration: 1.0),
+                    SKAction.scale(to: 1.0, duration: 1.0)
+                ])
+                bossSprite.run(SKAction.repeatForever(pulse))
+            }
         }
-    }
     
     func cleanup() {
         // Remove every node in the roadmap including the pointer
