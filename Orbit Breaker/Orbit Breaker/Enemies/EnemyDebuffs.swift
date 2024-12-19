@@ -27,7 +27,8 @@ class Debuffs: SKSpriteNode {
     func apply(to enemy: Enemy) {
         switch type {
         case .freeze:
-            enemy.applyFreezeDebuff(to: [enemy])
+  //          enemy.applyFreezeDebuff(to: [enemy])
+            print("NOT WORKING")
         }
     }
 }

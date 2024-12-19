@@ -590,10 +590,21 @@ class Boss: Enemy {
     }
     
     private func createMiniCloud(at playerPosition: CGPoint, in scene: SKScene) {
+        // Get appropriate top margin based on device
+        let screenHeight = Int(UIScreen.main.bounds.height)
+        let isiPhoneSE = screenHeight <= 667
+        let topMargin: CGFloat = isiPhoneSE ? 80 : 130  // Increased margin to account for health bar
+        
+        // Calculate maximum cloud height to stay below health bar
+        let maxCloudHeight = scene.size.height - topMargin
+        
+        // Calculate cloud Y position, capped at maxCloudHeight
+        let proposedY = playerPosition.y + 250
+        let cloudY = min(proposedY, maxCloudHeight)
+        
         let cloud = SKSpriteNode(imageNamed: "raincloud")
         cloud.size = CGSize(width: 100, height: 60)
-        cloud.position = CGPoint(x: playerPosition.x, y: playerPosition.y + 250)
-        
+        cloud.position = CGPoint(x: playerPosition.x, y: cloudY)
         cloud.zPosition = 2
         
         scene.addChild(cloud)
