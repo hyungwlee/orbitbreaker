@@ -33,7 +33,7 @@ struct DebugControls: View {
                                 .cornerRadius(8)
                         }
                     }
-                    .padding(.leading, 100)
+                    .padding()
                 }
             }
         }
