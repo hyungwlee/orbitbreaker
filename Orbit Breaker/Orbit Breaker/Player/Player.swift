@@ -46,12 +46,7 @@ class Player {
     }
     
     func playSoundEffect(named soundName: String) {
-        guard let scene = self.scene else {
-            print("Scene is not available to run the sound action.")
-            return
-        }
-        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: false)
-        scene.run(soundAction)
+        SoundManager.shared.playSound(soundName)
     }
     
     func update(currentTime: TimeInterval) {

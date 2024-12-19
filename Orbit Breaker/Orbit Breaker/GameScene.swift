@@ -142,20 +142,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     private func setupDebugControls() {
-#if DEBUG
-        let debugView = DebugControls(isVisible: .constant(true)) { [weak self] in
-            self?.startNextWave()
-        }
-        
-        let hostingController = UIHostingController(rootView: debugView)
-        hostingController.view.backgroundColor = .clear
-        hostingController.view.frame = CGRect(x: 10, y: 30, width: 120, height: 100)
-        
-        self.view?.addSubview(hostingController.view)
-        self.debugControls = hostingController
-#endif
-    }
-    
+          #if DEBUG
+          let debugView = DebugControls(isVisible: .constant(true)) { [weak self] in
+              self?.enemyManager.skipCurrentWave()
+          }
+          
+          let hostingController = UIHostingController(rootView: debugView)
+          hostingController.view.backgroundColor = .clear
+          hostingController.view.frame = CGRect(x: 10, y: 30, width: 120, height: 100)
+          
+          self.view?.addSubview(hostingController.view)
+          self.debugControls = hostingController
+          #endif
+      }
     deinit {
         debugControls?.view.removeFromSuperview()
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -389,11 +388,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // Disable player shooting immediately
             user.canShoot = false
             user.cleanup()
-            // Remove the isPaused toggle before visual effects
+            
+            // Show death effects first, then do cleanup
             VisualEffects.addPlayerDeathEffect(at: playerNode.position, in: self) { [weak self] in
-                // After effects are complete, cleanup and show game over
+                guard let self = self else { return }
                 
-                self?.gameOver()
+                // Do thorough cleanup after death animation
+                self.cleanupLevel()
+                
+                // Additional thorough cleanup for any remaining effects
+                self.enumerateChildNodes(withName: "//*") { node, _ in
+                    if let sprite = node as? SKSpriteNode,
+                       sprite.texture?.description.contains("raincloud") == true {
+                        sprite.removeAllActions()
+                        sprite.removeFromParent()
+                    }
+                }
+                
+                // Clean up any active boss effects
+                self.enemyManager.getAllEnemies().forEach { enemy in
+                    if let boss = enemy as? Boss {
+                        boss.cleanup()
+                    }
+                    enemy.removeFromParent()
+                }
+                
+                // Remove all enemy bullets
+                self.enumerateChildNodes(withName: "enemyBullet") { node, _ in
+                    node.removeAllActions()
+                    node.removeFromParent()
+                }
+                
+                // Finally show game over
+                self.gameOver()
             }
         }
     }
@@ -794,14 +821,14 @@ class SoundManager {
             "playerDeath.mp3",
             "ufo_descent.mp3",
             "new_enemy_shoot.mp3",
-            "bossDeath.mp3"
+            "bossDeath.mp3",
+            "asteroidHit.mp3",  // Add asteroid-related sounds
+            "asteroidWarning.mp3"
         ]
         
         for name in soundNames {
-            if let url = Bundle.main.url(forResource: name.replacingOccurrences(of: ".mp3", with: ""),
-                                       withExtension: "mp3") {
-                sounds[name] = SKAction.playSoundFileNamed(name, waitForCompletion: false)
-                print("Preloaded sound: \(name)")
+            if let sound = SKAction.playSoundFileNamed(name, waitForCompletion: false) as SKAction? {
+                sounds[name] = sound
             } else {
                 print("Warning: Could not find sound file: \(name)")
             }
@@ -822,3 +849,4 @@ class SoundManager {
         scene.run(sound)
     }
 }
+

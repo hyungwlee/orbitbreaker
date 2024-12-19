@@ -21,20 +21,20 @@ class EnemyManager {
     var bossNum: Int = 1
     
     init(scene: SKScene) {
-        self.scene = scene
-        self.waveManager = WaveManager(scene: scene)
-        self.bossAnnouncement = BossAnnouncement(scene: scene)
+            self.scene = scene
+            self.waveManager = WaveManager(scene: scene)
+            self.bossAnnouncement = BossAnnouncement(scene: scene)
 
-        // Look for existing roadmap nodes and remove them
-        scene.enumerateChildNodes(withName: "*") { node, _ in
-            if let circle = node as? SKShapeNode, circle.strokeColor == .yellow {
-                circle.removeFromParent()
+            // Look for existing roadmap nodes and remove them
+            scene.enumerateChildNodes(withName: "*") { node, _ in
+                if let circle = node as? SKShapeNode, circle.strokeColor == .yellow {
+                    circle.removeFromParent()
+                }
             }
+            
+            // Create new roadmap for fresh start
+            self.roadmap = WaveRoadmap(scene: scene, enemyManager: self)
         }
-        
-        // Create new roadmap for fresh start
-        self.roadmap = WaveRoadmap(scene: scene, enemyManager: self)
-    }
     
     
     func setupEnemies() {
@@ -74,7 +74,8 @@ class EnemyManager {
         
         // Determine number of kamikaze enemies based on wave
         let maxKamikazeCount = min(2, enemies.count - 1) // Never convert all enemies
-        let kamikazeCount = Int.random(in: 1...maxKamikazeCount)
+        
+        let kamikazeCount = enemies.count > 0 ? Int.random(in: 1...maxKamikazeCount) : 0
         
         // Select random enemies to become kamikaze
         let selectedEnemies = enemies.shuffled().prefix(kamikazeCount)
@@ -107,6 +108,15 @@ class EnemyManager {
     private func setupAsteroidField() {
         guard let scene = scene else { return }
         
+        // Clean up any existing power-ups
+        scene.enumerateChildNodes(withName: "powerUp") { node, _ in
+            if let powerUp = node as? PowerUp {
+                // Remove any ongoing animations first
+                powerUp.removeAllActions()
+                powerUp.removeFromParent()
+            }
+        }
+        
         // Show announcement first
         asteroidFieldAnnouncement = AsteroidFieldAnnouncement(scene: scene)
         asteroidChallenge = AsteroidFieldChallenge(scene: scene)
@@ -121,70 +131,57 @@ class EnemyManager {
         // Update roadmap but only increment half a position
         roadmap?.updateCurrentWave(currentWave)
     }
-    
-    func forceCleanup() {
-        // Remove all existing enemies
-        enemies.forEach {
-            if let boss = $0 as? Boss {
-                boss.cleanup()  // This will remove health bars
-            }
-            $0.removeFromParent() }
-        enemies.removeAll()
         
-        // Reset wave manager state if needed
-        waveManager.reset()
-        asteroidChallenge?.cleanup()
-    }
-    
-    private func setupRegularWave() {
-        guard let scene = scene else { return }
-        
-        let nextBossType = getBossType()
-        
-        // Choose formation based on wave number
-        let formationKeys = Array(FormationMatrix.formations.keys)
-        let formationKey = formationKeys[currentWave % formationKeys.count]
-        let formation = FormationMatrix.formations[formationKey] ?? FormationMatrix.formations["standard"]!
-        
-        // Get positions for current formation
-        let positions = FormationGenerator.generatePositions(
-            from: formation,
-            in: scene,
-            spacing: CGSize(width: 60, height: 50),
-            topMargin: 0.8
-        )
-        
-        var enemyQueue: [(Enemy, CGPoint)] = []
-        
-        // When creating enemies, set their texture based on next boss
-        for (index, position) in positions.enumerated() {
-            let enemyType: EnemyType = {
-                switch index % 3 {
-                case 0: return .a
-                case 1: return .b
-                default: return .c
-                }
-            }()
+        private func setupRegularWave() {
+            guard let scene = scene else { return }
             
-            let enemy = EnemySpawner.makeEnemy(ofType: enemyType)
-            enemy.updateTexture(forBossType: nextBossType)  // Set the appropriate texture
-            enemies.append(enemy)
-            enemyQueue.append((enemy, position))
-        }
-        
-        // Start the wave with ordered enemies
-        let orderedQueue = orderEnemiesForEntry(enemyQueue)
-        waveManager.startNextWave(enemies: orderedQueue)
-        
-        assignShooters()
-        assignPowerUpDroppers()
-        assignEnemyMovements()
-        if currentWave > 3 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-                self?.assignKamikazeEnemies()
+            // Clean up any existing asteroid field
+            asteroidChallenge?.cleanup()
+            asteroidFieldAnnouncement = nil
+            asteroidChallenge = nil
+            
+            // Rest of your regular wave setup code...
+            let nextBossType = getBossType()
+            let formationKeys = Array(FormationMatrix.formations.keys)
+            let formationKey = formationKeys[currentWave % formationKeys.count]
+            let formation = FormationMatrix.formations[formationKey] ?? FormationMatrix.formations["standard"]!
+            
+            let positions = FormationGenerator.generatePositions(
+                from: formation,
+                in: scene,
+                spacing: CGSize(width: 60, height: 50),
+                topMargin: 0.8
+            )
+            
+            var enemyQueue: [(Enemy, CGPoint)] = []
+            
+            for (index, position) in positions.enumerated() {
+                let enemyType: EnemyType = {
+                    switch index % 3 {
+                    case 0: return .a
+                    case 1: return .b
+                    default: return .c
+                    }
+                }()
+                
+                let enemy = EnemySpawner.makeEnemy(ofType: enemyType)
+                enemy.updateTexture(forBossType: nextBossType)
+                enemies.append(enemy)
+                enemyQueue.append((enemy, position))
+            }
+            
+            let orderedQueue = orderEnemiesForEntry(enemyQueue)
+            waveManager.startNextWave(enemies: orderedQueue)
+            
+            assignShooters()
+            assignPowerUpDroppers()
+            assignEnemyMovements()
+            if currentWave > 3 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                    self?.assignKamikazeEnemies()
+                }
             }
         }
-    }
     
     func assignEnemyMovements() {
             guard let scene = scene else { return }
@@ -298,20 +295,95 @@ class EnemyManager {
         ]))
     }
     
+        func skipCurrentWave() {
+            // Clean up current wave first
+            forceCleanup()
+            
+            // Increment wave count
+            currentWave += 1
+            
+            // Determine if the next wave should be an asteroid field
+            // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> boss -> repeat
+            let nextWaveType = currentWave % 6
+            
+            if nextWaveType == 3 {
+                // This should be an asteroid wave
+                roadmap?.updateCurrentWave(currentWave)
+                setupAsteroidField()
+            } else if nextWaveType == 0 {
+                // This should be a boss wave
+                roadmap?.showRoadmap()
+                setupBossWave()
+            } else {
+                // Regular enemy wave
+                roadmap?.showRoadmap()
+                roadmap?.updateCurrentWave(currentWave)
+                setupRegularWave()
+            }
+        }
+
+        func forceCleanup() {
+            // Clean up all enemies
+            enemies.forEach {
+                if let boss = $0 as? Boss {
+                    boss.cleanup()
+                }
+                $0.removeFromParent()
+            }
+            enemies.removeAll()
+            
+            // Reset wave manager state
+            waveManager.reset()
+            
+            // Clean up asteroid challenge
+            if let challenge = asteroidChallenge {
+                challenge.cleanup()
+            }
+            asteroidChallenge = nil
+            
+            // Clean up asteroid announcement
+            asteroidFieldAnnouncement = nil
+            
+            // Remove any remaining asteroid nodes
+            scene?.enumerateChildNodes(withName: "asteroid") { node, _ in
+                node.removeFromParent()
+            }
+            
+            // Remove any remaining enemy bullets
+            scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
+                node.removeFromParent()
+            }
+            
+            // Remove any power-ups
+            scene?.enumerateChildNodes(withName: "powerUp") { node, _ in
+                node.removeFromParent()
+            }
+        }
+    
     func cleanupAllEnemies() {
-        // Remove all enemies
-        enemies.forEach { $0.removeFromParent() }
-        enemies.removeAll()
-        
-        // Reset wave count
-        currentWave = 0
-        
-        // Reset wave manager
-        waveManager.reset()
-        roadmap?.showRoadmap()
-        roadmap?.updateCurrentWave(1)
-        asteroidChallenge?.cleanup()
-    }
+            // Remove all enemies
+            enemies.forEach { $0.removeFromParent() }
+            enemies.removeAll()
+            
+            // Reset wave count
+            currentWave = 0
+            
+            // Reset wave manager
+            waveManager.reset()
+            
+            // Clean up asteroid-related content
+            asteroidChallenge?.cleanup()
+            asteroidFieldAnnouncement = nil
+            asteroidChallenge = nil
+            
+            // Remove any remaining asteroid nodes
+            scene?.enumerateChildNodes(withName: "asteroid") { node, _ in
+                node.removeFromParent()
+            }
+            
+            roadmap?.showRoadmap()
+            roadmap?.updateCurrentWave(1)
+        }
     
     private func setupBossWave() {
         guard let scene = scene else { return }

@@ -10,7 +10,7 @@ import SwiftUI
 struct DebugControls: View {
     @Binding var isVisible: Bool
     var nextWave: () -> Void
-    @State var currentWave = 1
+    @State private var currentWave = 1
     
     var body: some View {
         HStack {
@@ -23,10 +23,12 @@ struct DebugControls: View {
                             .padding(.bottom, 4)
                         
                         Button(action: {
-                            currentWave += 1
-                            nextWave()
+                            withAnimation {
+                                currentWave += 1
+                                nextWave()
+                            }
                         }) {
-                            Text("Next Wave")
+                            Text("Skip Wave")
                                 .padding()
                                 .background(Color.blue)
                                 .foregroundColor(.white)
@@ -34,6 +36,8 @@ struct DebugControls: View {
                         }
                     }
                     .padding()
+                    .background(Color.black.opacity(0.5))
+                    .cornerRadius(10)
                 }
             }
         }

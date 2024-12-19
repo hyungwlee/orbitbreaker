@@ -521,36 +521,74 @@ class Boss: Enemy {
     }
     
     func cleanup() {
-        // Add this at the start of the existing cleanup function
+        // Clean up health bar elements
         healthBarContainer?.removeFromParent()
         healthBarContainer = nil
         
-        // Rest of your existing cleanup code...
+        // Clean up heart shields
         for shield in heartShields {
             shield.removeFromParent()
-
         }
         heartShields.removeAll()
         shieldHealth.removeAll()
         
+        // Clean up slime trail
         for slime in slimeTrail {
             slime.removeFromParent()
         }
         slimeTrail.removeAll()
         
+        // Clean up rain clouds and their actions
         for cloud in miniClouds {
+            cloud.removeAllActions() // Stop any ongoing actions first
             cloud.removeFromParent()
         }
         miniClouds.removeAll()
         
+        // Clean up raindrops
+        for raindrop in raindrops {
+            raindrop.removeAllActions()
+            raindrop.removeFromParent()
+        }
+        raindrops.removeAll()
+        
+        // Clean up health bar elements
         healthBar?.removeFromParent()
         healthBarFill?.removeFromParent()
+        
+        // Clean up any remaining nodes with specific names
         scene?.enumerateChildNodes(withName: "bossTitle") { node, _ in
+            node.removeAllActions()
             node.removeFromParent()
         }
+        
         scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
+            node.removeAllActions()
             node.removeFromParent()
         }
+        
+        // Specific cleanup for raincloud objects that might have been missed
+        scene?.enumerateChildNodes(withName: "//*") { node, _ in
+            if let sprite = node as? SKSpriteNode,
+               sprite.texture?.description.contains("raincloud") == true {
+                sprite.removeAllActions()
+                sprite.removeFromParent()
+            }
+        }
+        
+        // Reset all timers
+        lastShootTime = 0
+        lastSwoopTime = 0
+        lastRainCloudTime = 0
+        lastSlimeTime = 0
+        lastHeartBurstTime = 0
+        lastPoisonBurstTime = 0
+        lastCorruptionZoneTime = 0
+        
+        // Reset all state variables
+        hasEnteredScene = false
+        isSwooping = false
+        shieldsHaveBeenCreated = false
     }
     
     

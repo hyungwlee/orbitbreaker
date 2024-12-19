@@ -321,47 +321,39 @@ class WaveRoadmap {
     }
 
     private func updateBossStageColor(_ marker: SKShapeNode) {
-            // First, remove all existing children with fade out animation
-            marker.children.forEach { child in
-                let fadeOut = SKAction.sequence([
-                    SKAction.fadeOut(withDuration: 0.3),
-                    SKAction.removeFromParent()
-                ])
-                child.run(fadeOut)
-            }
-            
-            // Create new boss sprite after a short delay to ensure clean transition
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                let spriteName = switch self.enemyManager.bossNum {
-                case 2: "SadnessIcon"
-                case 3: "DisgustIcon"
-                case 4: "LoveIcon"
-                default: "AngerIcon"
-                }
-                
-                let bossSprite = SKSpriteNode(imageNamed: spriteName)
-                bossSprite.alpha = 0 // Start invisible for fade in
-                bossSprite.size = switch self.enemyManager.bossNum {
-                case 2: CGSize(width: 50, height: 30)
-                case 3: CGSize(width: 30, height: 30)
-                case 4: CGSize(width: 30, height: 30)
-                default: CGSize(width: 45, height: 30)
-                }
-                bossSprite.position = .zero
-                marker.addChild(bossSprite)
-                
-                // Fade in the new sprite
-                let fadeIn = SKAction.fadeIn(withDuration: 0.3)
-                bossSprite.run(fadeIn)
-                
-                // Add pulsing animation
-                let pulse = SKAction.sequence([
-                    SKAction.scale(to: 1.1, duration: 1.0),
-                    SKAction.scale(to: 1.0, duration: 1.0)
-                ])
-                bossSprite.run(SKAction.repeatForever(pulse))
-            }
+        // Remove any existing boss sprite immediately
+        marker.children.forEach { $0.removeFromParent() }
+        
+        // Create new boss sprite
+        let spriteName = switch enemyManager.bossNum {
+        case 2: "SadnessIcon"
+        case 3: "DisgustIcon"
+        case 4: "LoveIcon"
+        default: "AngerIcon"
         }
+        
+        let bossSprite = SKSpriteNode(imageNamed: spriteName)
+        bossSprite.alpha = 0 // Start invisible for fade in
+        bossSprite.size = switch enemyManager.bossNum {
+        case 2: CGSize(width: 50, height: 30)
+        case 3: CGSize(width: 30, height: 30)
+        case 4: CGSize(width: 30, height: 30)
+        default: CGSize(width: 45, height: 30)
+        }
+        bossSprite.position = .zero
+        marker.addChild(bossSprite)
+        
+        // Fade in the new sprite
+        let fadeIn = SKAction.fadeIn(withDuration: 0.3)
+        bossSprite.run(fadeIn)
+        
+        // Add pulsing animation
+        let pulse = SKAction.sequence([
+            SKAction.scale(to: 1.1, duration: 1.0),
+            SKAction.scale(to: 1.0, duration: 1.0)
+        ])
+        bossSprite.run(SKAction.repeatForever(pulse))
+    }
     
     func cleanup() {
         // Remove every node in the roadmap including the pointer
