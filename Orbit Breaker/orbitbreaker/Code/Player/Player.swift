@@ -22,7 +22,7 @@ class Player {
     private var damageTimer: Timer?
     var canShoot: Bool = true
     
-    init(scene: SKScene, layoutInfo: LayoutInfo) {
+    init(scene: SKScene, layoutInfo: OBLayoutInfo) {
         self.scene = scene
         
         // Initialize ship

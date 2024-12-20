@@ -107,10 +107,10 @@ class Boss: Enemy {
     
     
     // In Boss.swift
-    init(type: BossType) {
+    init(type: BossType, layoutInfo: OBLayoutInfo) {
         
         self.bossType = type
-        super.init(type: .a)
+        super.init(type: .a, layoutInfo: layoutInfo)
         
         self.removeAllChildren()
         self.zPosition = 2
@@ -119,8 +119,8 @@ class Boss: Enemy {
         alpha = 0
         
         let spriteSize = CGSize(
-            width: type.size.width * 2,
-            height: type.size.height * 1.7
+            width: type.size.width * 2 * layoutInfo.screenScaleFactor,
+            height: type.size.height * 1.7 * layoutInfo.screenScaleFactor
         )
         
         let sprite = SKSpriteNode(imageNamed: type == .sadness ? "sadness" :
@@ -282,7 +282,7 @@ class Boss: Enemy {
         position = CGPoint(x: scene.size.width/2, y: scene.size.height + 100)
         
         // Create intense haptic pattern for boss entry
-        if let engine = (scene as? GameScene)?.hapticsEngine {
+        if let engine = (scene as? OBGameScene)?.hapticsEngine {
             do {
                 // Create a continuous haptic pattern that intensifies
                 var events = [CHHapticEvent]()

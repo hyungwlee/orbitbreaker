@@ -15,13 +15,16 @@ class Enemy: SKSpriteNode {
     var canShoot: Bool
     var holdsPowerUp: Bool
     var holdsDebuff: Bool
+    
+    var layoutInfo: OBLayoutInfo!
 
-    init(type: EnemyType) {
+    init(type: EnemyType, layoutInfo: OBLayoutInfo) {
         self.initialHealth = type.initialHealth
         self.health = type.initialHealth
         self.canShoot = false
         self.holdsPowerUp = false
         self.holdsDebuff = false
+        self.layoutInfo = layoutInfo
 
         super.init(texture: SKTexture(imageNamed: "enemy"), color: .white,
                    size: CGSize(width: EnemyType.size.width * 2, height: EnemyType.size.height * 2.3))
@@ -81,7 +84,7 @@ class Enemy: SKSpriteNode {
         
         // Get the boss-themed color with increased saturation
         let glowColor: SKColor = {
-            if let gameScene = scene as? GameScene,
+            if let gameScene = scene as? OBGameScene,
                let enemyManager = gameScene.enemyManager {
                 switch enemyManager.getBossType() {
                 case .anger: return .red
@@ -398,7 +401,7 @@ class Enemy: SKSpriteNode {
             
             createDamageEffect()
             
-            if let gameScene = scene as? GameScene,
+            if let gameScene = scene as? OBGameScene,
                let enemyManager = gameScene.enemyManager {
                 updateSprite(forHealth: health, bossType: enemyManager.getBossType())
                 

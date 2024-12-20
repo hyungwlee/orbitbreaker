@@ -92,12 +92,12 @@ class PowerUp: SKSpriteNode {
         switch type {
         case .shield:
             player.addShield()
-            if let scene = scene as? GameScene {
+            if let scene = scene as? OBGameScene {
                 scene.powerUpManager.showPowerUp(.shield)
             }
         case .doubleDamage:
             player.setDoubleDamage()
-            if let scene = scene as? GameScene {
+            if let scene = scene as? OBGameScene {
                 scene.powerUpManager.showPowerUp(.doubleDamage)
             }
         }

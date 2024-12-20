@@ -389,7 +389,7 @@ class AsteroidFieldChallenge {
         isActive = true
         cleanup()
         
-        if let gameScene = scene as? GameScene {
+        if let gameScene = scene as? OBGameScene {
             if gameScene.user.hasShield {
                 gameScene.user?.removeShield()
                 gameScene.powerUpManager?.hideShieldIndicator()

@@ -8,7 +8,7 @@
 import SpriteKit
 
 class EnemySpawner {
-    static func makeEnemy(ofType enemyType: EnemyType) -> Enemy {
-        return Enemy(type: enemyType)
+    static func makeEnemy(ofType enemyType: EnemyType, layoutInfo: OBLayoutInfo) -> Enemy {
+        return Enemy(type: enemyType, layoutInfo: layoutInfo)
     }
 }

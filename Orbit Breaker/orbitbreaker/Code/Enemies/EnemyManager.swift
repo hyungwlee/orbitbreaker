@@ -9,7 +9,7 @@ import SpriteKit
 
 
 class EnemyManager {
-    private weak var scene: SKScene?
+    private weak var scene: OBGameScene?
     private var enemies: [Enemy] = []
     private var waveManager: WaveManager
     private var bossAnnouncement: BossAnnouncement?
@@ -20,7 +20,7 @@ class EnemyManager {
     var currentWave = 0
     var bossNum: Int = 1
     
-    init(scene: SKScene, layoutInfo: LayoutInfo) {
+    init(scene: OBGameScene, layoutInfo: OBLayoutInfo) {
             self.scene = scene
             self.waveManager = WaveManager(scene: scene)
             self.bossAnnouncement = BossAnnouncement(scene: scene)
@@ -164,7 +164,7 @@ class EnemyManager {
                     }
                 }()
                 
-                let enemy = EnemySpawner.makeEnemy(ofType: enemyType)
+                let enemy = EnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
                 enemy.updateTexture(forBossType: nextBossType)
                 enemies.append(enemy)
                 enemyQueue.append((enemy, position))
@@ -404,19 +404,19 @@ class EnemyManager {
         
         switch bossNum {
         case 1:
-            boss = Boss(type: .anger)
+            boss = Boss(type: .anger, layoutInfo: scene.layoutInfo)
             bossNum = 2
         case 2:
-            boss = Boss(type: .sadness)
+            boss = Boss(type: .sadness, layoutInfo: scene.layoutInfo)
             bossNum = 3
         case 3:
-            boss = Boss(type: .disgust)
+            boss = Boss(type: .disgust, layoutInfo: scene.layoutInfo)
             bossNum = 4
         case 4:
-            boss = Boss(type: .love)
+            boss = Boss(type: .love, layoutInfo: scene.layoutInfo)
             bossNum = 1
         default:
-            boss = Boss(type: .anger)
+            boss = Boss(type: .anger, layoutInfo: scene.layoutInfo)
             bossNum = 2
         }
         
@@ -492,7 +492,7 @@ class EnemyManager {
                     }
                 }()
                 
-                let enemy = EnemySpawner.makeEnemy(ofType: enemyType)
+                let enemy = EnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
                 enemy.updateTexture(forBossType: nextBossType)
                 preparedEnemies.append((enemy, position))
             }

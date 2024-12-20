@@ -34,16 +34,9 @@ class GameContext: ObservableObject {
 
     weak var delegate: GameContextDelegate?
 
-    // Add layoutInfo property
-    var layoutInfo: LayoutInfo = .init(screenSize: .zero)
 
     init(dependencies deps: Dependencies) {
         dependencies = deps
-    }
-
-    // Method to update layout information
-    func updateLayoutInfo(withScreenSize size: CGSize) {
-        layoutInfo = LayoutInfo(screenSize: size)
     }
     
     func exit() {

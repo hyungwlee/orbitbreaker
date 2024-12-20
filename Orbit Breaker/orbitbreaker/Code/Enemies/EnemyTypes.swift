@@ -16,7 +16,7 @@ enum EnemyType {
     static var size: CGSize {
         return CGSize(width: 24, height: 16)
     }
-    
+
     static var name: String {
         return "enemy"
     }

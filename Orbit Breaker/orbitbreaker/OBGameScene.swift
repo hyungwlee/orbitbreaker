@@ -11,7 +11,10 @@ import SwiftUI
 import CoreHaptics
 import AVFoundation
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class OBGameScene: SKScene, SKPhysicsContactDelegate {
+    unowned let context: OBGameContext
+    var layoutInfo: OBLayoutInfo { return context.layoutInfo }
+
     @State private var hasShield = false
     private var contentCreated = false
     var enemyManager: EnemyManager!
@@ -34,7 +37,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var backgroundMusicPlayer: AVAudioPlayer?
     var audioPlayers: [String: AVAudioPlayer] = [:]
     
-    var context: GameContext?
+    init(context: OBGameContext, size: CGSize) {
+        self.context = context
+        super.init(size: size)
+        self.scaleMode = .resizeFill
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -48,8 +59,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             contentCreated = true
         }
         
-        guard let layoutInfo = context?.layoutInfo else { return }
-
         
         // Initialize background
         setupBackgroundScrolling()
@@ -212,7 +221,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func createContent() {
-           guard let layoutInfo = self.context?.layoutInfo else { return }
 
            setupBackgroundScrolling()
            
@@ -530,20 +538,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func restartGame() {
-        if context == nil {
-            print("Context is nil, reinitializing...")
-            
-            // Create Dependencies object
-            let dependencies = Dependencies() // Provide the required properties here
-            context = GameContext(dependencies: dependencies)
-            
-            // Update layoutInfo based on current screen size
-            context?.updateLayoutInfo(withScreenSize: size)
-        }
-        
-        guard let layoutInfo = context?.layoutInfo else {
-            fatalError("LayoutInfo is nil. Ensure context is properly set in GameContext.")
-        }
 
         // Reset score
         score = 0

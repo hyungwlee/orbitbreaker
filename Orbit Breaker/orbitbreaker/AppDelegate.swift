@@ -6,22 +6,24 @@
 //
 
 import UIKit
+import SwiftUI
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+        // Create the SwiftUI view that provides the app's main interface
+        let contentView = ContentView()
 
+        // Use a UIHostingController as the window's root view controller
+        let hostingController = UIHostingController(rootView: contentView)
+
+        // Set up the window
         window = UIWindow(frame: UIScreen.main.bounds)
-
-        let gameViewController = GameViewController()
-        window?.rootViewController = gameViewController
-        
-
+        window?.rootViewController = hostingController
         window?.makeKeyAndVisible()
-        
+
         return true
     }
 }
