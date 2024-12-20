@@ -30,9 +30,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		F3EE74232CCC3C3A00B6FE5E /* Orbit Breaker */ = {
+		68F7E9BA2D1525170074A4E2 /* orbitbreaker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Orbit Breaker";
+			path = orbitbreaker;
 			sourceTree = "<group>";
 		};
 		F3EE743D2CCC3C3C00B6FE5E /* Orbit BreakerTests */ = {
@@ -75,7 +75,7 @@
 		F3EE74182CCC3C3A00B6FE5E = {
 			isa = PBXGroup;
 			children = (
-				F3EE74232CCC3C3A00B6FE5E /* Orbit Breaker */,
+				68F7E9BA2D1525170074A4E2 /* orbitbreaker */,
 				F3EE743D2CCC3C3C00B6FE5E /* Orbit BreakerTests */,
 				F3EE74472CCC3C3C00B6FE5E /* Orbit BreakerUITests */,
 				F3EE74222CCC3C3A00B6FE5E /* Products */,
@@ -108,7 +108,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				F3EE74232CCC3C3A00B6FE5E /* Orbit Breaker */,
+				68F7E9BA2D1525170074A4E2 /* orbitbreaker */,
 			);
 			name = "Orbit Breaker";
 			packageProductDependencies = (
