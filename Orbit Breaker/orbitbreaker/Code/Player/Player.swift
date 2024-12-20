@@ -27,6 +27,16 @@ class Player {
         
         // Initialize ship
         //ship = SKSpriteNode(color: .white, size: CGSize(width: 30, height: 30))
+        
+//        init(scene: SKScene, layoutInfo: LayoutInfo) {
+//            self.scene = scene
+//
+//            // Use size and position from LayoutInfo
+//            ship = SKSpriteNode(imageNamed: "Player")
+//            ship.size = layoutInfo.nodeSize
+//            ship.position = layoutInfo.nodePosition
+//            ship.name = "testPlayer"
+            
         ship = SKSpriteNode(imageNamed: "Player")
         ship.size = CGSize(width: 80, height: 80)
         ship.position = CGPoint(x: scene.size.width/2, y: 60)
