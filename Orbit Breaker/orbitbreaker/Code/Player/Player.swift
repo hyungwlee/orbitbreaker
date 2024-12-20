@@ -22,7 +22,7 @@ class Player {
     private var damageTimer: Timer?
     var canShoot: Bool = true
     
-    init(scene: SKScene) {
+    init(scene: SKScene, layoutInfo: LayoutInfo) {
         self.scene = scene
         
         // Initialize ship
@@ -31,15 +31,15 @@ class Player {
 //        init(scene: SKScene, layoutInfo: LayoutInfo) {
 //            self.scene = scene
 //
-//            // Use size and position from LayoutInfo
-//            ship = SKSpriteNode(imageNamed: "Player")
-//            ship.size = layoutInfo.nodeSize
-//            ship.position = layoutInfo.nodePosition
-//            ship.name = "testPlayer"
-            
+        // Use size and position from LayoutInfo
         ship = SKSpriteNode(imageNamed: "Player")
-        ship.size = CGSize(width: 80, height: 80)
-        ship.position = CGPoint(x: scene.size.width/2, y: 60)
+        let scaleFactor: CGFloat = 1.5 // Adjust this to fine-tune the size
+        ship.size = CGSize(width: layoutInfo.nodeSize.width * scaleFactor,
+                           height: layoutInfo.nodeSize.height * scaleFactor)
+        
+        let scalePosition: CGFloat = 0.3
+        ship.position = CGPoint(x: layoutInfo.nodePosition.x, y: layoutInfo.nodePosition.y * scalePosition)
+        
         ship.name = "testPlayer"
         
         

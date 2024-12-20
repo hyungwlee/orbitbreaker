@@ -20,7 +20,7 @@ class EnemyManager {
     var currentWave = 0
     var bossNum: Int = 1
     
-    init(scene: SKScene) {
+    init(scene: SKScene, layoutInfo: LayoutInfo) {
             self.scene = scene
             self.waveManager = WaveManager(scene: scene)
             self.bossAnnouncement = BossAnnouncement(scene: scene)
@@ -595,5 +595,9 @@ class EnemyManager {
         
         
     }
+    deinit {
+        print("EnemyManager is being deallocated")
+    }
+
 }
 

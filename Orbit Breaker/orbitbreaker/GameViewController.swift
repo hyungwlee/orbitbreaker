@@ -21,8 +21,13 @@ class GameViewController: UIViewController {
         let skView = SKView(frame: self.view.frame)
         self.view = skView
         
+        let dependencies = Dependencies() // Replace with actual dependencies
+        let gameContext = GameContext(dependencies: dependencies)
+        let screenSize = UIScreen.main.bounds.size
+        gameContext.updateLayoutInfo(withScreenSize: screenSize)
         
         let scene = GameScene(size: skView.frame.size)
+        scene.context = gameContext
         scene.scaleMode = .aspectFill
         
         

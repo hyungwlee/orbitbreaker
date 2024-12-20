@@ -211,26 +211,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
     }
     
-    
     private func createContent() {
-        
-        setupBackgroundScrolling()
-        
-        // Set up physics world
-        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
-        physicsWorld.contactDelegate = self
-        
-        // Initialize managers/systems
-        enemyManager = EnemyManager(scene: self)
-        user = Orbit_Breaker.Player(scene: self)
-        
-        // Setup score label
-        setupScoreLabel()
-        
-        // Setup game elements
-        setupGame()
-        
-    }
+           guard let layoutInfo = self.context?.layoutInfo else { return }
+
+           setupBackgroundScrolling()
+           
+           // Set up physics world
+           physicsWorld.gravity = CGVector(dx: 0, dy: 0)
+           physicsWorld.contactDelegate = self
+           
+           // Initialize managers/systems
+           enemyManager = EnemyManager(scene: self, layoutInfo: layoutInfo)
+           user = Orbit_Breaker.Player(scene: self, layoutInfo: layoutInfo)
+           
+           // Setup score label
+           setupScoreLabel()
+           
+           // Setup game elements
+           setupGame()
+           
+       }
     
     // Call this function when the boss is defeated
     func onBossDefeated(_ boss: Boss) {
@@ -534,6 +534,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         scoreLabel.text = "Score: 0"
         
+        guard let layoutInfo = self.context?.layoutInfo else {
+            fatalError("LayoutInfo is nil. Ensure context is properly set in GameContext.")
+        }
+
         // Cleanup the roadmap before removing all children
         waveRoadmap?.cleanup()
         waveRoadmap = nil
@@ -545,7 +549,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         isPaused = false
         
         // Reset enemy manager and wave count
-        enemyManager = EnemyManager(scene: self)
+        enemyManager = EnemyManager(scene: self, layoutInfo: layoutInfo)
         
         // Reset power up manager
         powerUpManager = PowerUpManager(scene: self)
