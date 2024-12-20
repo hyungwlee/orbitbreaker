@@ -34,6 +34,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var backgroundMusicPlayer: AVAudioPlayer?
     var audioPlayers: [String: AVAudioPlayer] = [:]
     
+    weak var context: GameContext?
+    
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
@@ -45,6 +47,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             createContent()
             contentCreated = true
         }
+        
+        guard let layoutInfo = context?.layoutInfo else { return }
+
         
         // Initialize background
         setupBackgroundScrolling()
@@ -61,6 +66,51 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
 
     }
+    
+//    override func didMove(to view: SKView) {
+//        super.didMove(to: view)
+//
+//        initializeHaptics()
+//        powerUpManager = PowerUpManager(scene: self)
+//
+//        // Ensure layoutInfo is available
+//        guard let layoutInfo = context?.layoutInfo else { return }
+//
+//        // Example: Set up the background using layoutInfo
+//        setupBackgroundScrolling()
+//
+//        // Scale and position other assets dynamically
+//        setupGameNodes(using: layoutInfo)
+//
+//        // Set the scene and preload sounds
+//        SoundManager.shared.setScene(self)
+//        SoundManager.shared.preloadSounds()
+//
+//        // Start background music playback
+//        playBackgroundMusic()
+//        preloadSounds()
+//
+//        // Notifications for app lifecycle events
+//        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillResignActive), name: UIApplication.willResignActiveNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+//
+//        didSceneLoad = true
+//        if !contentCreated {
+//            createContent()
+//            contentCreated = true
+//        }
+//    }
+
+//    func setupGameNodes(using layoutInfo: LayoutInfo) {
+//        // Example: Create a node and scale it dynamically
+//        let sprite = SKSpriteNode(imageNamed: "exampleNode")
+//        sprite.size = layoutInfo.nodeSize   // Use calculated size
+//        sprite.position = layoutInfo.nodePosition // Use calculated position
+//        addChild(sprite)
+//        
+//        // Repeat for other nodes if needed
+//    }
+
     
     func playBackgroundMusic() {
         guard let musicURL = Bundle.main.url(forResource: "backgroundMusic", withExtension: "mp3") else {
