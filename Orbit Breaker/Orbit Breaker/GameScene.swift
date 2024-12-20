@@ -37,7 +37,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
-        setupDebugControls()
+        // setupDebugControls()
         powerUpManager = PowerUpManager(scene: self)
         super.didMove(to: view)
         didSceneLoad = true
@@ -788,10 +788,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             VisualEffects.addScreenShake(to: self, intensity: 30)
             
             // Add victory text
-            let victoryLabel = SKLabelNode(fontNamed: "Arial-Bold")
+            let victoryLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
             victoryLabel.text = "\(String(describing: boss.bossType).capitalized) Defeated!"
             victoryLabel.fontSize = 40
             victoryLabel.fontColor = boss.bossType.color
+       
+        // Resize font based on screen size
+        let maxWidth = self.size.width * 0.95 // Allow some padding
+               while victoryLabel.frame.width > maxWidth {
+                   victoryLabel.fontSize -= 1 // Reduce font size until it fits
+               }
+        
+        
             victoryLabel.position = CGPoint(x: size.width/2, y: size.height/2)
             victoryLabel.setScale(0)
             victoryLabel.zPosition = 101
