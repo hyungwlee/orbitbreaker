@@ -34,7 +34,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var backgroundMusicPlayer: AVAudioPlayer?
     var audioPlayers: [String: AVAudioPlayer] = [:]
     
-    weak var context: GameContext?
+    var context: GameContext?
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -530,41 +530,54 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func restartGame() {
+        if context == nil {
+            print("Context is nil, reinitializing...")
+            
+            // Create Dependencies object
+            let dependencies = Dependencies() // Provide the required properties here
+            context = GameContext(dependencies: dependencies)
+            
+            // Update layoutInfo based on current screen size
+            context?.updateLayoutInfo(withScreenSize: size)
+        }
+        
+        guard let layoutInfo = context?.layoutInfo else {
+            fatalError("LayoutInfo is nil. Ensure context is properly set in GameContext.")
+        }
+
         // Reset score
         score = 0
         scoreLabel.text = "Score: 0"
-        
-        guard let layoutInfo = self.context?.layoutInfo else {
-            fatalError("LayoutInfo is nil. Ensure context is properly set in GameContext.")
-        }
 
         // Cleanup the roadmap before removing all children
         waveRoadmap?.cleanup()
         waveRoadmap = nil
-        
+
         // Remove all nodes
         removeAllChildren()
-        
+
         // Reset game state
         isPaused = false
-        
+
         // Reset enemy manager and wave count
         enemyManager = EnemyManager(scene: self, layoutInfo: layoutInfo)
-        
+
         // Reset power up manager
         powerUpManager = PowerUpManager(scene: self)
-        
+
         // Create new content
         createContent()
-        
+
         // Reset user shooting ability
-        user.canShoot = true  // Add this line
-        
+        user.canShoot = true
+
         // Restart background music
-        backgroundMusicPlayer?.stop()           // Stop playback if it's still playing
-        backgroundMusicPlayer?.currentTime = 0  // Reset playback position to the beginning
-        backgroundMusicPlayer?.play()           // Start playback from the beginning
+        backgroundMusicPlayer?.stop()
+        backgroundMusicPlayer?.currentTime = 0
+        backgroundMusicPlayer?.play()
     }
+
+
     
     private func gameOver() {
         // Ensure we're on the main thread
