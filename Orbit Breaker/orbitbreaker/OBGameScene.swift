@@ -577,7 +577,6 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         // Ensure we're on the main thread
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            
             // Clean up all game objects
             self.cleanupLevel()
             
@@ -884,7 +883,6 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     
 }
 
-
 extension CGPoint {
     static func +(lhs: CGPoint, rhs: CGPoint) -> CGPoint {
         return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
@@ -921,7 +919,8 @@ class SoundManager {
             "new_enemy_shoot.mp3",
             "bossDeath.mp3",
             "asteroidHit.mp3",  // Add asteroid-related sounds
-            "asteroidWarning.mp3"
+            "asteroidWarning.mp3",
+            "gameOver.mp3"
         ]
         
         for name in soundNames {

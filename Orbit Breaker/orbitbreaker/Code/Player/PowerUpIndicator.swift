@@ -163,10 +163,10 @@ class PowerUpManager {
     private func setupIndicators() {
         guard let scene = scene else { return }
         
-        let size: CGFloat = 50  // Back to original size
-        let spacing: CGFloat = 10
-        let leftMargin: CGFloat = 15
-        let bottomMargin: CGFloat = 20
+        let size: CGFloat = 80 * layoutInfo.screenScaleFactor  // Back to original size
+        let spacing: CGFloat = 10 * layoutInfo.screenScaleFactor
+        let leftMargin: CGFloat = 15 * layoutInfo.screenScaleFactor
+        let bottomMargin: CGFloat = 20 * layoutInfo.screenScaleFactor
         
         let orderedPowerUps = [PowerUps.shield, PowerUps.doubleDamage]
         
