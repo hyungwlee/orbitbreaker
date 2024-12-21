@@ -12,17 +12,17 @@ struct OBLayoutInfo {
     let nodeSize: CGSize
     let nodePosition: CGPoint
     let screenScaleFactor: CGFloat
-
+    
     init(screenSize: CGSize) {
         self.screenSize = screenSize
-
+        
         // Example logic for calculating size and position
         self.nodeSize = CGSize(width: screenSize.width * 0.1, height: screenSize.width * 0.1)
         self.nodePosition = CGPoint(x: screenSize.width * 0.5, y: screenSize.height * 0.5)
         // 44 is the size you want
         // 440 * 0.1 = 44 (Pro Max)
         // ~300 * = 30 (SE)
-    
+        
         self.screenScaleFactor = screenSize.height / 956.0 //height of Pro Max
         // 956 / 956 = 1.0 (Pro Max)
         // 667 / 956 -> 0.7 (SE)

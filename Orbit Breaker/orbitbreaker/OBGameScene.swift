@@ -64,8 +64,8 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         setupBackgroundScrolling()
         
         // Set the scene and preload sounds
-        SoundManager.shared.setScene(self)
-        SoundManager.shared.preloadSounds()
+        OBSoundManager.shared.setScene(self)
+        OBSoundManager.shared.preloadSounds()
         
         // Start music playback
         playBackgroundMusic()
@@ -321,7 +321,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     
     private func startNextWave() {
         // Ensure power-ups and timers are removed before starting next wave
-        user.removeShield()
+        user.removeShield(playSound: false)
         user.removeDamageBoost()
         
         // Force cleanup of any existing enemies
@@ -427,7 +427,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handlePlayerBulletCollision(_ bullet: SKNode) {
         if user.hasShield {
-            SoundManager.shared.playSound("OBshieldDamaged.mp3")
+            OBSoundManager.shared.playSound("OBshieldDamaged.mp3")
             user.removeShield()  // This will set hasShield to false and remove the shield node
             powerUpManager.hideShieldIndicator()  // Add this line to hide the shield indicator
             bullet.removeFromParent()
@@ -577,7 +577,8 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         // Ensure we're on the main thread
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            // Clean up all game objects
+            
+            // Clean up all game objects including power-ups
             self.cleanupLevel()
             
             // Create game over label
@@ -603,48 +604,54 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
             self.isPaused = true
             
             backgroundMusicPlayer?.stop()
-
         }
     }
     
     private func cleanupLevel() {
-            // Remove all bullets
-            enumerateChildNodes(withName: "OBtestBullet") { node, _ in
-                node.removeFromParent()
-            }
-            enumerateChildNodes(withName: "OBenemyBullet") { node, _ in
-                node.removeFromParent()
-            }
-            enumerateChildNodes(withName: "OBpowerUp") { node, _ in
-                node.removeFromParent()
-            }
-            
-            // Remove all heart shields
-            enumerateChildNodes(withName: "OBheartShield") { node, _ in
-                node.physicsBody = nil
-                node.removeFromParent()
-            }
-            
-            // Remove all toxic trails (slime nodes)
-            enumerateChildNodes(withName: "//*") { node, _ in
-                if let cloud = node as? SKShapeNode,
-                   cloud.physicsBody?.categoryBitMask == 0x1 << 3,  // Check for enemy bullet category
-                   cloud.fillColor == .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5),
-                   cloud.strokeColor == .green {
-                    // First remove any glow effects
-                    cloud.removeAllChildren()
-                    // Remove physics body
-                    cloud.physicsBody = nil
-                    // Remove any remaining actions
-                    cloud.removeAllActions()
-                    // Finally remove the node
-                    cloud.removeFromParent()
-                }
-            }
-            
-            // Remove all enemies through enemy manager
-            enemyManager.cleanupAllEnemies()
+        // Remove all bullets
+        enumerateChildNodes(withName: "OBtestBullet") { node, _ in
+            node.removeFromParent()
         }
+        enumerateChildNodes(withName: "OBenemyBullet") { node, _ in
+            node.removeFromParent()
+        }
+        enumerateChildNodes(withName: "OBpowerUp") { node, _ in
+            node.removeFromParent()
+        }
+        
+        // Remove all heart shields
+        enumerateChildNodes(withName: "OBheartShield") { node, _ in
+            node.physicsBody = nil
+            node.removeFromParent()
+        }
+        
+        // Remove all toxic trails (slime nodes)
+        enumerateChildNodes(withName: "//*") { node, _ in
+            if let cloud = node as? SKShapeNode,
+               cloud.physicsBody?.categoryBitMask == 0x1 << 3,  // Check for enemy bullet category
+               cloud.fillColor == .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5),
+               cloud.strokeColor == .green {
+                // First remove any glow effects
+                cloud.removeAllChildren()
+                // Remove physics body
+                cloud.physicsBody = nil
+                // Remove any remaining actions
+                cloud.removeAllActions()
+                // Finally remove the node
+                cloud.removeFromParent()
+            }
+        }
+        
+        // Clean up all enemies through enemy manager
+        enemyManager.cleanupAllEnemies()
+        
+        // Clean up power-up manager and its indicators
+        powerUpManager.cleanup()
+        
+        // Reset player power-up states
+        user.removeShield(playSound: false)
+        user.removeDamageBoost()
+    }
     
     @objc private func handleAppWillResignActive() {
         backgroundMusicPlayer?.pause()
@@ -704,7 +711,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handleBossDefeat(_ boss: OBBoss) {
             // Create multiple explosion waves
-        SoundManager.shared.playSound("OBbossDeath.mp3")
+        OBSoundManager.shared.playSound("OBbossDeath.mp3")
             for i in 0...3 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.2) {
                     // Create expanding ring
@@ -886,64 +893,6 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
 extension CGPoint {
     static func +(lhs: CGPoint, rhs: CGPoint) -> CGPoint {
         return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
-    }
-}
-
-class SoundManager {
-    static let shared = SoundManager()
-    private var sounds: [String: SKAction] = [:]
-    private var scene: SKScene?
-    
-    private init() {}
-    
-    func setScene(_ scene: SKScene) {
-        self.scene = scene
-    }
-    
-    func preloadSounds() {
-        let soundNames = [
-            "OBannouncementSound.mp3",
-            "OBloveShoot.mp3",
-            "OBsadnessShoot.mp3",
-            "OBdisgustShoot.mp3",
-            "OBangerShoot.mp3",
-            "OBloveShield.mp3",
-            "OBloveShield1.mp3",
-            "OBangerDive.mp3",
-            "OBdisgustRing.mp3",
-            "OBenemyHit.mp4a",
-            "OBshieldDamaged.mp3",
-            "OBpowerUp.mp3",
-            "OBplayerDeath.mp3",
-            "OBufo_descent.mp3",
-            "OBnew_enemy_shoot.mp3",
-            "OBbossDeath.mp3",
-            "OBasteroidHit.mp3",  // Add asteroid-related sounds
-            "OBasteroidWarning.mp3",
-            "OBgameOver.mp3"
-        ]
-        
-        for name in soundNames {
-            if let sound = SKAction.playSoundFileNamed(name, waitForCompletion: false) as SKAction? {
-                sounds[name] = sound
-            } else {
-                print("Warning: Could not find sound file: \(name)")
-            }
-        }
-    }
-    
-    func playSound(_ name: String) {
-        guard let scene = scene else {
-            print("Warning: No scene set for SoundManager")
-            return
-        }
-        
-        guard let sound = sounds[name] else {
-            print("Warning: Sound \(name) not loaded")
-            return
-        }
-        
-        scene.run(sound)
     }
 }
 

@@ -17,7 +17,7 @@ class OBEnemy: SKSpriteNode {
     var holdsDebuff: Bool
     
     var layoutInfo: OBLayoutInfo!
-
+    
     init(type: OBEnemyType, layoutInfo: OBLayoutInfo) {
         self.initialHealth = type.initialHealth
         self.health = type.initialHealth
@@ -27,9 +27,9 @@ class OBEnemy: SKSpriteNode {
         self.layoutInfo = layoutInfo
         
         let scaledSize = type.size(using: layoutInfo)
-
+        
         super.init(texture: SKTexture(imageNamed: "OBenemy"), color: .white, size: scaledSize)
-       
+        
         self.zPosition = 1
         self.zRotation = 0
         self.colorBlendFactor = 1.0
@@ -48,7 +48,7 @@ class OBEnemy: SKSpriteNode {
     }
     
     func playSoundEffect(named soundName: String) {
-        SoundManager.shared.playSound(soundName)
+        OBSoundManager.shared.playSound(soundName)
     }
     
     func updateSprite(forHealth health: Int, bossType: OBBossType) {
@@ -76,7 +76,7 @@ class OBEnemy: SKSpriteNode {
             nextShootTime = currentTime + baseInterval + randomVariation
         }
     }
-
+    
     
     func startKamikazeBehavior() {
         guard let scene = scene else { return }
@@ -161,7 +161,7 @@ class OBEnemy: SKSpriteNode {
             )
         ])
         playSoundEffect(named: "OBufo_descent.mp3")
-
+        
         self.run(sequence)
     }
     
@@ -323,7 +323,7 @@ class OBEnemy: SKSpriteNode {
         bullet.physicsBody?.affectedByGravity = false
         
         scene.addChild(bullet)
-
+        
         // Ensure bullets travel full screen height
         let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + bullet.size.height), duration: 2.0)
         let removeAction = SKAction.removeFromParent()
@@ -391,49 +391,49 @@ class OBEnemy: SKSpriteNode {
             ]))
         }
     }
-        
+    
     func takeDamage(_ amount: Int) -> Bool {
-            health -= amount
+        health -= amount
+        
+        let isDead = (health <= 0)
+        if isDead { return true }
+        
+        createDamageEffect()
+        
+        if let gameScene = scene as? OBGameScene,
+           let enemyManager = gameScene.enemyManager {
+            updateSprite(forHealth: health, bossType: enemyManager.getBossType())
             
-            let isDead = (health <= 0)
-            if isDead { return true }
-            
-            createDamageEffect()
-            
-            if let gameScene = scene as? OBGameScene,
-               let enemyManager = gameScene.enemyManager {
-                updateSprite(forHealth: health, bossType: enemyManager.getBossType())
+            // Update kamikaze effects if needed
+            if name == "OBkamikazeEnemy" {
+                let glowColor: SKColor = {
+                    switch enemyManager.getBossType() {
+                    case .anger: return .red
+                    case .sadness: return SKColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 1.0)
+                    case .disgust: return SKColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
+                    case .love: return SKColor(red: 1.0, green: 0.0, blue: 0.5, alpha: 1.0)
+                    }
+                }()
                 
-                // Update kamikaze effects if needed
-                if name == "OBkamikazeEnemy" {
-                    let glowColor: SKColor = {
-                        switch enemyManager.getBossType() {
-                        case .anger: return .red
-                        case .sadness: return SKColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 1.0)
-                        case .disgust: return SKColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
-                        case .love: return SKColor(red: 1.0, green: 0.0, blue: 0.5, alpha: 1.0)
-                        }
-                    }()
-                    
-                    // Update all glow effects
-                    if let outerGlow = childNode(withName: "OBkamikazeOuterGlow") as? SKEffectNode,
-                       let outerSprite = outerGlow.children.first as? SKSpriteNode {
-                        outerSprite.color = glowColor
-                    }
-                    
-                    if let innerGlow = childNode(withName: "OBkamikazeInnerGlow") as? SKEffectNode,
-                       let innerSprite = innerGlow.children.first as? SKSpriteNode {
-                        innerSprite.color = glowColor
-                    }
-                    
-                    if let warning = childNode(withName: "OBkamikazeWarning") as? SKSpriteNode {
-                        warning.color = glowColor
-                    }
+                // Update all glow effects
+                if let outerGlow = childNode(withName: "OBkamikazeOuterGlow") as? SKEffectNode,
+                   let outerSprite = outerGlow.children.first as? SKSpriteNode {
+                    outerSprite.color = glowColor
+                }
+                
+                if let innerGlow = childNode(withName: "OBkamikazeInnerGlow") as? SKEffectNode,
+                   let innerSprite = innerGlow.children.first as? SKSpriteNode {
+                    innerSprite.color = glowColor
+                }
+                
+                if let warning = childNode(withName: "OBkamikazeWarning") as? SKSpriteNode {
+                    warning.color = glowColor
                 }
             }
-            
-            return false
         }
+        
+        return false
     }
+}
 
 

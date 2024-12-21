@@ -16,50 +16,50 @@ class OBEnemyManager {
     private var roadmap: OBWaveRoadmap?
     private var asteroidFieldAnnouncement: OBAsteroidFieldAnnouncement?
     private var asteroidChallenge: OBAsteroidFieldChallenge?
-
+    
     var currentWave = 0
     var bossNum: Int = 1
     var layoutInfo: OBLayoutInfo
     init(scene: OBGameScene, layoutInfo: OBLayoutInfo) {
-            self.scene = scene
-            self.waveManager = OBWaveManager(scene: scene)
-            self.bossAnnouncement = OBBossAnnouncement(scene: scene)
+        self.scene = scene
+        self.waveManager = OBWaveManager(scene: scene)
+        self.bossAnnouncement = OBBossAnnouncement(scene: scene)
         self.layoutInfo = layoutInfo
-            // Look for existing roadmap nodes and remove them
-            scene.enumerateChildNodes(withName: "*") { node, _ in
-                if let circle = node as? SKShapeNode, circle.strokeColor == .yellow {
-                    circle.removeFromParent()
-                }
+        // Look for existing roadmap nodes and remove them
+        scene.enumerateChildNodes(withName: "*") { node, _ in
+            if let circle = node as? SKShapeNode, circle.strokeColor == .yellow {
+                circle.removeFromParent()
             }
-            
-            // Create new roadmap for fresh start
-        self.roadmap = OBWaveRoadmap(scene: scene, enemyManager: self, layoutInfo: layoutInfo)
         }
+        
+        // Create new roadmap for fresh start
+        self.roadmap = OBWaveRoadmap(scene: scene, enemyManager: self, layoutInfo: layoutInfo)
+    }
     
     
     func setupEnemies() {
-            guard let scene = scene else { return }
-            
-            // Clear existing enemies
-            enemies.forEach { $0.removeFromParent() }
-            enemies.removeAll()
-            
-            currentWave += 1
-            
-            // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> boss -> repeat
-            let waveType = currentWave % 6
-            
-            if waveType == 0 {
-                // Boss wave
-                roadmap?.showRoadmap()
-                setupBossWave()
-            } else {
-                // Regular wave or asteroid field
-                roadmap?.showRoadmap()
-                roadmap?.updateCurrentWave(currentWave)
-                setupRegularWave()
-            }
+        guard let scene = scene else { return }
+        
+        // Clear existing enemies
+        enemies.forEach { $0.removeFromParent() }
+        enemies.removeAll()
+        
+        currentWave += 1
+        
+        // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> boss -> repeat
+        let waveType = currentWave % 6
+        
+        if waveType == 0 {
+            // Boss wave
+            roadmap?.showRoadmap()
+            setupBossWave()
+        } else {
+            // Regular wave or asteroid field
+            roadmap?.showRoadmap()
+            roadmap?.updateCurrentWave(currentWave)
+            setupRegularWave()
         }
+    }
     
     private func orderEnemiesForEntry(_ enemies: [(OBEnemy, CGPoint)]) -> [(OBEnemy, CGPoint)] {
         // Sort enemies by their final X position to create a wave-like entry
@@ -131,71 +131,71 @@ class OBEnemyManager {
         // Update roadmap but only increment half a position
         roadmap?.updateCurrentWave(currentWave)
     }
+    
+    private func setupRegularWave() {
+        guard let scene = scene else { return }
         
-        private func setupRegularWave() {
-            guard let scene = scene else { return }
-            
-            // Clean up any existing asteroid field
-            asteroidChallenge?.cleanup()
-            asteroidFieldAnnouncement = nil
-            asteroidChallenge = nil
-            
-            // Rest of your regular wave setup code...
-            let nextBossType = getBossType()
-            let formationKeys = Array(OBFormationMatrix.formations.keys)
-            let formationKey = formationKeys[currentWave % formationKeys.count]
-            let formation = OBFormationMatrix.formations[formationKey] ?? OBFormationMatrix.formations["standard"]!
-            
-            let positions = OBFormationGenerator.generatePositions(
-                from: formation,
-                in: scene,
-                spacing: CGSize(width: 60, height: 50),
-                topMargin: 0.8
-            )
-            
-            var enemyQueue: [(OBEnemy, CGPoint)] = []
-            
-            for (index, position) in positions.enumerated() {
-                let enemyType: OBEnemyType = {
-                    switch index % 3 {
-                    case 0: return .a
-                    case 1: return .b
-                    default: return .c
-                    }
-                }()
-                
-                let enemy = OBEnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
-                enemy.updateTexture(forBossType: nextBossType)
-                enemies.append(enemy)
-                enemyQueue.append((enemy, position))
-            }
-            
-            let orderedQueue = orderEnemiesForEntry(enemyQueue)
-            waveManager.startNextWave(enemies: orderedQueue)
-            
-            assignShooters()
-            assignPowerUpDroppers()
-            assignEnemyMovements()
-            if currentWave > 3 {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-                    self?.assignKamikazeEnemies()
+        // Clean up any existing asteroid field
+        asteroidChallenge?.cleanup()
+        asteroidFieldAnnouncement = nil
+        asteroidChallenge = nil
+        
+        // Rest of your regular wave setup code...
+        let nextBossType = getBossType()
+        let formationKeys = Array(OBFormationMatrix.formations.keys)
+        let formationKey = formationKeys[currentWave % formationKeys.count]
+        let formation = OBFormationMatrix.formations[formationKey] ?? OBFormationMatrix.formations["standard"]!
+        
+        let positions = OBFormationGenerator.generatePositions(
+            from: formation,
+            in: scene,
+            spacing: CGSize(width: 60, height: 50),
+            topMargin: 0.8
+        )
+        
+        var enemyQueue: [(OBEnemy, CGPoint)] = []
+        
+        for (index, position) in positions.enumerated() {
+            let enemyType: OBEnemyType = {
+                switch index % 3 {
+                case 0: return .a
+                case 1: return .b
+                default: return .c
                 }
+            }()
+            
+            let enemy = OBEnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
+            enemy.updateTexture(forBossType: nextBossType)
+            enemies.append(enemy)
+            enemyQueue.append((enemy, position))
+        }
+        
+        let orderedQueue = orderEnemiesForEntry(enemyQueue)
+        waveManager.startNextWave(enemies: orderedQueue)
+        
+        assignShooters()
+        assignPowerUpDroppers()
+        assignEnemyMovements()
+        if currentWave > 3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                self?.assignKamikazeEnemies()
             }
         }
+    }
     
     func assignEnemyMovements() {
-            guard let scene = scene else { return }
+        guard let scene = scene else { return }
+        
+        // Give each enemy a simple side-to-side movement
+        for enemy in enemies {
+            let moveRight = SKAction.moveBy(x: 30, y: 0, duration: 2.0)
+            moveRight.timingMode = .easeInEaseOut
+            let moveLeft = moveRight.reversed()
             
-            // Give each enemy a simple side-to-side movement
-            for enemy in enemies {
-                let moveRight = SKAction.moveBy(x: 30, y: 0, duration: 2.0)
-                moveRight.timingMode = .easeInEaseOut
-                let moveLeft = moveRight.reversed()
-                
-                let sequence = SKAction.sequence([moveRight, moveLeft])
-                enemy.run(SKAction.repeatForever(sequence))
-            }
+            let sequence = SKAction.sequence([moveRight, moveLeft])
+            enemy.run(SKAction.repeatForever(sequence))
         }
+    }
     
     func performFormationChange() {
         guard let scene = scene,
@@ -295,95 +295,95 @@ class OBEnemyManager {
         ]))
     }
     
-        func skipCurrentWave() {
-            // Clean up current wave first
-            forceCleanup()
-            
-            // Increment wave count
-            currentWave += 1
-            
-            // Determine if the next wave should be an asteroid field
-            // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> boss -> repeat
-            let nextWaveType = currentWave % 6
-            
-            if nextWaveType == 3 {
-                // This should be an asteroid wave
-                roadmap?.updateCurrentWave(currentWave)
-                setupAsteroidField()
-            } else if nextWaveType == 0 {
-                // This should be a boss wave
-                roadmap?.showRoadmap()
-                setupBossWave()
-            } else {
-                // Regular enemy wave
-                roadmap?.showRoadmap()
-                roadmap?.updateCurrentWave(currentWave)
-                setupRegularWave()
-            }
+    func skipCurrentWave() {
+        // Clean up current wave first
+        forceCleanup()
+        
+        // Increment wave count
+        currentWave += 1
+        
+        // Determine if the next wave should be an asteroid field
+        // Wave sequence: 1,2(enemy) -> 3(asteroid) -> 4,5(enemy) -> boss -> repeat
+        let nextWaveType = currentWave % 6
+        
+        if nextWaveType == 3 {
+            // This should be an asteroid wave
+            roadmap?.updateCurrentWave(currentWave)
+            setupAsteroidField()
+        } else if nextWaveType == 0 {
+            // This should be a boss wave
+            roadmap?.showRoadmap()
+            setupBossWave()
+        } else {
+            // Regular enemy wave
+            roadmap?.showRoadmap()
+            roadmap?.updateCurrentWave(currentWave)
+            setupRegularWave()
         }
-
-        func forceCleanup() {
-            // Clean up all enemies
-            enemies.forEach {
-                if let boss = $0 as? OBBoss {
-                    boss.cleanup()
-                }
-                $0.removeFromParent()
+    }
+    
+    func forceCleanup() {
+        // Clean up all enemies
+        enemies.forEach {
+            if let boss = $0 as? OBBoss {
+                boss.cleanup()
             }
-            enemies.removeAll()
-            
-            // Reset wave manager state
-            waveManager.reset()
-            
-            // Clean up asteroid challenge
-            if let challenge = asteroidChallenge {
-                challenge.cleanup()
-            }
-            asteroidChallenge = nil
-            
-            // Clean up asteroid announcement
-            asteroidFieldAnnouncement = nil
-            
-            // Remove any remaining asteroid nodes
-            scene?.enumerateChildNodes(withName: "OBasteroid") { node, _ in
-                node.removeFromParent()
-            }
-            
-            // Remove any remaining enemy bullets
-            scene?.enumerateChildNodes(withName: "OBenemyBullet") { node, _ in
-                node.removeFromParent()
-            }
-            
-            // Remove any power-ups
-            scene?.enumerateChildNodes(withName: "OBpowerUp") { node, _ in
-                node.removeFromParent()
-            }
+            $0.removeFromParent()
         }
+        enemies.removeAll()
+        
+        // Reset wave manager state
+        waveManager.reset()
+        
+        // Clean up asteroid challenge
+        if let challenge = asteroidChallenge {
+            challenge.cleanup()
+        }
+        asteroidChallenge = nil
+        
+        // Clean up asteroid announcement
+        asteroidFieldAnnouncement = nil
+        
+        // Remove any remaining asteroid nodes
+        scene?.enumerateChildNodes(withName: "OBasteroid") { node, _ in
+            node.removeFromParent()
+        }
+        
+        // Remove any remaining enemy bullets
+        scene?.enumerateChildNodes(withName: "OBenemyBullet") { node, _ in
+            node.removeFromParent()
+        }
+        
+        // Remove any power-ups
+        scene?.enumerateChildNodes(withName: "OBpowerUp") { node, _ in
+            node.removeFromParent()
+        }
+    }
     
     func cleanupAllEnemies() {
-            // Remove all enemies
-            enemies.forEach { $0.removeFromParent() }
-            enemies.removeAll()
-            
-            // Reset wave count
-            currentWave = 0
-            
-            // Reset wave manager
-            waveManager.reset()
-            
-            // Clean up asteroid-related content
-            asteroidChallenge?.cleanup()
-            asteroidFieldAnnouncement = nil
-            asteroidChallenge = nil
-            
-            // Remove any remaining asteroid nodes
-            scene?.enumerateChildNodes(withName: "OBasteroid") { node, _ in
-                node.removeFromParent()
-            }
-            
-            roadmap?.showRoadmap()
-            roadmap?.updateCurrentWave(1)
+        // Remove all enemies
+        enemies.forEach { $0.removeFromParent() }
+        enemies.removeAll()
+        
+        // Reset wave count
+        currentWave = 0
+        
+        // Reset wave manager
+        waveManager.reset()
+        
+        // Clean up asteroid-related content
+        asteroidChallenge?.cleanup()
+        asteroidFieldAnnouncement = nil
+        asteroidChallenge = nil
+        
+        // Remove any remaining asteroid nodes
+        scene?.enumerateChildNodes(withName: "OBasteroid") { node, _ in
+            node.removeFromParent()
         }
+        
+        roadmap?.showRoadmap()
+        roadmap?.updateCurrentWave(1)
+    }
     
     private func setupBossWave() {
         guard let scene = scene else { return }
@@ -426,103 +426,103 @@ class OBEnemyManager {
     }
     
     func getBossType() -> OBBossType {
-            switch bossNum {
-            case 1: return .anger
-            case 2: return .sadness
-            case 3: return .disgust
-            case 4: return .love
-            default: return .love
-            }
+        switch bossNum {
+        case 1: return .anger
+        case 2: return .sadness
+        case 3: return .disgust
+        case 4: return .love
+        default: return .love
         }
+    }
     func handleEnemyDestroyed(_ enemy: OBEnemy) {
-           if let index = enemies.firstIndex(of: enemy) {
-               enemies.remove(at: index)
-               
-               if enemies.isEmpty {
-                   let delay: TimeInterval = (enemy is OBBoss) ? 3.5 : 1.0
-                   DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                       guard let self = self else { return }
-                       
-                       if enemy is OBBoss {
-                           // After boss, reset to wave 0
-                           self.currentWave = 0
-                           self.roadmap?.showRoadmap()
-                           self.roadmap?.updateCurrentWave(0)
-                           self.setupEnemies()
-                       } else {
-                           // Check for asteroid field after every 2nd wave
-                           if self.currentWave % 6 != 0 && self.currentWave % 6 == 2 {
-                               self.currentWave += 1
-                               roadmap?.updateCurrentWave(currentWave)
-                               self.setupAsteroidField()
-                           } else {
-                               self.setupEnemies()
-                           }
-                       }
-                   }
-               }
-           }
-       }
-    
-    
-    private var preparedEnemies: [(OBEnemy, CGPoint)] = []
-        
-        private func prepareNextWave() {
-            guard let scene = scene else { return }
-            preparedEnemies.removeAll()
+        if let index = enemies.firstIndex(of: enemy) {
+            enemies.remove(at: index)
             
-            let nextBossType = getBossType()
-            let formationKeys = Array(OBFormationMatrix.formations.keys)
-            let formationKey = formationKeys[currentWave % formationKeys.count]
-            let formation = OBFormationMatrix.formations[formationKey] ?? OBFormationMatrix.formations["standard"]!
-            
-            let positions = OBFormationGenerator.generatePositions(
-                from: formation,
-                in: scene,
-                spacing: CGSize(width: 60, height: 50),
-                topMargin: 0.8
-            )
-            
-            for (index, position) in positions.enumerated() {
-                let enemyType: OBEnemyType = {
-                    switch index % 3 {
-                    case 0: return .a
-                    case 1: return .b
-                    default: return .c
+            if enemies.isEmpty {
+                let delay: TimeInterval = (enemy is OBBoss) ? 3.5 : 1.0
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                    guard let self = self else { return }
+                    
+                    if enemy is OBBoss {
+                        // After boss, reset to wave 0
+                        self.currentWave = 0
+                        self.roadmap?.showRoadmap()
+                        self.roadmap?.updateCurrentWave(0)
+                        self.setupEnemies()
+                    } else {
+                        // Check for asteroid field after every 2nd wave
+                        if self.currentWave % 6 != 0 && self.currentWave % 6 == 2 {
+                            self.currentWave += 1
+                            roadmap?.updateCurrentWave(currentWave)
+                            self.setupAsteroidField()
+                        } else {
+                            self.setupEnemies()
+                        }
                     }
-                }()
-                
-                let enemy = OBEnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
-                enemy.updateTexture(forBossType: nextBossType)
-                preparedEnemies.append((enemy, position))
-            }
-        }
-    
-    private func showPreparedWave() {
-            guard !preparedEnemies.isEmpty else {
-                setupEnemies()
-                return
-            }
-            
-            for (enemy, _) in preparedEnemies {
-                enemies.append(enemy)
-            }
-            
-            let orderedQueue = orderEnemiesForEntry(preparedEnemies)
-            waveManager.startNextWave(enemies: orderedQueue)
-            
-            assignShooters()
-            assignPowerUpDroppers()
-            assignEnemyMovements()
-            
-            preparedEnemies.removeAll()
-            
-            if currentWave > 3 {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-                    self?.assignKamikazeEnemies()
                 }
             }
         }
+    }
+    
+    
+    private var preparedEnemies: [(OBEnemy, CGPoint)] = []
+    
+    private func prepareNextWave() {
+        guard let scene = scene else { return }
+        preparedEnemies.removeAll()
+        
+        let nextBossType = getBossType()
+        let formationKeys = Array(OBFormationMatrix.formations.keys)
+        let formationKey = formationKeys[currentWave % formationKeys.count]
+        let formation = OBFormationMatrix.formations[formationKey] ?? OBFormationMatrix.formations["standard"]!
+        
+        let positions = OBFormationGenerator.generatePositions(
+            from: formation,
+            in: scene,
+            spacing: CGSize(width: 60, height: 50),
+            topMargin: 0.8
+        )
+        
+        for (index, position) in positions.enumerated() {
+            let enemyType: OBEnemyType = {
+                switch index % 3 {
+                case 0: return .a
+                case 1: return .b
+                default: return .c
+                }
+            }()
+            
+            let enemy = OBEnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
+            enemy.updateTexture(forBossType: nextBossType)
+            preparedEnemies.append((enemy, position))
+        }
+    }
+    
+    private func showPreparedWave() {
+        guard !preparedEnemies.isEmpty else {
+            setupEnemies()
+            return
+        }
+        
+        for (enemy, _) in preparedEnemies {
+            enemies.append(enemy)
+        }
+        
+        let orderedQueue = orderEnemiesForEntry(preparedEnemies)
+        waveManager.startNextWave(enemies: orderedQueue)
+        
+        assignShooters()
+        assignPowerUpDroppers()
+        assignEnemyMovements()
+        
+        preparedEnemies.removeAll()
+        
+        if currentWave > 3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                self?.assignKamikazeEnemies()
+            }
+        }
+    }
     func handleBulletCollision(bullet: SKNode, enemy: OBEnemy) {
         guard let bullet = bullet as? OBBullet else { return }
         
@@ -598,6 +598,6 @@ class OBEnemyManager {
     deinit {
         print("EnemyManager is being deallocated")
     }
-
+    
 }
 

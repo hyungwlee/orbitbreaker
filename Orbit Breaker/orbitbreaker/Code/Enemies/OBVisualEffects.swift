@@ -93,8 +93,8 @@ class OBVisualEffects {
             let path = CGMutablePath()
             path.move(to: position)
             path.addQuadCurve(to: CGPoint(x: position.x + cos(angle) * distance,
-                                        y: position.y + sin(angle) * distance),
-                            control: controlPoint)
+                                          y: position.y + sin(angle) * distance),
+                              control: controlPoint)
             
             let followPath = SKAction.follow(path, asOffset: false, orientToPath: true, duration: duration)
             let fadeAction = SKAction.sequence([

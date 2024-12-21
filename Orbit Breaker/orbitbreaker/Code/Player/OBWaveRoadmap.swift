@@ -20,13 +20,13 @@ class OBWaveRoadmap {
     var layoutInfo: OBLayoutInfo
     
     init(scene: SKScene, enemyManager: OBEnemyManager, layoutInfo: OBLayoutInfo) {
-       self.scene = scene
-       self.enemyManager = enemyManager
-       self.screenHeight = Int(UIScreen.main.bounds.height)
-       self.layoutInfo = layoutInfo
-       self.isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
-       setupRoadmap()
-   }
+        self.scene = scene
+        self.enemyManager = enemyManager
+        self.screenHeight = Int(UIScreen.main.bounds.height)
+        self.layoutInfo = layoutInfo
+        self.isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
+        setupRoadmap()
+    }
     
     private func setupRoadmap() {
         guard let scene = scene else { return }
@@ -36,7 +36,7 @@ class OBWaveRoadmap {
         
         let spacing: CGFloat = 50 * layoutInfo.screenScaleFactor
         let dotRadius: CGFloat = 15 * layoutInfo.screenScaleFactor
-        let centerX: CGFloat = 45 * layoutInfo.screenScaleFactor
+        let centerX: CGFloat = getAdjustedCenterX()  // Use new helper method
         
         // Adjust margins based on device
         let topMargin: CGFloat = isiPhoneSE ? 30 : 80
@@ -46,7 +46,7 @@ class OBWaveRoadmap {
         let path = CGMutablePath()
         path.move(to: CGPoint(x: centerX, y: startY))
         path.addLine(to: CGPoint(x: centerX, y: scene.size.height - topMargin))
-            
+        
         
         // Add glowing background to path
         let glowPath = SKShapeNode(path: path)
@@ -102,7 +102,7 @@ class OBWaveRoadmap {
             roadmapNodes.append(stageContainer)
         }
         
-            setupPlayerIndicator(startY: startY, centerX: centerX)
+        setupPlayerIndicator(startY: startY, centerX: centerX)
     }
     
     private func createStageMarker(for stage: Int, radius: CGFloat) -> SKShapeNode {
@@ -240,24 +240,30 @@ class OBWaveRoadmap {
         }
     }
     
+    private func getAdjustedCenterX() -> CGFloat {
+        let screenWidth = UIScreen.main.bounds.width
+        if screenWidth <= 375 {  // iPhone SE
+            return 31.5 * layoutInfo.screenScaleFactor
+        } else if screenWidth <= 393 {  // iPhone 16 Pro
+            return 35 * layoutInfo.screenScaleFactor
+        } else {  // Other devices (Pro Max, etc.)
+            return 45 * layoutInfo.screenScaleFactor
+        }
+    }
+    
     func updateCurrentWave(_ wave: Int) {
         guard let scene = scene else { return }
         
-        let spacing: CGFloat = 50 * layoutInfo.screenScaleFactor  // Scale the spacing
+        let spacing: CGFloat = 50 * layoutInfo.screenScaleFactor
         let topMargin: CGFloat = isiPhoneSE ? 30 : 80
         let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
         let currentStage = wave == 0 ? 0 : (wave - 1) % stageCount
         let y = startY + CGFloat(currentStage) * spacing
         
-        // Adjust the X position based on the device model
-        let xPosition: CGFloat
-        if isiPhoneSE {
-            xPosition = 45 - 13.5  // Move left for iPhone SE
-        } else {
-            xPosition = 45  // Keep it as is for other devices
-        }
-
-        // Only move the existing indicator, don't create a new one
+        // Use the helper method for X position
+        let xPosition = getAdjustedCenterX()
+        
+        // Move player indicator
         if let indicator = currentStageIndicator {
             let moveAction = SKAction.move(to: CGPoint(x: xPosition, y: y), duration: 0.8)
             moveAction.timingMode = .easeInEaseOut
@@ -312,7 +318,7 @@ class OBWaveRoadmap {
             indicator.run(moveAction)
         }
     }
-
+    
     private func updateBossStageColor(_ marker: SKShapeNode) {
         // Fade out existing sprites before removing them
         let fadeOutAndRemove = SKAction.sequence([
@@ -378,7 +384,7 @@ class OBWaveRoadmap {
             node.removeFromParent()
         }
     }
-
+    
     
     func hideRoadmap() {
         let fadeOut = SKAction.fadeOut(withDuration: 0.5)

@@ -18,7 +18,7 @@ class OBAsteroidFieldAnnouncement {
     }
     
     func playSoundEffect(named soundName: String) {
-        SoundManager.shared.playSound(soundName)
+        OBSoundManager.shared.playSound(soundName)
     }
     
     func showAnnouncement(completion: @escaping () -> Void) {
@@ -108,10 +108,10 @@ class OBAsteroidFieldAnnouncement {
 class OBAsteroidFieldChallenge {
     private weak var scene: SKScene?
     private var asteroids: [SKNode] = []
-       private var isActive = false
+    private var isActive = false
     private var formationFunctions: [(SKScene) -> Void] = []
     private var isDebugging = true
-
+    
     private func checkPosition(node: SKNode, label: String) {
         guard isDebugging, let scene = scene else { return }
         if node.position.y > scene.size.height {
@@ -122,7 +122,7 @@ class OBAsteroidFieldChallenge {
             print("\(label): VISIBLE ON SCREEN at y: \(node.position.y)")
         }
     }
-
+    
     init(scene: SKScene) {
         self.scene = scene
         
@@ -170,8 +170,8 @@ class OBAsteroidFieldChallenge {
         return asteroid
     }
     
-
-
+    
+    
     private func createRotatingCross() {
         guard let scene = scene else { return }
         let centerX = scene.size.width/2
@@ -197,7 +197,7 @@ class OBAsteroidFieldChallenge {
             vAsteroid.run(sequence)
         }
     }
-
+    
     private func createExpandingCircle() {
         guard let scene = scene else { return }
         let centerX = scene.size.width/2
@@ -224,7 +224,7 @@ class OBAsteroidFieldChallenge {
             asteroid.run(SKAction.sequence([expandAndDescend, SKAction.removeFromParent()]))
         }
     }
-
+    
     private func createSweepingGate() {
         guard let scene = scene else { return }
         let centerX = scene.size.width/2
@@ -255,7 +255,7 @@ class OBAsteroidFieldChallenge {
             }
         }
     }
-
+    
     private func createSimpleSpiral() {
         guard let scene = scene else { return }
         let centerX = scene.size.width/2
@@ -285,7 +285,7 @@ class OBAsteroidFieldChallenge {
             ]))
         }
     }
-
+    
     private func createSinglePendulum() {
         guard let scene = scene else { return }
         let centerX = scene.size.width/2
@@ -370,20 +370,20 @@ class OBAsteroidFieldChallenge {
             }
         }
     }
-        
-        private func createWallSection(at xPosition: CGFloat, width: CGFloat, spacing: CGFloat) {
-            for x in stride(from: xPosition - width/2, through: xPosition + width/2, by: spacing) {
-                let asteroid = createAsteroid(at: CGPoint(x: x, y: (scene?.size.height)! + 50))
-                
-                // Simple vertical movement
-                let moveDown = SKAction.moveBy(x: 0, y: -(scene!.size.height + 100), duration: 4.0)
-                asteroid.run(SKAction.sequence([moveDown, SKAction.removeFromParent()]))
-            }
+    
+    private func createWallSection(at xPosition: CGFloat, width: CGFloat, spacing: CGFloat) {
+        for x in stride(from: xPosition - width/2, through: xPosition + width/2, by: spacing) {
+            let asteroid = createAsteroid(at: CGPoint(x: x, y: (scene?.size.height)! + 50))
             
-            return
+            // Simple vertical movement
+            let moveDown = SKAction.moveBy(x: 0, y: -(scene!.size.height + 100), duration: 4.0)
+            asteroid.run(SKAction.sequence([moveDown, SKAction.removeFromParent()]))
         }
         
-        
+        return
+    }
+    
+    
     
     func startChallenge(completion: @escaping () -> Void) {
         isActive = true
@@ -419,14 +419,14 @@ class OBAsteroidFieldChallenge {
     }
     
     func cleanup() {
-            // Remove all asteroids and their actions
-            for asteroid in asteroids {
-                asteroid.removeAllActions()
-                asteroid.removeFromParent()
-            }
-            asteroids.removeAll()
-            
-            // Remove any remaining asteroid-related actions from the scene
-            scene?.removeAction(forKey: "asteroidSequence")
+        // Remove all asteroids and their actions
+        for asteroid in asteroids {
+            asteroid.removeAllActions()
+            asteroid.removeFromParent()
         }
+        asteroids.removeAll()
+        
+        // Remove any remaining asteroid-related actions from the scene
+        scene?.removeAction(forKey: "asteroidSequence")
+    }
 }

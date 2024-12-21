@@ -34,7 +34,7 @@ class OBDebuffs: SKSpriteNode {
     func apply(to enemy: OBEnemy) {
         switch type {
         case .freeze:
-  //          enemy.applyFreezeDebuff(to: [enemy])
+            //          enemy.applyFreezeDebuff(to: [enemy])
             print("NOT WORKING")
         }
     }

@@ -62,6 +62,7 @@ enum OBBossType {
         }
     }
 }
+
 class OBBoss: OBEnemy {
     let bossType: OBBossType
     private var lastShootTime: TimeInterval = 0
@@ -174,9 +175,9 @@ class OBBoss: OBEnemy {
         // Rest of the setup remains the same...
         let titleLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
         titleLabel.text = bossType == .anger ? "" :
-                         bossType == .sadness ? "" :
-                         bossType == .disgust ? "" :
-                         bossType == .love ? "" : ""
+        bossType == .sadness ? "" :
+        bossType == .disgust ? "" :
+        bossType == .love ? "" : ""
         
         titleLabel.fontSize = 32
         titleLabel.fontColor = .white
@@ -194,9 +195,9 @@ class OBBoss: OBEnemy {
         let cornerRadius: CGFloat = 10
         let containerRect = CGRect(x: -barWidth/2, y: -barHeight/2, width: barWidth, height: barHeight)
         let containerPath = CGPath(roundedRect: containerRect,
-                                 cornerWidth: cornerRadius,
-                                 cornerHeight: cornerRadius,
-                                 transform: nil)
+                                   cornerWidth: cornerRadius,
+                                   cornerHeight: cornerRadius,
+                                   transform: nil)
         
         healthBar = SKShapeNode(path: containerPath)
         healthBar.fillColor = SKColor(white: 0.1, alpha: 1.0)
@@ -205,10 +206,10 @@ class OBBoss: OBEnemy {
         healthBar.position = CGPoint(x: scene.size.width/2, y: yPosition)
         
         originalFillColor = bossType == .anger ? SKColor(red: 0.9, green: 0.2, blue: 0.2, alpha: 1.0) :
-                           bossType == .sadness ? SKColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0) :
-                           bossType == .disgust ? SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1.0) :
-                           bossType == .love ? SKColor(red: 0.9, green: 0.2, blue: 0.5, alpha: 1.0) :
-                           SKColor.red
+        bossType == .sadness ? SKColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0) :
+        bossType == .disgust ? SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1.0) :
+        bossType == .love ? SKColor(red: 0.9, green: 0.2, blue: 0.5, alpha: 1.0) :
+        SKColor.red
         
         healthBarFill = SKShapeNode(path: containerPath)
         healthBarFill.fillColor = originalFillColor
@@ -232,7 +233,7 @@ class OBBoss: OBEnemy {
         
         updateHealthBar()
     }
-
+    
     private func updateHealthBar() {
         let percentage = CGFloat(health) / CGFloat(initialHealth)
         let barWidth: CGFloat = 200
@@ -243,9 +244,9 @@ class OBBoss: OBEnemy {
         
         let currentRect = CGRect(x: -barWidth/2, y: -barHeight/2, width: currentWidth, height: barHeight)
         let newPath = CGPath(roundedRect: currentRect,
-                            cornerWidth: cornerRadius,
-                            cornerHeight: cornerRadius,
-                            transform: nil)
+                             cornerWidth: cornerRadius,
+                             cornerHeight: cornerRadius,
+                             transform: nil)
         
         healthBarFill.path = newPath
         
@@ -275,7 +276,7 @@ class OBBoss: OBEnemy {
         
         lastHealthPercentage = percentage
     }
-
+    
     private func startEntryAnimation(in scene: SKScene) {
         setupHealthBar(in: scene)
         position = CGPoint(x: scene.size.width/2, y: scene.size.height + 100)
@@ -291,9 +292,9 @@ class OBBoss: OBEnemy {
                     let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(i) / 20.0)
                     let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.3)
                     let event = CHHapticEvent(eventType: .hapticContinuous,
-                                            parameters: [intensity, sharpness],
-                                            relativeTime: TimeInterval(i) * 0.1,
-                                            duration: 0.15)
+                                              parameters: [intensity, sharpness],
+                                              relativeTime: TimeInterval(i) * 0.1,
+                                              duration: 0.15)
                     events.append(event)
                 }
                 
@@ -392,7 +393,7 @@ class OBBoss: OBEnemy {
         heart.run(SKAction.sequence([initialMove, wait, homingMove, SKAction.removeFromParent()]))
         
         playSoundEffect(named: "OBloveShoot.mp3")
-
+        
     }
     
     private func createHeartShields() {
@@ -457,7 +458,7 @@ class OBBoss: OBEnemy {
                 SKAction.scale(to: 1.0, duration: 0.1)
             ]))
             playSoundEffect(named: "OBloveShield.mp3")
-
+            
         }
     }
     
@@ -577,7 +578,7 @@ class OBBoss: OBEnemy {
         removeAllActions()
         physicsBody = nil
     }
-
+    
     
     
     private func createRaindrop(at position: CGPoint, in scene: SKScene) {
@@ -725,7 +726,7 @@ class OBBoss: OBEnemy {
         if shieldHits[shield, default: 0] >= 4 {
             shield.removeFromParent()
             playSoundEffect(named: "OBloveShield1.mp3")
-
+            
             heartShields.removeAll { $0 == shield }
             shieldHits.removeValue(forKey: shield)
         } else {
@@ -770,7 +771,7 @@ class OBBoss: OBEnemy {
         position.y += velocityY * 1/60
         
         if currentTime - lastSlimeTime >= 0.05 {  // More frequent trail
- //           createSlimeTrail(in: scene)
+            //           createSlimeTrail(in: scene)
             lastSlimeTime = currentTime
         }
         
@@ -789,47 +790,47 @@ class OBBoss: OBEnemy {
         )
     }
     
-//    private func createSlimeTrail(in scene: SKScene) {
-//        // Create main toxic cloud
-//        let cloud = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
-//        cloud.fillColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5)
-//        cloud.strokeColor = .green
-//        cloud.alpha = 0.7
-//        cloud.position = position
-//        cloud.zPosition = 1
-//
-//        // Add toxic effect
-//        let glow = SKEffectNode()
-//        glow.shouldRasterize = true
-//        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5.0])
-//
-//        let glowShape = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
-//        glowShape.fillColor = .green
-//        glowShape.strokeColor = .clear
-//        glow.addChild(glowShape)
-//        cloud.addChild(glow)
-//
-//        scene.addChild(cloud)
-//        slimeTrail.append(cloud)
-//
-//        // Deadly collision
-//        cloud.physicsBody = SKPhysicsBody(circleOfRadius: 25)  // Smaller collision radius
-//        cloud.physicsBody?.categoryBitMask = 0x1 << 3  // Same as enemy bullets
-//        cloud.physicsBody?.contactTestBitMask = 0x1 << 0  // Player category
-//        cloud.physicsBody?.collisionBitMask = 0
-//        cloud.physicsBody?.isDynamic = false
-//
-//        // Animation
-//        let sequence = SKAction.sequence([
-//            SKAction.wait(forDuration: 2.5),
-//            SKAction.fadeOut(withDuration: 1.0),
-//            SKAction.removeFromParent()
-//        ])
-//
-//        cloud.run(sequence) { [weak self] in
-//            self?.slimeTrail.removeFirst()
-//        }
-//    }
+    //    private func createSlimeTrail(in scene: SKScene) {
+    //        // Create main toxic cloud
+    //        let cloud = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
+    //        cloud.fillColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 0.5)
+    //        cloud.strokeColor = .green
+    //        cloud.alpha = 0.7
+    //        cloud.position = position
+    //        cloud.zPosition = 1
+    //
+    //        // Add toxic effect
+    //        let glow = SKEffectNode()
+    //        glow.shouldRasterize = true
+    //        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5.0])
+    //
+    //        let glowShape = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
+    //        glowShape.fillColor = .green
+    //        glowShape.strokeColor = .clear
+    //        glow.addChild(glowShape)
+    //        cloud.addChild(glow)
+    //
+    //        scene.addChild(cloud)
+    //        slimeTrail.append(cloud)
+    //
+    //        // Deadly collision
+    //        cloud.physicsBody = SKPhysicsBody(circleOfRadius: 25)  // Smaller collision radius
+    //        cloud.physicsBody?.categoryBitMask = 0x1 << 3  // Same as enemy bullets
+    //        cloud.physicsBody?.contactTestBitMask = 0x1 << 0  // Player category
+    //        cloud.physicsBody?.collisionBitMask = 0
+    //        cloud.physicsBody?.isDynamic = false
+    //
+    //        // Animation
+    //        let sequence = SKAction.sequence([
+    //            SKAction.wait(forDuration: 2.5),
+    //            SKAction.fadeOut(withDuration: 1.0),
+    //            SKAction.removeFromParent()
+    //        ])
+    //
+    //        cloud.run(sequence) { [weak self] in
+    //            self?.slimeTrail.removeFirst()
+    //        }
+    //    }
     
     
     private func shootToxicProjectile(in scene: SKScene) {

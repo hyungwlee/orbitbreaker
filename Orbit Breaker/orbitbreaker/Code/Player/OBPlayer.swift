@@ -54,7 +54,7 @@ class OBPlayer {
     }
     
     func playSoundEffect(named soundName: String) {
-        SoundManager.shared.playSound(soundName)
+        OBSoundManager.shared.playSound(soundName)
     }
     
     func update(currentTime: TimeInterval, layoutInfo: OBLayoutInfo) {
@@ -68,7 +68,7 @@ class OBPlayer {
     func fireBullet(layoutInfo: OBLayoutInfo) {
         guard let scene = scene else { return }
         
-        // Bullet damage gets multiplied by damage multiplier (either 0 or 1 depending on power-up status)
+        // Bullet damage gets multiplied by damage multiplier
         let bulletDamage: Int = 10 * damageMultiplier
         
         // Define the base size for the bullet
@@ -76,10 +76,11 @@ class OBPlayer {
         
         // Create a new bullet with the damage and scaled size
         let bullet = OBBullet(
-            damage: bulletDamage,
-            texture: SKTexture(imageNamed: "OBplayerBullet"),
-            size: baseBulletSize,
-            scaleFactor: layoutInfo.screenScaleFactor // Pass the scale factor
+                    damage: bulletDamage,
+                    texture: SKTexture(imageNamed: "OBplayerBullet"),
+                    size: baseBulletSize,
+                    scaleFactor: layoutInfo.screenScaleFactor,
+                    isDoubleDamage: damageMultiplier > 1
         )
         
         // Set the bullet position
@@ -138,13 +139,15 @@ class OBPlayer {
         }
     }
     
-    func removeShield() {
+    func removeShield(playSound: Bool = true) {
         hasShield = false
         shieldNode?.removeFromParent()
         shieldNode = nil
         shieldTimer?.invalidate()
         shieldTimer = nil
-        playSoundEffect(named: "OBshieldDamaged.mp3")
+        if playSound {
+            playSoundEffect(named: "OBshieldDamaged.mp3")
+        }
     }
     
     func setDoubleDamage() {
@@ -166,7 +169,7 @@ class OBPlayer {
     }
     
     func cleanup() {
-        removeShield()
+        removeShield(playSound: false)
         removeDamageBoost()
         ship.removeFromParent()
         playSoundEffect(named: "OBplayerDeath.mp3")

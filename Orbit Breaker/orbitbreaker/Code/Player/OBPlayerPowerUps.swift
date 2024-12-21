@@ -13,7 +13,7 @@ enum OBPowerUps: CaseIterable {
     
     func size(using layoutInfo: OBLayoutInfo) -> CGSize {
         switch self {
-            case .shield:
+        case .shield:
             let baseSize = CGSize(width: 20, height: 25)
             return CGSize(
                 width: baseSize.width * layoutInfo.screenScaleFactor,
@@ -66,7 +66,7 @@ class OBPowerUp: SKSpriteNode {
     }
     
     func playSoundEffect(named soundName: String) {
-        SoundManager.shared.playSound(soundName)
+        OBSoundManager.shared.playSound(soundName)
     }
     
     private func addGlowEffect() {
@@ -79,7 +79,7 @@ class OBPowerUp: SKSpriteNode {
         glowSprite.colorBlendFactor = 0.8
         glowSprite.alpha = 0.6
         glowSprite.size = CGSize(width: self.size.width * 1.5, height: self.size.height * 1.5)
-
+        
         glow.addChild(glowSprite)
         addChild(glow)
     }

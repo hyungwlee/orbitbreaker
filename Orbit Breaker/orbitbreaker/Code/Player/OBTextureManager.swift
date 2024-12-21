@@ -47,39 +47,39 @@ class OBTextureManager {
         }
         
         for textureName in backgroundTextures {
-                    let texture = SKTexture(imageNamed: textureName)
-                    // Force texture to load immediately
-                    texture.preload {
-                        self.textureCache[textureName] = texture
-                    }
-                }
+            let texture = SKTexture(imageNamed: textureName)
+            // Force texture to load immediately
+            texture.preload {
+                self.textureCache[textureName] = texture
+            }
+        }
         
         let shieldTexture = SKTexture(imageNamed: "OBshield")
-                textureCache["shield"] = shieldTexture
-                shieldTexture.preload { }
-                
-                // Create and cache double damage texture
-                let lightningBolt = SKShapeNode(rectOf: CGSize(width: 25, height: 25))
-                let path = CGMutablePath()
-                path.move(to: CGPoint(x: -5, y: 12))
-                path.addLine(to: CGPoint(x: 2, y: 2))
-                path.addLine(to: CGPoint(x: 8, y: 2))
-                path.addLine(to: CGPoint(x: 0, y: -12))
-                path.addLine(to: CGPoint(x: 5, y: -2))
-                path.addLine(to: CGPoint(x: -2, y: -2))
-                path.closeSubpath()
-                
-                lightningBolt.path = path
-                lightningBolt.fillColor = .yellow
-                lightningBolt.strokeColor = .orange
-                lightningBolt.lineWidth = 2
-                
-                let powerupTexture = SKView().texture(from: lightningBolt)
-                textureCache["powershot"] = powerupTexture
-            
+        textureCache["shield"] = shieldTexture
+        shieldTexture.preload { }
+        
+        // Create and cache double damage texture
+        let lightningBolt = SKShapeNode(rectOf: CGSize(width: 25, height: 25))
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: -5, y: 12))
+        path.addLine(to: CGPoint(x: 2, y: 2))
+        path.addLine(to: CGPoint(x: 8, y: 2))
+        path.addLine(to: CGPoint(x: 0, y: -12))
+        path.addLine(to: CGPoint(x: 5, y: -2))
+        path.addLine(to: CGPoint(x: -2, y: -2))
+        path.closeSubpath()
+        
+        lightningBolt.path = path
+        lightningBolt.fillColor = .yellow
+        lightningBolt.strokeColor = .orange
+        lightningBolt.lineWidth = 2
+        
+        let powerupTexture = SKView().texture(from: lightningBolt)
+        textureCache["powershot"] = powerupTexture
+        
     }
     
     func getTexture(_ name: String) -> SKTexture? {
-            return textureCache[name]
-        }
+        return textureCache[name]
+    }
 }

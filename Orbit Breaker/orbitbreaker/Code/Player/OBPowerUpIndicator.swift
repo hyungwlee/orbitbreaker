@@ -87,14 +87,14 @@ class OBPowerUpIndicator: SKNode {
             }
             
         case .doubleDamage:
-            self.duration = 5.0
+            self.duration = 8.0
             iconNode.texture = SKTexture(imageNamed: "OBdoubleDamage")
             textNode.text = ""
             if sizeChanged == false {
                 iconNode.size = CGSize(width: iconNode.size.width * 1.7 * layoutInfo.screenScaleFactor, height: iconNode.size.height * 1.3 * layoutInfo.screenScaleFactor)
                 sizeChanged = true
             }
-        
+            
             progressRing.strokeColor = SKColor(red: 1.0, green: 0.4, blue: 0.4, alpha: 1.0)
         }
         
@@ -153,6 +153,7 @@ class OBPowerUpManager {
     private var droppedPowerUps: [OBPowerUp] = []
     private weak var scene: SKScene?
     var layoutInfo: OBLayoutInfo
+    private var activePowerUps: [(type: OBPowerUps, indicator: OBPowerUpIndicator)] = []
     
     init(scene: SKScene, layoutInfo: OBLayoutInfo) {
         self.scene = scene
@@ -163,24 +164,57 @@ class OBPowerUpManager {
     private func setupIndicators() {
         guard let scene = scene else { return }
         
-        let size: CGFloat = 80 * layoutInfo.screenScaleFactor  // Back to original size
+        let size: CGFloat = 80 * layoutInfo.screenScaleFactor
+        let leftMargin: CGFloat = 15 * layoutInfo.screenScaleFactor
+        let bottomMargin: CGFloat = 20 * layoutInfo.screenScaleFactor
+        
+        // Create one indicator for each power-up type
+        for type in OBPowerUps.allCases {
+            let indicator = OBPowerUpIndicator(size: size, layoutInfo: layoutInfo)
+            indicator.position = CGPoint(
+                x: leftMargin + (size / 2),
+                y: size/2 + bottomMargin
+            )
+            indicator.isHidden = true
+            scene.addChild(indicator)
+            indicators.append(indicator)
+        }
+    }
+    
+    private func updateIndicatorPositions() {
+        let size: CGFloat = 80 * layoutInfo.screenScaleFactor
         let spacing: CGFloat = 10 * layoutInfo.screenScaleFactor
         let leftMargin: CGFloat = 15 * layoutInfo.screenScaleFactor
         let bottomMargin: CGFloat = 20 * layoutInfo.screenScaleFactor
         
-        let orderedPowerUps = [OBPowerUps.shield, OBPowerUps.doubleDamage]
-        
-        for (index, type) in orderedPowerUps.enumerated() {
-            let indicator = OBPowerUpIndicator(size: size, layoutInfo: layoutInfo)
+        // Animate each active indicator to its new position
+        for (index, powerUp) in activePowerUps.enumerated() {
             let xPosition = leftMargin + (size / 2) + (CGFloat(index) * (size + spacing))
-            
-            indicator.position = CGPoint(
+            let newPosition = CGPoint(
                 x: xPosition,
                 y: size/2 + bottomMargin
             )
             
-            scene.addChild(indicator)
-            indicators.append(indicator)
+            // Create smooth animation for position change
+            let moveAction = SKAction.move(to: newPosition, duration: 0.2)
+            moveAction.timingMode = .easeInEaseOut
+            powerUp.indicator.run(moveAction)
+        }
+    }
+    func showPowerUp(_ type: OBPowerUps) {
+        // Find an unused indicator for this type
+        if let indicator = indicators.first(where: { $0.isHidden }) {
+            // Remove any existing active power-up of the same type
+            activePowerUps.removeAll(where: { $0.type == type })
+            
+            // Add the new power-up to the front of the array
+            activePowerUps.insert((type: type, indicator: indicator), at: 0)
+            
+            // Show the power-up
+            indicator.showPowerUp(type)
+            
+            // Update positions of all indicators
+            updateIndicatorPositions()
         }
     }
     
@@ -193,25 +227,33 @@ class OBPowerUpManager {
         indicators.forEach { $0.removeFromParent() }
         indicators.removeAll()
         
+        activePowerUps.removeAll()
+        
         // Remove all dropped power-ups
         droppedPowerUps.forEach { $0.removeFromParent() }
         droppedPowerUps.removeAll()
     }
     
-    func showPowerUp(_ type: OBPowerUps) {
-        if let index = OBPowerUps.allCases.firstIndex(of: type) {
-            indicators[index].showPowerUp(type)
-        }
-    }
     
     func hideShieldIndicator() {
-        // Hide only the shield indicator
-        if let shieldIndex = OBPowerUps.allCases.firstIndex(of: .shield) {
-            indicators[shieldIndex].hideIfShield()
+        if let index = activePowerUps.firstIndex(where: { $0.type == .shield }) {
+            let powerUp = activePowerUps.remove(at: index)
+            powerUp.indicator.hideIfShield()
+            updateIndicatorPositions()
         }
     }
     
     func update(currentTime: TimeInterval) {
+        // Update all indicators
         indicators.forEach { $0.update(currentTime: currentTime) }
+        
+        // Remove any hidden indicators from active power-ups
+        let previousCount = activePowerUps.count
+        activePowerUps.removeAll(where: { $0.indicator.isHidden })
+        
+        // If we removed any power-ups, update positions
+        if previousCount != activePowerUps.count {
+            updateIndicatorPositions()
+        }
     }
 }

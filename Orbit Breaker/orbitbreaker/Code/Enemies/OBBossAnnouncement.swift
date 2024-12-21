@@ -9,21 +9,21 @@ import SpriteKit
 
 class OBBossAnnouncement {
     private weak var scene: SKScene?
-
+    
     init(scene: SKScene) {
         self.scene = scene
     }
     
     func playSoundEffect(named soundName: String) {
-        SoundManager.shared.playSound(soundName)
+        OBSoundManager.shared.playSound(soundName)
     }
-
+    
     
     func showAnnouncement(bossType: OBBossType, completion: @escaping () -> Void) {
         guard let scene = scene else { return }
         
         playSoundEffect(named: "OBannouncementSound.mp3") // Replace with your sound file name
-
+        
         // Create container node for centering and scaling
         let container = SKNode()
         container.position = CGPoint(x: scene.size.width/2, y: scene.size.height/2)
@@ -71,9 +71,9 @@ class OBBossAnnouncement {
         
         // Create slashes with glow
         let leftSlash = createGlowingSlash(width: scene.size.width * 0.8,
-                                         position: CGPoint(x: -scene.size.width/2, y: 30))
+                                           position: CGPoint(x: -scene.size.width/2, y: 30))
         let rightSlash = createGlowingSlash(width: scene.size.width * 0.8,
-                                          position: CGPoint(x: scene.size.width/2, y: -30))
+                                            position: CGPoint(x: scene.size.width/2, y: -30))
         
         slashContainer.addChild(leftSlash)
         slashContainer.addChild(rightSlash)
@@ -113,9 +113,9 @@ class OBBossAnnouncement {
         
         // Resize font based on screen size
         let maxWidth = scene.size.width * 0.8 // Allow some padding
-               while nameLabel.frame.width > maxWidth {
-                   nameLabel.fontSize -= 1 // Reduce font size until it fits
-               }
+        while nameLabel.frame.width > maxWidth {
+            nameLabel.fontSize -= 1 // Reduce font size until it fits
+        }
         
         // Calculate background size based on text
         let textWidth = nameLabel.frame.width
