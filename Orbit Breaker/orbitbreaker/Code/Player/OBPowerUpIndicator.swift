@@ -4,6 +4,7 @@
 //
 //  Created by August Wetterau on 11/30/24.
 //
+
 import SpriteKit
 
 class OBPowerUpIndicator: SKNode {
@@ -15,11 +16,14 @@ class OBPowerUpIndicator: SKNode {
     private var duration: TimeInterval = 5.0
     private var startTime: TimeInterval = 0
     private var glowNode: SKEffectNode?
-    private var sizeChanged = false
+    private let originalIconSize: CGSize
     var layoutInfo: OBLayoutInfo
     
     init(size: CGFloat, layoutInfo: OBLayoutInfo) {
         self.layoutInfo = layoutInfo
+        // Store original icon size for reset
+        self.originalIconSize = CGSize(width: size * 0.3, height: size * 0.4)
+        
         // Create rounded background using SKShapeNode
         backgroundNode = SKShapeNode(circleOfRadius: size/2 * layoutInfo.screenScaleFactor)
         backgroundNode.fillColor = SKColor(red: 0.1, green: 0.1, blue: 0.2, alpha: 0.9)
@@ -32,8 +36,8 @@ class OBPowerUpIndicator: SKNode {
         progressRing.lineWidth = 3
         progressRing.lineCap = .round
         
-        // Create icon node with thinner width for shield
-        iconNode = SKSpriteNode(color: .clear, size: CGSize(width: size * 0.3, height: size * 0.4))
+        // Create icon node with original size
+        iconNode = SKSpriteNode(color: .clear, size: originalIconSize)
         
         // Create text node for X2
         textNode = SKLabelNode(fontNamed: "AvenirNext-Heavy")
@@ -71,7 +75,22 @@ class OBPowerUpIndicator: SKNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private func resetState() {
+        // Stop any running animations
+        iconNode.removeAllActions()
+        textNode.removeAllActions()
+        
+        // Reset icon size to original
+        iconNode.size = originalIconSize
+        
+        // Clear any existing glow effects
+        glowNode?.removeAllChildren()
+    }
+    
     func showPowerUp(_ type: OBPowerUps) {
+        // Reset state before showing new power-up
+        resetState()
+        
         self.powerUpType = type
         self.startTime = 0
         
@@ -90,11 +109,11 @@ class OBPowerUpIndicator: SKNode {
             self.duration = 8.0
             iconNode.texture = SKTexture(imageNamed: "OBdoubleDamage")
             textNode.text = ""
-            if sizeChanged == false {
-                iconNode.size = CGSize(width: iconNode.size.width * 1.7 * layoutInfo.screenScaleFactor, height: iconNode.size.height * 1.3 * layoutInfo.screenScaleFactor)
-                sizeChanged = true
-            }
-            
+            // Scale the icon for double damage with respect to original size
+            iconNode.size = CGSize(
+                width: originalIconSize.width * 1.7 * layoutInfo.screenScaleFactor,
+                height: originalIconSize.height * 1.3 * layoutInfo.screenScaleFactor
+            )
             progressRing.strokeColor = SKColor(red: 1.0, green: 0.4, blue: 0.4, alpha: 1.0)
         }
         
@@ -140,8 +159,10 @@ class OBPowerUpIndicator: SKNode {
         }
     }
     
+    
     func hideIfShield() {
         if powerUpType == .shield {
+            resetState()
             isHidden = true
             powerUpType = nil
         }
