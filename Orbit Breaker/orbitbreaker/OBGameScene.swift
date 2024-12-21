@@ -50,7 +50,8 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
-         setupDebugControls()
+        // Uncomment to Skip waves
+//        setupDebugControls()
         powerUpManager = OBPowerUpManager(scene: self, layoutInfo: layoutInfo)
         super.didMove(to: view)
         didSceneLoad = true
