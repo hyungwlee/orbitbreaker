@@ -1,21 +1,22 @@
 //
-//  Bosses.swift
+//  OBBosses.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 11/4/24.
+//  Created by Michelle Bai on 12/20/24.
 //
+
 
 import SpriteKit
 import CoreHaptics
 import UIKit
 
-private enum BossMovementPattern: Int, CaseIterable {
+private enum OBBossMovementPattern: Int, CaseIterable {
     case circular = 0
     case figureEight = 1
     case teleporting = 2
 }
 
-enum BossType {
+enum OBBossType {
     case anger    // Round 5
     case sadness  // Round 10
     case disgust  // Round 15
@@ -61,8 +62,8 @@ enum BossType {
         }
     }
 }
-class Boss: Enemy {
-    let bossType: BossType
+class OBBoss: OBEnemy {
+    let bossType: OBBossType
     private var lastShootTime: TimeInterval = 0
     private var lastSwoopTime: TimeInterval = 0
     private var lastRainCloudTime: TimeInterval = 0
@@ -105,7 +106,7 @@ class Boss: Enemy {
     private var originalFillColor: SKColor = .red  // Store the original color
     
     // In Boss.swift
-    init(type: BossType, layoutInfo: OBLayoutInfo) {
+    init(type: OBBossType, layoutInfo: OBLayoutInfo) {
         
         self.bossType = type
         super.init(type: .a, layoutInfo: layoutInfo)
@@ -796,35 +797,35 @@ class Boss: Enemy {
 //        cloud.alpha = 0.7
 //        cloud.position = position
 //        cloud.zPosition = 1
-//        
+//
 //        // Add toxic effect
 //        let glow = SKEffectNode()
 //        glow.shouldRasterize = true
 //        glow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5.0])
-//        
+//
 //        let glowShape = SKShapeNode(ellipseOf: CGSize(width: 60, height: 40))
 //        glowShape.fillColor = .green
 //        glowShape.strokeColor = .clear
 //        glow.addChild(glowShape)
 //        cloud.addChild(glow)
-//        
+//
 //        scene.addChild(cloud)
 //        slimeTrail.append(cloud)
-//        
+//
 //        // Deadly collision
 //        cloud.physicsBody = SKPhysicsBody(circleOfRadius: 25)  // Smaller collision radius
 //        cloud.physicsBody?.categoryBitMask = 0x1 << 3  // Same as enemy bullets
 //        cloud.physicsBody?.contactTestBitMask = 0x1 << 0  // Player category
 //        cloud.physicsBody?.collisionBitMask = 0
 //        cloud.physicsBody?.isDynamic = false
-//        
+//
 //        // Animation
 //        let sequence = SKAction.sequence([
 //            SKAction.wait(forDuration: 2.5),
 //            SKAction.fadeOut(withDuration: 1.0),
 //            SKAction.removeFromParent()
 //        ])
-//        
+//
 //        cloud.run(sequence) { [weak self] in
 //            self?.slimeTrail.removeFirst()
 //        }

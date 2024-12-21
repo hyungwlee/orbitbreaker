@@ -7,7 +7,7 @@
 import SwiftUI
 import SpriteKit
 
-struct ContentView: View {
+struct OBContentView: View {
     let context = OBGameContext(dependencies: .init(), gameMode: .single)
     
     var body: some View {
@@ -21,6 +21,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    OBContentView()
         .ignoresSafeArea()
 }

@@ -1,13 +1,13 @@
 //
-//  VisualEffects.swift
+//  OBVisualEffects.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 11/29/24.
+//  Created by Michelle Bai on 12/20/24.
 //
 
 import SpriteKit
 
-class VisualEffects {
+class OBVisualEffects {
     static func addExplosion(at position: CGPoint, in scene: SKScene) {
         // Basic enemy explosion
         let particleCount = 20

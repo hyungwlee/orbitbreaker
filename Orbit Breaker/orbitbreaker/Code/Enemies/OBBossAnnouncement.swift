@@ -1,12 +1,13 @@
 //
-//  BossAnnouncement.swift
+//  OBBossAnnouncement.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 11/29/24.
+//  Created by Michelle Bai on 12/20/24.
 //
+
 import SpriteKit
 
-class BossAnnouncement {
+class OBBossAnnouncement {
     private weak var scene: SKScene?
 
     init(scene: SKScene) {
@@ -18,7 +19,7 @@ class BossAnnouncement {
     }
 
     
-    func showAnnouncement(bossType: BossType, completion: @escaping () -> Void) {
+    func showAnnouncement(bossType: OBBossType, completion: @escaping () -> Void) {
         guard let scene = scene else { return }
         
         playSoundEffect(named: "announcementSound.mp3") // Replace with your sound file name
@@ -212,7 +213,7 @@ class BossAnnouncement {
         ]))
     }
     
-    private func getBossColor(for bossType: BossType) -> SKColor {
+    private func getBossColor(for bossType: OBBossType) -> SKColor {
         switch bossType {
         case .anger:
             return SKColor(red: 0.9, green: 0.2, blue: 0.2, alpha: 1.0)

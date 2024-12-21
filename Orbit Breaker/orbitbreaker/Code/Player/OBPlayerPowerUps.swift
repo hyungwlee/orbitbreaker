@@ -1,5 +1,5 @@
 //
-//  PowerUps.swift
+//  OBPowerUps.swift
 //  Orbit Breaker
 //
 //  Created by Thomas Rife on 11/4/24.
@@ -7,7 +7,7 @@
 
 import SpriteKit
 
-enum PowerUps: CaseIterable {
+enum OBPowerUps: CaseIterable {
     case shield
     case doubleDamage
     
@@ -27,10 +27,10 @@ enum PowerUps: CaseIterable {
     }
 }
 
-class PowerUp: SKSpriteNode {
-    let type: PowerUps
+class OBPowerUp: SKSpriteNode {
+    let type: OBPowerUps
     
-    init(type: PowerUps, color: UIColor, layoutInfo: OBLayoutInfo) {
+    init(type: OBPowerUps, color: UIColor, layoutInfo: OBLayoutInfo) {
         self.type = type
         
         // Get the scaled size using layoutInfo
@@ -95,7 +95,7 @@ class PowerUp: SKSpriteNode {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func apply(to player: Player) {
+    func apply(to player: OBPlayer) {
         // Create pickup effect
         createPickupEffect()
         playSoundEffect(named: "powerUp.mp3")

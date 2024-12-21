@@ -1,24 +1,25 @@
 //
-//  WaveRoadmap.swift
+//  OBWaveRoadmap.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 11/30/24.
+//  Created by Michelle Bai on 12/20/24.
 //
+
 import SpriteKit
 import UIKit
 
-class WaveRoadmap {
+class OBWaveRoadmap {
     private weak var scene: SKScene?
     private var roadmapNodes: [SKNode] = []
     private var stageDots: [SKShapeNode] = []
     private var currentStageIndicator: SKShapeNode?
     private let stageCount = 6  // 5 stages + boss
-    private var enemyManager: EnemyManager
+    private var enemyManager: OBEnemyManager
     var screenHeight: Int
     var isiPhoneSE: Bool // SE (2nd gen) has 667 points height
     var layoutInfo: OBLayoutInfo
     
-    init(scene: SKScene, enemyManager: EnemyManager, layoutInfo: OBLayoutInfo) {
+    init(scene: SKScene, enemyManager: OBEnemyManager, layoutInfo: OBLayoutInfo) {
        self.scene = scene
        self.enemyManager = enemyManager
        self.screenHeight = Int(UIScreen.main.bounds.height)

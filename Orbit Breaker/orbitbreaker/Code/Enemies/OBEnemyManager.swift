@@ -1,29 +1,29 @@
 //
-//  EnemyManager.swift
+//  OBEnemyManager.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 10/25/24.
+//  Created by Michelle Bai on 12/20/24.
 //
 
 import SpriteKit
 
 
-class EnemyManager {
+class OBEnemyManager {
     private weak var scene: OBGameScene?
-    private var enemies: [Enemy] = []
-    private var waveManager: WaveManager
-    private var bossAnnouncement: BossAnnouncement?
-    private var roadmap: WaveRoadmap?
-    private var asteroidFieldAnnouncement: AsteroidFieldAnnouncement?
-    private var asteroidChallenge: AsteroidFieldChallenge?
+    private var enemies: [OBEnemy] = []
+    private var waveManager: OBWaveManager
+    private var bossAnnouncement: OBBossAnnouncement?
+    private var roadmap: OBWaveRoadmap?
+    private var asteroidFieldAnnouncement: OBAsteroidFieldAnnouncement?
+    private var asteroidChallenge: OBAsteroidFieldChallenge?
 
     var currentWave = 0
     var bossNum: Int = 1
     var layoutInfo: OBLayoutInfo
     init(scene: OBGameScene, layoutInfo: OBLayoutInfo) {
             self.scene = scene
-            self.waveManager = WaveManager(scene: scene)
-            self.bossAnnouncement = BossAnnouncement(scene: scene)
+            self.waveManager = OBWaveManager(scene: scene)
+            self.bossAnnouncement = OBBossAnnouncement(scene: scene)
         self.layoutInfo = layoutInfo
             // Look for existing roadmap nodes and remove them
             scene.enumerateChildNodes(withName: "*") { node, _ in
@@ -33,7 +33,7 @@ class EnemyManager {
             }
             
             // Create new roadmap for fresh start
-        self.roadmap = WaveRoadmap(scene: scene, enemyManager: self, layoutInfo: layoutInfo)
+        self.roadmap = OBWaveRoadmap(scene: scene, enemyManager: self, layoutInfo: layoutInfo)
         }
     
     
@@ -61,7 +61,7 @@ class EnemyManager {
             }
         }
     
-    private func orderEnemiesForEntry(_ enemies: [(Enemy, CGPoint)]) -> [(Enemy, CGPoint)] {
+    private func orderEnemiesForEntry(_ enemies: [(OBEnemy, CGPoint)]) -> [(OBEnemy, CGPoint)] {
         // Sort enemies by their final X position to create a wave-like entry
         let sorted = enemies.sorted { first, second in
             first.1.x < second.1.x
@@ -83,7 +83,7 @@ class EnemyManager {
         // Convert selected enemies to kamikaze
         for enemy in selectedEnemies {
             // Don't convert bosses
-            if !(enemy is Boss) {
+            if !(enemy is OBBoss) {
                 enemy.startKamikazeBehavior()
             }
         }
@@ -94,7 +94,7 @@ class EnemyManager {
         waveManager.update(currentTime: currentTime)
         
         for enemy in enemies {
-            if let boss = enemy as? Boss {
+            if let boss = enemy as? OBBoss {
                 // Call the boss-specific update method
                 boss.update(currentTime: currentTime, in: scene)
             } else {
@@ -110,7 +110,7 @@ class EnemyManager {
         
         // Clean up any existing power-ups
         scene.enumerateChildNodes(withName: "powerUp") { node, _ in
-            if let powerUp = node as? PowerUp {
+            if let powerUp = node as? OBPowerUp {
                 // Remove any ongoing animations first
                 powerUp.removeAllActions()
                 powerUp.removeFromParent()
@@ -118,8 +118,8 @@ class EnemyManager {
         }
         
         // Show announcement first
-        asteroidFieldAnnouncement = AsteroidFieldAnnouncement(scene: scene, layoutInfo: layoutInfo)
-        asteroidChallenge = AsteroidFieldChallenge(scene: scene)
+        asteroidFieldAnnouncement = OBAsteroidFieldAnnouncement(scene: scene, layoutInfo: layoutInfo)
+        asteroidChallenge = OBAsteroidFieldChallenge(scene: scene)
         
         asteroidFieldAnnouncement?.showAnnouncement { [weak self] in
             self?.asteroidChallenge?.startChallenge { [weak self] in
@@ -142,21 +142,21 @@ class EnemyManager {
             
             // Rest of your regular wave setup code...
             let nextBossType = getBossType()
-            let formationKeys = Array(FormationMatrix.formations.keys)
+            let formationKeys = Array(OBFormationMatrix.formations.keys)
             let formationKey = formationKeys[currentWave % formationKeys.count]
-            let formation = FormationMatrix.formations[formationKey] ?? FormationMatrix.formations["standard"]!
+            let formation = OBFormationMatrix.formations[formationKey] ?? OBFormationMatrix.formations["standard"]!
             
-            let positions = FormationGenerator.generatePositions(
+            let positions = OBFormationGenerator.generatePositions(
                 from: formation,
                 in: scene,
                 spacing: CGSize(width: 60, height: 50),
                 topMargin: 0.8
             )
             
-            var enemyQueue: [(Enemy, CGPoint)] = []
+            var enemyQueue: [(OBEnemy, CGPoint)] = []
             
             for (index, position) in positions.enumerated() {
-                let enemyType: EnemyType = {
+                let enemyType: OBEnemyType = {
                     switch index % 3 {
                     case 0: return .a
                     case 1: return .b
@@ -164,7 +164,7 @@ class EnemyManager {
                     }
                 }()
                 
-                let enemy = EnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
+                let enemy = OBEnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
                 enemy.updateTexture(forBossType: nextBossType)
                 enemies.append(enemy)
                 enemyQueue.append((enemy, position))
@@ -205,8 +205,8 @@ class EnemyManager {
         let safeMarginY: CGFloat = 100
         
         // Get new formation positions
-        let newFormation = FormationMatrix.formations.randomElement()?.value ?? []
-        var newPositions = FormationGenerator.generatePositions(
+        let newFormation = OBFormationMatrix.formations.randomElement()?.value ?? []
+        var newPositions = OBFormationGenerator.generatePositions(
             from: newFormation,
             in: scene,
             spacing: CGSize(width: 50, height: 40),
@@ -253,7 +253,7 @@ class EnemyManager {
     
     // Optional: Add this method to create smooth formation changes
     
-    private func getMovementPattern(for index: Int) -> Enemy.MovementPattern {
+    private func getMovementPattern(for index: Int) -> OBEnemy.OBMovementPattern {
         // Use wave number to influence pattern selection
         let basePattern = index % 4
         
@@ -273,11 +273,11 @@ class EnemyManager {
     private func setupFormationChanges() {
         let formationChange = SKAction.run { [weak self] in
             guard let self = self else { return }
-            let newFormation = FormationMatrix.formations.randomElement()?.value ?? []
+            let newFormation = OBFormationMatrix.formations.randomElement()?.value ?? []
             
             for (index, enemy) in self.enemies.enumerated() {
                 if index < newFormation.count {
-                    let newPosition = FormationGenerator.generatePositions(
+                    let newPosition = OBFormationGenerator.generatePositions(
                         from: [newFormation[index]],
                         in: self.scene!,
                         spacing: CGSize(width: 60, height: 50),
@@ -325,7 +325,7 @@ class EnemyManager {
         func forceCleanup() {
             // Clean up all enemies
             enemies.forEach {
-                if let boss = $0 as? Boss {
+                if let boss = $0 as? OBBoss {
                     boss.cleanup()
                 }
                 $0.removeFromParent()
@@ -400,23 +400,23 @@ class EnemyManager {
     private func spawnBoss() {
         guard let scene = scene else { return }
         
-        let boss: Boss
+        let boss: OBBoss
         
         switch bossNum {
         case 1:
-            boss = Boss(type: .anger, layoutInfo: scene.layoutInfo)
+            boss = OBBoss(type: .anger, layoutInfo: scene.layoutInfo)
             bossNum = 2
         case 2:
-            boss = Boss(type: .sadness, layoutInfo: scene.layoutInfo)
+            boss = OBBoss(type: .sadness, layoutInfo: scene.layoutInfo)
             bossNum = 3
         case 3:
-            boss = Boss(type: .disgust, layoutInfo: scene.layoutInfo)
+            boss = OBBoss(type: .disgust, layoutInfo: scene.layoutInfo)
             bossNum = 4
         case 4:
-            boss = Boss(type: .love, layoutInfo: scene.layoutInfo)
+            boss = OBBoss(type: .love, layoutInfo: scene.layoutInfo)
             bossNum = 1
         default:
-            boss = Boss(type: .anger, layoutInfo: scene.layoutInfo)
+            boss = OBBoss(type: .anger, layoutInfo: scene.layoutInfo)
             bossNum = 2
         }
         
@@ -425,7 +425,7 @@ class EnemyManager {
         enemies.append(boss)
     }
     
-    func getBossType() -> BossType {
+    func getBossType() -> OBBossType {
             switch bossNum {
             case 1: return .anger
             case 2: return .sadness
@@ -434,16 +434,16 @@ class EnemyManager {
             default: return .love
             }
         }
-    func handleEnemyDestroyed(_ enemy: Enemy) {
+    func handleEnemyDestroyed(_ enemy: OBEnemy) {
            if let index = enemies.firstIndex(of: enemy) {
                enemies.remove(at: index)
                
                if enemies.isEmpty {
-                   let delay: TimeInterval = (enemy is Boss) ? 3.5 : 1.0
+                   let delay: TimeInterval = (enemy is OBBoss) ? 3.5 : 1.0
                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                        guard let self = self else { return }
                        
-                       if enemy is Boss {
+                       if enemy is OBBoss {
                            // After boss, reset to wave 0
                            self.currentWave = 0
                            self.roadmap?.showRoadmap()
@@ -465,18 +465,18 @@ class EnemyManager {
        }
     
     
-    private var preparedEnemies: [(Enemy, CGPoint)] = []
+    private var preparedEnemies: [(OBEnemy, CGPoint)] = []
         
         private func prepareNextWave() {
             guard let scene = scene else { return }
             preparedEnemies.removeAll()
             
             let nextBossType = getBossType()
-            let formationKeys = Array(FormationMatrix.formations.keys)
+            let formationKeys = Array(OBFormationMatrix.formations.keys)
             let formationKey = formationKeys[currentWave % formationKeys.count]
-            let formation = FormationMatrix.formations[formationKey] ?? FormationMatrix.formations["standard"]!
+            let formation = OBFormationMatrix.formations[formationKey] ?? OBFormationMatrix.formations["standard"]!
             
-            let positions = FormationGenerator.generatePositions(
+            let positions = OBFormationGenerator.generatePositions(
                 from: formation,
                 in: scene,
                 spacing: CGSize(width: 60, height: 50),
@@ -484,7 +484,7 @@ class EnemyManager {
             )
             
             for (index, position) in positions.enumerated() {
-                let enemyType: EnemyType = {
+                let enemyType: OBEnemyType = {
                     switch index % 3 {
                     case 0: return .a
                     case 1: return .b
@@ -492,7 +492,7 @@ class EnemyManager {
                     }
                 }()
                 
-                let enemy = EnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
+                let enemy = OBEnemySpawner.makeEnemy(ofType: enemyType, layoutInfo: scene.layoutInfo)
                 enemy.updateTexture(forBossType: nextBossType)
                 preparedEnemies.append((enemy, position))
             }
@@ -523,8 +523,8 @@ class EnemyManager {
                 }
             }
         }
-    func handleBulletCollision(bullet: SKNode, enemy: Enemy) {
-        guard let bullet = bullet as? Bullet else { return }
+    func handleBulletCollision(bullet: SKNode, enemy: OBEnemy) {
+        guard let bullet = bullet as? OBBullet else { return }
         
         
         if enemy.takeDamage(bullet.damage) {
@@ -543,7 +543,7 @@ class EnemyManager {
         bullet.removeFromParent()
     }
     
-    func getAllEnemies() -> [Enemy] {
+    func getAllEnemies() -> [OBEnemy] {
         return enemies
     }
     

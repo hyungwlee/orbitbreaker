@@ -1,14 +1,21 @@
+//
+//  OBEnemyDebuffs.swift
+//  Orbit Breaker
+//
+//  Created by Michelle Bai on 12/20/24.
+//
+
 import SpriteKit
 
-enum DebuffType: CaseIterable {
+enum OBDebuffType: CaseIterable {
     case freeze
     
 }
 
-class Debuffs: SKSpriteNode {
-    let type: DebuffType
+class OBDebuffs: SKSpriteNode {
+    let type: OBDebuffType
     
-    init(type: DebuffType, color: UIColor, size: CGSize) {
+    init(type: OBDebuffType, color: UIColor, size: CGSize) {
         self.type = type
         
         super.init(texture: nil, color: color, size: size)
@@ -24,7 +31,7 @@ class Debuffs: SKSpriteNode {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func apply(to enemy: Enemy) {
+    func apply(to enemy: OBEnemy) {
         switch type {
         case .freeze:
   //          enemy.applyFreezeDebuff(to: [enemy])

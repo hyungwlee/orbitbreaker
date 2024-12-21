@@ -17,16 +17,16 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
 
     @State private var hasShield = false
     private var contentCreated = false
-    var enemyManager: EnemyManager!
-    var user: Player!
-    private var PowerUp: PowerUp!
-    private var debugControls: UIHostingController<DebugControls>?
+    var enemyManager: OBEnemyManager!
+    var user: OBPlayer!
+    private var PowerUp: OBPowerUp!
+    private var debugControls: UIHostingController<OBDebugControls>?
     var powerUpsDropped = 0
     let maxPowerUpsDropped = 3
     private var score: Int = 0
     private var scoreLabel: SKLabelNode!
-    var powerUpManager: PowerUpManager!
-    private var waveRoadmap: WaveRoadmap?
+    var powerUpManager: OBPowerUpManager!
+    private var waveRoadmap: OBWaveRoadmap?
     
     var bossCount = 0
     var background1: SKSpriteNode!
@@ -51,7 +51,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         super.didMove(to: view)
         initializeHaptics()
          setupDebugControls()
-        powerUpManager = PowerUpManager(scene: self, layoutInfo: layoutInfo)
+        powerUpManager = OBPowerUpManager(scene: self, layoutInfo: layoutInfo)
         super.didMove(to: view)
         didSceneLoad = true
         if !contentCreated {
@@ -153,7 +153,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     
     func preloadGame() {
             // Pre-load all textures at game start
-            TextureManager.shared.preloadTextures()
+            OBTextureManager.shared.preloadTextures()
         }
     
     private func setupBackgroundScrolling() {
@@ -202,7 +202,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
 
     private func setupDebugControls() {
           #if DEBUG
-          let debugView = DebugControls(isVisible: .constant(true)) { [weak self] in
+          let debugView = OBDebugControls(isVisible: .constant(true)) { [weak self] in
               self?.enemyManager.skipCurrentWave()
           }
           
@@ -229,8 +229,8 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
            physicsWorld.contactDelegate = self
            
            // Initialize managers/systems
-           enemyManager = EnemyManager(scene: self, layoutInfo: layoutInfo)
-           user = Orbit_Breaker.Player(scene: self, layoutInfo: layoutInfo)
+           enemyManager = OBEnemyManager(scene: self, layoutInfo: layoutInfo)
+           user = Orbit_Breaker.OBPlayer(scene: self, layoutInfo: layoutInfo)
            
            // Setup score label
            setupScoreLabel()
@@ -241,7 +241,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
        }
     
     // Call this function when the boss is defeated
-    func onBossDefeated(_ boss: Boss) {
+    func onBossDefeated(_ boss: OBBoss) {
             let newBackground: String
             
             switch boss.bossType {
@@ -252,7 +252,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
             }
             
             // Get pre-loaded texture
-            if let newTexture = TextureManager.shared.getTexture(newBackground) {
+            if let newTexture = OBTextureManager.shared.getTexture(newBackground) {
                 // Perform the fade transition
                 let fadeOutAction = SKAction.fadeOut(withDuration: 1.0)
                 let fadeInAction = SKAction.fadeIn(withDuration: 1.0)
@@ -335,7 +335,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     private func shieldHit(_ shield: SKSpriteNode) {
         // Find boss in the scene
         enumerateChildNodes(withName: "boss") { node, _ in
-            if let boss = node as? Boss {
+            if let boss = node as? OBBoss {
                 boss.damageShield(shield)
             }
         }
@@ -354,11 +354,11 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         // Check for heart shield collision with bullets
-        if let bullet = nodeA as? Bullet, let shield = nodeB as? SKSpriteNode,
+        if let bullet = nodeA as? OBBullet, let shield = nodeB as? SKSpriteNode,
            shield.name == "heartShield" {
             bullet.removeFromParent()
             shieldHit(shield)
-        } else if let bullet = nodeB as? Bullet, let shield = nodeA as? SKSpriteNode,
+        } else if let bullet = nodeB as? OBBullet, let shield = nodeA as? SKSpriteNode,
                   shield.name == "heartShield" {
             bullet.removeFromParent()
             shieldHit(shield)
@@ -376,13 +376,13 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         }
 
         // Add check for boss intro state
-        if let bullet = nodeA as? Bullet, let boss = nodeB as? Boss {
+        if let bullet = nodeA as? OBBullet, let boss = nodeB as? OBBoss {
             if !boss.hasEnteredScene {
                 bullet.removeFromParent()
                 return
             }
             handleBulletEnemyCollision(bullet: bullet, enemy: boss)
-        } else if let bullet = nodeB as? Bullet, let boss = nodeA as? Boss {
+        } else if let bullet = nodeB as? OBBullet, let boss = nodeA as? OBBoss {
             if !boss.hasEnteredScene {
                 bullet.removeFromParent()
                 return
@@ -391,17 +391,17 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         // Handle player collision with enemy
-        if (nodeA?.name == "testPlayer" && nodeB is Enemy) ||
-            (nodeB?.name == "testPlayer" && nodeA is Enemy) {
+        if (nodeA?.name == "testPlayer" && nodeB is OBEnemy) ||
+            (nodeB?.name == "testPlayer" && nodeA is OBEnemy) {
             handlePlayerHit()
             return
         }
         
         // Check bullet-enemy collisions
-        if let bullet = nodeA as? Bullet, let enemy = nodeB as? Enemy {
+        if let bullet = nodeA as? OBBullet, let enemy = nodeB as? OBEnemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
-        } else if let bullet = nodeB as? Bullet, let enemy = nodeA as? Enemy {
+        } else if let bullet = nodeB as? OBBullet, let enemy = nodeA as? OBEnemy {
             handleBulletEnemyCollision(bullet: bullet, enemy: enemy)
             playHapticFeedback()
         }
@@ -416,10 +416,10 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         // Handle power-up collisions
-        if let powerUp = nodeA as? PowerUp, let playerNode = nodeB as? SKSpriteNode,
+        if let powerUp = nodeA as? OBPowerUp, let playerNode = nodeB as? SKSpriteNode,
            powerUp.name == "powerUp" && playerNode.name == "testPlayer" {
             handlePowerUpCollision(powerUp)
-        } else if let powerUp = nodeB as? PowerUp, let playerNode = nodeA as? SKSpriteNode,
+        } else if let powerUp = nodeB as? OBPowerUp, let playerNode = nodeA as? SKSpriteNode,
                   powerUp.name == "powerUp" && playerNode.name == "testPlayer" {
             handlePowerUpCollision(powerUp)
         }
@@ -436,7 +436,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    private func handlePowerUpCollision(_ powerUp: PowerUp) {
+    private func handlePowerUpCollision(_ powerUp: OBPowerUp) {
         powerUp.apply(to: user)
         powerUp.removeFromParent()
     }
@@ -448,14 +448,14 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
             user.cleanup()
             
             // Show death effects first, then do cleanup
-            VisualEffects.addPlayerDeathEffect(at: playerNode.position, in: self) { [weak self] in
+            OBVisualEffects.addPlayerDeathEffect(at: playerNode.position, in: self) { [weak self] in
                 guard let self = self else { return }
                 
                 // Do thorough cleanup after death animation
                 self.cleanupLevel()
                 
                 enumerateChildNodes(withName: "boss") { node, _ in
-                    if let boss = node as? Boss {
+                    if let boss = node as? OBBoss {
                         boss.cleanup()
                     }
                 }
@@ -471,7 +471,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
                 
                 // Clean up any active boss effects
                 self.enemyManager.getAllEnemies().forEach { enemy in
-                    if let boss = enemy as? Boss {
+                    if let boss = enemy as? OBBoss {
                         boss.cleanup()
                     }
                     enemy.removeFromParent()
@@ -522,10 +522,10 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         
         for (index, enemy) in enemies.enumerated() {
             // Skip bosses
-            guard !(enemy is Boss) else { continue }
+            guard !(enemy is OBBoss) else { continue }
             
             // Assign different movement patterns based on position or random chance
-            let pattern: Enemy.MovementPattern
+            let pattern: OBEnemy.OBMovementPattern
             switch index % 4 {
             case 0: pattern = .oscillate
             case 1: pattern = .circle
@@ -554,10 +554,10 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         isPaused = false
 
         // Reset enemy manager and wave count
-        enemyManager = EnemyManager(scene: self, layoutInfo: layoutInfo)
+        enemyManager = OBEnemyManager(scene: self, layoutInfo: layoutInfo)
 
         // Reset power up manager
-        powerUpManager = PowerUpManager(scene: self, layoutInfo: layoutInfo)
+        powerUpManager = OBPowerUpManager(scene: self, layoutInfo: layoutInfo)
 
         // Create new content
         createContent()
@@ -678,7 +678,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     
-    private func handleBulletEnemyCollision(bullet: Bullet, enemy: Enemy) {
+    private func handleBulletEnemyCollision(bullet: OBBullet, enemy: OBEnemy) {
         bullet.removeFromParent()
         
         if enemy.takeDamage(bullet.damage) {
@@ -686,13 +686,13 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
             
             // Add screen shake for boss defeats
             // Check if it's a boss defeat
-                       if let boss = enemy as? Boss {
+                       if let boss = enemy as? OBBoss {
                            // Create epic boss defeat sequence
                            handleBossDefeat(boss)
                            updateScore(100)
             } else {
                 // Regular enemy defeat
-                VisualEffects.addExplosion(at: enemy.position, in: self)
+                OBVisualEffects.addExplosion(at: enemy.position, in: self)
                 updateScore(10)
             }
             
@@ -702,7 +702,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    private func handleBossDefeat(_ boss: Boss) {
+    private func handleBossDefeat(_ boss: OBBoss) {
             // Create multiple explosion waves
         SoundManager.shared.playSound("bossDeath.mp3")
             for i in 0...3 {
@@ -734,7 +734,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
                 )
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                    VisualEffects.addExplosion(at: position, in: self)
+                    OBVisualEffects.addExplosion(at: position, in: self)
                 }
             }
             
@@ -845,7 +845,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
             }
             
             // Add intense screen shake
-            VisualEffects.addScreenShake(to: self, intensity: 30)
+            OBVisualEffects.addScreenShake(to: self, intensity: 30)
             
             // Add victory text
             let victoryLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")

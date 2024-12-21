@@ -1,14 +1,14 @@
 //
-//  Enemy.swift
+//  OBEnemy.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 10/25/24.
+//  Created by Michelle Bai on 12/20/24.
 //
 
 import SpriteKit
 import SwiftUI
 
-class Enemy: SKSpriteNode {
+class OBEnemy: SKSpriteNode {
     var health: Int
     var initialHealth: Int
     private var nextShootTime: TimeInterval = 0
@@ -18,7 +18,7 @@ class Enemy: SKSpriteNode {
     
     var layoutInfo: OBLayoutInfo!
 
-    init(type: EnemyType, layoutInfo: OBLayoutInfo) {
+    init(type: OBEnemyType, layoutInfo: OBLayoutInfo) {
         self.initialHealth = type.initialHealth
         self.health = type.initialHealth
         self.canShoot = false
@@ -51,8 +51,8 @@ class Enemy: SKSpriteNode {
         SoundManager.shared.playSound(soundName)
     }
     
-    func updateSprite(forHealth health: Int, bossType: BossType) {
-        let spriteName = EnemyType.spriteForHealth(health, bossType: bossType)
+    func updateSprite(forHealth health: Int, bossType: OBBossType) {
+        let spriteName = OBEnemyType.spriteForHealth(health, bossType: bossType)
         self.texture = SKTexture(imageNamed: spriteName)
         
         // Flash effect
@@ -191,14 +191,14 @@ class Enemy: SKSpriteNode {
         }
     }
     
-    enum MovementPattern {
+    enum OBMovementPattern {
         case oscillate
         case circle
         case figure8
         case dive
     }
     
-    func addDynamicMovement(_ pattern: MovementPattern) {
+    func addDynamicMovement(_ pattern: OBMovementPattern) {
         switch pattern {
         case .oscillate:
             applyOscillation()
@@ -210,7 +210,7 @@ class Enemy: SKSpriteNode {
             applyDivePattern()
         }
     }
-    func updateTexture(forBossType bossType: BossType) {
+    func updateTexture(forBossType bossType: OBBossType) {
         let textureName: String
         switch bossType {
         case .anger:
@@ -332,8 +332,8 @@ class Enemy: SKSpriteNode {
     
     func dropPowerUp(scene: SKScene) {
         if (self.holdsPowerUp) {
-            let powerUpType = PowerUps.allCases.randomElement()!
-            let powerUp = PowerUp(type: powerUpType, color: .green, layoutInfo: layoutInfo)
+            let powerUpType = OBPowerUps.allCases.randomElement()!
+            let powerUp = OBPowerUp(type: powerUpType, color: .green, layoutInfo: layoutInfo)
             
             powerUp.name = "powerUp"
             powerUp.position = CGPoint(x: position.x, y: position.y - size.height/2)
@@ -433,7 +433,7 @@ class Enemy: SKSpriteNode {
             }
             
             return false
-        }     
+        }
     }
 
 

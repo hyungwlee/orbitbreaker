@@ -1,13 +1,13 @@
 //
-//  Bullets.swift
+//  OBBullets.swift
 //  Orbit Breaker
 //
-//  Created by Thomas Rife on 11/6/24.
+//  Created by Michelle Bai on 12/20/24.
 //
 
 import SpriteKit
 
-class Bullet: SKSpriteNode {
+class OBBullet: SKSpriteNode {
     var damage: Int
     
     init(damage: Int, texture: SKTexture? = SKTexture(imageNamed: "playerBullet"), size: CGSize, scaleFactor: CGFloat) {

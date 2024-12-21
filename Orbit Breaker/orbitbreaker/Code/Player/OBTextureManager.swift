@@ -1,5 +1,5 @@
 //
-//  TextureManager.swift
+//  OBTextureManager.swift
 //  Orbit Breaker
 //
 //  Created by August Wetterau on 12/12/24.
@@ -8,8 +8,8 @@
 import Foundation
 import SpriteKit
 
-class TextureManager {
-    static let shared = TextureManager()
+class OBTextureManager {
+    static let shared = OBTextureManager()
     private var textureCache: [String: SKTexture] = [:]
     
     private init() {}

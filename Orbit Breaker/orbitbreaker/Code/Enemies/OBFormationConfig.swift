@@ -1,14 +1,14 @@
 //
-//  FormationConfig.swift
+//  OBFormationConfig.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 11/29/24.
+//  Created by Michelle Bai on 12/20/24.
 //
 
 import SpriteKit
 
 
-struct FormationMatrix {
+struct OBFormationMatrix {
     // Each formation is defined by a 2D array where:
     // 1 represents an enemy position
     // 0 represents an empty space
@@ -66,7 +66,7 @@ struct FormationMatrix {
     
 }
 
-class FormationGenerator {
+class OBFormationGenerator {
     static func generatePositions(
            from matrix: [[Int]],
            in scene: SKScene,

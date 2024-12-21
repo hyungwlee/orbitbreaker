@@ -1,5 +1,5 @@
 //
-//  AsteroidField.swift
+//  OBAsteroidField.swift
 //  Orbit Breaker
 //
 //  Created by August Wetterau on 11/30/24.
@@ -8,13 +8,13 @@
 import SpriteKit
 
 
-class AsteroidFieldAnnouncement {
+class OBAsteroidFieldAnnouncement {
     private weak var scene: SKScene?
-    let powerUpManager: PowerUpManager
+    let powerUpManager: OBPowerUpManager
     
     init(scene: SKScene, layoutInfo: OBLayoutInfo) {
         self.scene = scene
-        self.powerUpManager = PowerUpManager(scene: scene, layoutInfo: layoutInfo)
+        self.powerUpManager = OBPowerUpManager(scene: scene, layoutInfo: layoutInfo)
     }
     
     func playSoundEffect(named soundName: String) {
@@ -105,7 +105,7 @@ class AsteroidFieldAnnouncement {
     }
 }
 
-class AsteroidFieldChallenge {
+class OBAsteroidFieldChallenge {
     private weak var scene: SKScene?
     private var asteroids: [SKNode] = []
        private var isActive = false

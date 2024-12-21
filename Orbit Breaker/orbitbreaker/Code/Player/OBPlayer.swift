@@ -1,5 +1,5 @@
 //
-//  TestPlayer.swift
+//  OBPlayer.swift
 //  Orbit Breaker
 //
 //  Created by August Wetterau on 10/25/24.
@@ -9,7 +9,7 @@
 
 import SpriteKit
 
-class Player {
+class OBPlayer {
     private weak var scene: SKScene?
     private var ship: SKSpriteNode
     private var lastFireTime: TimeInterval = 0
@@ -75,7 +75,7 @@ class Player {
         let baseBulletSize = CGSize(width: 6, height: 10)
         
         // Create a new bullet with the damage and scaled size
-        let bullet = Bullet(
+        let bullet = OBBullet(
             damage: bulletDamage,
             texture: SKTexture(imageNamed: "playerBullet"),
             size: baseBulletSize,

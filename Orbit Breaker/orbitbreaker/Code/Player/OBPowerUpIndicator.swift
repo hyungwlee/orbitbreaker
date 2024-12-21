@@ -1,17 +1,17 @@
 //
-//  PowerUpIndicator.swift
+//  OBPowerUpIndicator.swift
 //  Orbit Breaker
 //
 //  Created by August Wetterau on 11/30/24.
 //
 import SpriteKit
 
-class PowerUpIndicator: SKNode {
+class OBPowerUpIndicator: SKNode {
     private let backgroundNode: SKShapeNode
     private let iconNode: SKSpriteNode
     private let textNode: SKLabelNode
     private let progressRing: SKShapeNode
-    private var powerUpType: PowerUps?
+    private var powerUpType: OBPowerUps?
     private var duration: TimeInterval = 5.0
     private var startTime: TimeInterval = 0
     private var glowNode: SKEffectNode?
@@ -71,7 +71,7 @@ class PowerUpIndicator: SKNode {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func showPowerUp(_ type: PowerUps) {
+    func showPowerUp(_ type: OBPowerUps) {
         self.powerUpType = type
         self.startTime = 0
         
@@ -148,9 +148,9 @@ class PowerUpIndicator: SKNode {
     }
 }
 
-class PowerUpManager {
-    private var indicators: [PowerUpIndicator] = []
-    private var droppedPowerUps: [PowerUp] = []
+class OBPowerUpManager {
+    private var indicators: [OBPowerUpIndicator] = []
+    private var droppedPowerUps: [OBPowerUp] = []
     private weak var scene: SKScene?
     var layoutInfo: OBLayoutInfo
     
@@ -168,10 +168,10 @@ class PowerUpManager {
         let leftMargin: CGFloat = 15 * layoutInfo.screenScaleFactor
         let bottomMargin: CGFloat = 20 * layoutInfo.screenScaleFactor
         
-        let orderedPowerUps = [PowerUps.shield, PowerUps.doubleDamage]
+        let orderedPowerUps = [OBPowerUps.shield, OBPowerUps.doubleDamage]
         
         for (index, type) in orderedPowerUps.enumerated() {
-            let indicator = PowerUpIndicator(size: size, layoutInfo: layoutInfo)
+            let indicator = OBPowerUpIndicator(size: size, layoutInfo: layoutInfo)
             let xPosition = leftMargin + (size / 2) + (CGFloat(index) * (size + spacing))
             
             indicator.position = CGPoint(
@@ -184,7 +184,7 @@ class PowerUpManager {
         }
     }
     
-    func trackDroppedPowerUp(_ powerUp: PowerUp) {
+    func trackDroppedPowerUp(_ powerUp: OBPowerUp) {
         droppedPowerUps.append(powerUp)
     }
     
@@ -198,15 +198,15 @@ class PowerUpManager {
         droppedPowerUps.removeAll()
     }
     
-    func showPowerUp(_ type: PowerUps) {
-        if let index = PowerUps.allCases.firstIndex(of: type) {
+    func showPowerUp(_ type: OBPowerUps) {
+        if let index = OBPowerUps.allCases.firstIndex(of: type) {
             indicators[index].showPowerUp(type)
         }
     }
     
     func hideShieldIndicator() {
         // Hide only the shield indicator
-        if let shieldIndex = PowerUps.allCases.firstIndex(of: .shield) {
+        if let shieldIndex = OBPowerUps.allCases.firstIndex(of: .shield) {
             indicators[shieldIndex].hideIfShield()
         }
     }

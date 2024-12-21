@@ -1,14 +1,15 @@
 //
-//  EnemyConfig.swift
+//  OBEnemyConfig.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 10/25/24.
+//  Created by Michelle Bai on 12/20/24.
 //
+
 
 import Foundation
 import CoreGraphics
 
-struct EnemyConfig {
+struct OBEnemyConfig {
     // Grid layout
     static let topScreenPadding: CGFloat = 0.2  // 20% padding from top
     static let gridHeight: CGFloat = 0.33       // Takes up 1/3 of screen height

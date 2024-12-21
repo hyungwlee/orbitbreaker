@@ -1,13 +1,13 @@
 //
-//  EnemyTypes.swift
+//  OBEnemyTypes.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 10/25/24.
+//  Created by Michelle Bai on 12/20/24.
 //
 
 import SpriteKit
 
-enum EnemyType {
+enum OBEnemyType {
     case a
     case b
     case c
@@ -26,7 +26,7 @@ enum EnemyType {
     }
     
     // Get sprite name based on health and boss type
-    static func spriteForHealth(_ health: Int, bossType: BossType) -> String {
+    static func spriteForHealth(_ health: Int, bossType: OBBossType) -> String {
         let prefix = bossType == .anger ? "Angry" :
                     bossType == .disgust ? "Breathe" :
                     bossType == .sadness ? "Sad" :

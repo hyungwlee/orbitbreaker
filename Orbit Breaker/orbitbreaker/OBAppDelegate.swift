@@ -14,7 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Create the SwiftUI view that provides the app's main interface
-        let contentView = ContentView()
+        let contentView = OBContentView()
 
         // Use a UIHostingController as the window's root view controller
         let hostingController = UIHostingController(rootView: contentView)

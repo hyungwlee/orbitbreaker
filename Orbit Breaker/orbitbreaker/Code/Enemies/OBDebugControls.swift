@@ -1,13 +1,13 @@
 //
-//  DebugControls.swift
+//  OBDebugControls.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 11/6/24.
+//  Created by Michelle Bai on 12/20/24.
 //
 
 import SwiftUI
 
-struct DebugControls: View {
+struct OBDebugControls: View {
     @Binding var isVisible: Bool
     var nextWave: () -> Void
     @State private var currentWave = 1

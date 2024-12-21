@@ -1,15 +1,16 @@
 //
-//  EnemyWaveManager.swift
+//  OBEnemyWaveManager.swift
 //  Orbit Breaker
 //
-//  Created by August Wetterau on 10/28/24.
+//  Created by Michelle Bai on 12/20/24.
 //
+
 
 import Foundation
 import SpriteKit
 import CoreGraphics
 
-struct EnemyWaveConfig {
+struct OBEnemyWaveConfig {
     static let leftEntryPoint = CGPoint(x: -30, y: 550)
     static let rightEntryPoint = CGPoint(x: 450, y: 550)
     
@@ -20,7 +21,7 @@ struct EnemyWaveConfig {
     static let leftBottomPoint = CGPoint(x: 100, y: 100)  // Near bottom left
     static let rightBottomPoint = CGPoint(x: 320, y: 100) // Near bottom right
     
-    enum EntryPattern {
+    enum OBEntryPattern {
         case swoopLeft
         case swoopRight
         case advancedSwoopLeft
@@ -48,10 +49,10 @@ struct EnemyWaveConfig {
     }
 }
 
-class WaveManager {
+class OBWaveManager {
     private weak var scene: SKScene?
     private var currentWave = 0
-    private var enemySpawnQueue: [(Enemy, CGPoint)] = []
+    private var enemySpawnQueue: [(OBEnemy, CGPoint)] = []
     private var isSpawning = false
     private var lastSpawnTime: TimeInterval = 0
     
@@ -64,7 +65,7 @@ class WaveManager {
         lastSpawnTime = 0
     }
     
-    func startNextWave(enemies: [(Enemy, CGPoint)]) {
+    func startNextWave(enemies: [(OBEnemy, CGPoint)]) {
         currentWave += 1
         enemySpawnQueue = enemies
         isSpawning = true
@@ -74,14 +75,14 @@ class WaveManager {
     func update(currentTime: TimeInterval) {
         guard isSpawning,
               !enemySpawnQueue.isEmpty,
-              currentTime - lastSpawnTime >= EnemyWaveConfig.enemySpawnInterval,
+              currentTime - lastSpawnTime >= OBEnemyWaveConfig.enemySpawnInterval,
               let scene = scene else { return }
         
         let (enemy, finalPosition) = enemySpawnQueue.removeFirst()
         let useLeftEntry = enemySpawnQueue.count % 2 == 0
         
-        let startPoint = useLeftEntry ? EnemyWaveConfig.leftEntryPoint : EnemyWaveConfig.rightEntryPoint
-        let pattern: EnemyWaveConfig.EntryPattern = useLeftEntry ? .advancedSwoopLeft : .advancedSwoopRight
+        let startPoint = useLeftEntry ? OBEnemyWaveConfig.leftEntryPoint : OBEnemyWaveConfig.rightEntryPoint
+        let pattern: OBEnemyWaveConfig.OBEntryPattern = useLeftEntry ? .advancedSwoopLeft : .advancedSwoopRight
         
         enemy.position = startPoint
         // Set rotation to 0 (facing right)
@@ -91,8 +92,8 @@ class WaveManager {
         let path = pattern.generatePath(from: startPoint, to: finalPosition, waveNumber: currentWave)
         
         let pathDuration = currentWave <= 3 ?
-        EnemyWaveConfig.pathDuration :
-        EnemyWaveConfig.pathDuration * 1.5
+        OBEnemyWaveConfig.pathDuration :
+        OBEnemyWaveConfig.pathDuration * 1.5
         
         let followPath = SKAction.follow(path.cgPath,
                                          asOffset: false,
