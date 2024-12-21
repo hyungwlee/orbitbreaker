@@ -12,9 +12,9 @@ class AsteroidFieldAnnouncement {
     private weak var scene: SKScene?
     let powerUpManager: PowerUpManager
     
-    init(scene: SKScene) {
+    init(scene: SKScene, layoutInfo: OBLayoutInfo) {
         self.scene = scene
-        self.powerUpManager = PowerUpManager(scene: scene)
+        self.powerUpManager = PowerUpManager(scene: scene, layoutInfo: layoutInfo)
     }
     
     func playSoundEffect(named soundName: String) {

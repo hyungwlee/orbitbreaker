@@ -10,10 +10,12 @@ import SpriteKit
 class Bullet: SKSpriteNode {
     var damage: Int
     
-    init(damage: Int, texture: SKTexture? = SKTexture(imageNamed: "playerBullet"), size: CGSize) {
+    init(damage: Int, texture: SKTexture? = SKTexture(imageNamed: "playerBullet"), size: CGSize, scaleFactor: CGFloat) {
         self.damage = damage
-        super.init(texture: texture, color: .clear, size: size)
-        
+        let scaledSize = CGSize(width: size.width * scaleFactor, height: size.height * scaleFactor)
+
+        super.init(texture: texture, color: .clear, size: scaledSize)
+
         self.physicsBody = SKPhysicsBody(rectangleOf: size)
         self.physicsBody?.categoryBitMask =
         0x1 << 1 // Bullet category

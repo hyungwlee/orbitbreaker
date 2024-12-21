@@ -11,10 +11,18 @@ enum PowerUps: CaseIterable {
     case shield
     case doubleDamage
     
-    var size: CGSize {
+    func size(using layoutInfo: OBLayoutInfo) -> CGSize {
         switch self {
-        case .shield: return CGSize(width: 25, height: 30)  // Adjusted to be thinner
-        case .doubleDamage: return CGSize(width: 30, height: 30)
+            case .shield:
+            let baseSize = CGSize(width: 20, height: 25)
+            return CGSize(
+                width: baseSize.width * layoutInfo.screenScaleFactor,
+                height: baseSize.height * layoutInfo.screenScaleFactor)
+        case .doubleDamage:
+            let baseSize = CGSize(width: 30, height: 30)
+            return CGSize(
+                width: baseSize.width * layoutInfo.screenScaleFactor,
+                height: baseSize.height * layoutInfo.screenScaleFactor)
         }
     }
 }
@@ -22,21 +30,24 @@ enum PowerUps: CaseIterable {
 class PowerUp: SKSpriteNode {
     let type: PowerUps
     
-    init(type: PowerUps, color: UIColor, size: CGSize) {
+    init(type: PowerUps, color: UIColor, layoutInfo: OBLayoutInfo) {
         self.type = type
+        
+        // Get the scaled size using layoutInfo
+        let scaledSize = type.size(using: layoutInfo)
         
         // For double damage, create a custom node
         if type == .doubleDamage {
             let texture = SKTexture(imageNamed: "doubleDamage")
-            super.init(texture: texture, color: .white, size: type.size)
+            super.init(texture: texture, color: .white, size: scaledSize)
         } else {
             // Shield uses the sprite
             let texture = SKTexture(imageNamed: "shield")
-            super.init(texture: texture, color: .white, size: type.size)
+            super.init(texture: texture, color: .white, size: scaledSize)
         }
         
         // Physics setup
-        self.physicsBody = SKPhysicsBody(rectangleOf: type.size)
+        self.physicsBody = SKPhysicsBody(rectangleOf: scaledSize)
         self.physicsBody?.categoryBitMask = 0x1 << 1
         self.physicsBody?.contactTestBitMask = 0x1 << 2
         self.physicsBody?.collisionBitMask = 0
@@ -52,7 +63,6 @@ class PowerUp: SKSpriteNode {
             SKAction.scale(to: 1.0, duration: 0.5)
         ])
         run(SKAction.repeatForever(pulseAction))
-        
     }
     
     func playSoundEffect(named soundName: String) {
@@ -135,3 +145,4 @@ class PowerUp: SKSpriteNode {
         }
     }
 }
+

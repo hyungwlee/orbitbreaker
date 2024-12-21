@@ -16,15 +16,17 @@ class PowerUpIndicator: SKNode {
     private var startTime: TimeInterval = 0
     private var glowNode: SKEffectNode?
     private var sizeChanged = false
+    var layoutInfo: OBLayoutInfo
     
-    init(size: CGFloat) {
+    init(size: CGFloat, layoutInfo: OBLayoutInfo) {
+        self.layoutInfo = layoutInfo
         // Create rounded background using SKShapeNode
-        backgroundNode = SKShapeNode(circleOfRadius: size/2)
+        backgroundNode = SKShapeNode(circleOfRadius: size/2 * layoutInfo.screenScaleFactor)
         backgroundNode.fillColor = SKColor(red: 0.1, green: 0.1, blue: 0.2, alpha: 0.9)
         backgroundNode.strokeColor = .clear
         
         // Create progress ring with space theme
-        progressRing = SKShapeNode(circleOfRadius: size/2 - 2)
+        progressRing = SKShapeNode(circleOfRadius: size/2 - 2 * layoutInfo.screenScaleFactor)
         progressRing.strokeColor = .clear
         progressRing.fillColor = .clear
         progressRing.lineWidth = 3
@@ -35,7 +37,7 @@ class PowerUpIndicator: SKNode {
         
         // Create text node for X2
         textNode = SKLabelNode(fontNamed: "AvenirNext-Heavy")
-        textNode.fontSize = size * 0.35
+        textNode.fontSize = size * 0.35 * layoutInfo.screenScaleFactor
         textNode.verticalAlignmentMode = .center
         textNode.horizontalAlignmentMode = .center
         textNode.fontColor = .white
@@ -43,7 +45,7 @@ class PowerUpIndicator: SKNode {
         super.init()
         
         // Create metallic border effect
-        let border = SKShapeNode(circleOfRadius: size/2)
+        let border = SKShapeNode(circleOfRadius: size/2 * layoutInfo.screenScaleFactor)
         border.strokeColor = .white
         border.lineWidth = 2
         border.glowWidth = 1
@@ -89,7 +91,7 @@ class PowerUpIndicator: SKNode {
             iconNode.texture = SKTexture(imageNamed: "doubleDamage")
             textNode.text = ""
             if sizeChanged == false {
-                iconNode.size = CGSize(width: iconNode.size.width * 1.7, height: iconNode.size.height * 1.3)
+                iconNode.size = CGSize(width: iconNode.size.width * 1.7 * layoutInfo.screenScaleFactor, height: iconNode.size.height * 1.3 * layoutInfo.screenScaleFactor)
                 sizeChanged = true
             }
         
@@ -150,9 +152,11 @@ class PowerUpManager {
     private var indicators: [PowerUpIndicator] = []
     private var droppedPowerUps: [PowerUp] = []
     private weak var scene: SKScene?
+    var layoutInfo: OBLayoutInfo
     
-    init(scene: SKScene) {
+    init(scene: SKScene, layoutInfo: OBLayoutInfo) {
         self.scene = scene
+        self.layoutInfo = layoutInfo
         setupIndicators()
     }
     
@@ -167,7 +171,7 @@ class PowerUpManager {
         let orderedPowerUps = [PowerUps.shield, PowerUps.doubleDamage]
         
         for (index, type) in orderedPowerUps.enumerated() {
-            let indicator = PowerUpIndicator(size: size)
+            let indicator = PowerUpIndicator(size: size, layoutInfo: layoutInfo)
             let xPosition = leftMargin + (size / 2) + (CGFloat(index) * (size + spacing))
             
             indicator.position = CGPoint(

@@ -104,8 +104,6 @@ class Boss: Enemy {
     private var healthBarContainer: SKNode?
     private var originalFillColor: SKColor = .red  // Store the original color
     
-    
-    
     // In Boss.swift
     init(type: BossType, layoutInfo: OBLayoutInfo) {
         
@@ -354,7 +352,7 @@ class Boss: Enemy {
         guard let player = scene.childNode(withName: "testPlayer") else { return }
         
         let heart = SKSpriteNode(imageNamed: "heart")
-        heart.size = CGSize(width: 20, height: 20)
+        heart.size = CGSize(width: 20 * layoutInfo.screenScaleFactor, height: 20 * layoutInfo.screenScaleFactor)
         heart.name = "enemyBullet"
         heart.position = position
         
@@ -404,7 +402,7 @@ class Boss: Enemy {
             let angle = (CGFloat(i) / CGFloat(shieldCount)) * CGFloat.pi * 2
             
             let shield = SKSpriteNode(imageNamed: "heartShield")
-            shield.size = CGSize(width: 20, height: 20)
+            shield.size = CGSize(width: 20 * layoutInfo.screenScaleFactor, height: 20 * layoutInfo.screenScaleFactor)
             shield.name = "heartShield"
             shield.zPosition = 1
             shield.position = CGPoint(
@@ -583,7 +581,7 @@ class Boss: Enemy {
     
     private func createRaindrop(at position: CGPoint, in scene: SKScene) {
         let raindrop = SKSpriteNode(imageNamed: "raindrop")
-        raindrop.size = CGSize(width: 8, height: 16)
+        raindrop.size = CGSize(width: 8 * layoutInfo.screenScaleFactor, height: 16 * layoutInfo.screenScaleFactor)
         raindrop.position = position
         raindrop.name = "enemyBullet"
         raindrop.alpha = 0.7
@@ -630,7 +628,7 @@ class Boss: Enemy {
         let cloudY = min(proposedY, maxCloudHeight)
         
         let cloud = SKSpriteNode(imageNamed: "raincloud")
-        cloud.size = CGSize(width: 100, height: 60)
+        cloud.size = CGSize(width: 100 * layoutInfo.screenScaleFactor, height: 60 * layoutInfo.screenScaleFactor)
         cloud.position = CGPoint(x: playerPosition.x, y: cloudY)
         cloud.zPosition = 2
         
@@ -837,7 +835,7 @@ class Boss: Enemy {
         guard let player = scene.childNode(withName: "testPlayer") else { return }
         
         let projectile = SKSpriteNode(imageNamed: "slimeBall")
-        projectile.size = CGSize(width: 20, height: 20)
+        projectile.size = CGSize(width: 20 * layoutInfo.screenScaleFactor, height: 20 * layoutInfo.screenScaleFactor)
         projectile.position = position
         projectile.name = "enemyBullet"
         
@@ -961,7 +959,7 @@ class Boss: Enemy {
         for i in 0..<bulletCount {
             let angle = (CGFloat(i) / CGFloat(bulletCount)) * CGFloat.pi * 2
             
-            let bullet = SKShapeNode(circleOfRadius: 8)
+            let bullet = SKShapeNode(circleOfRadius: 8 * layoutInfo.screenScaleFactor)
             bullet.fillColor = .green
             bullet.strokeColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 1.0)
             bullet.name = "enemyBullet"
@@ -1019,7 +1017,7 @@ class Boss: Enemy {
         
         for i in 0..<bulletCount {
             let fireball = SKSpriteNode(imageNamed: "Fireball")
-            fireball.size = CGSize(width: 24, height: 24)
+            fireball.size = CGSize(width: 24 * layoutInfo.screenScaleFactor, height: 24 * layoutInfo.screenScaleFactor)
             fireball.name = "enemyBullet"
             
             // Create glow effect

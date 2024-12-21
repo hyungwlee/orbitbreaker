@@ -13,8 +13,12 @@ enum EnemyType {
     case c
     case d
     
-    static var size: CGSize {
-        return CGSize(width: 24, height: 16)
+    func size(using layoutInfo: OBLayoutInfo) -> CGSize {
+        let baseSize = CGSize(width: 55.2, height: 36.8)
+        return CGSize(
+            width: baseSize.width * layoutInfo.screenScaleFactor,
+            height: baseSize.height * layoutInfo.screenScaleFactor
+        )
     }
 
     static var name: String {

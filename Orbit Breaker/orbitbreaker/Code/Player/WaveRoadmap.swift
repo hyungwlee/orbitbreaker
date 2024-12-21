@@ -16,46 +16,47 @@ class WaveRoadmap {
     private var enemyManager: EnemyManager
     var screenHeight: Int
     var isiPhoneSE: Bool // SE (2nd gen) has 667 points height
+    var layoutInfo: OBLayoutInfo
     
+    init(scene: SKScene, enemyManager: EnemyManager, layoutInfo: OBLayoutInfo) {
+       self.scene = scene
+       self.enemyManager = enemyManager
+       self.screenHeight = Int(UIScreen.main.bounds.height)
+       self.layoutInfo = layoutInfo
+       self.isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
+       setupRoadmap()
+   }
     
-    init(scene: SKScene, enemyManager: EnemyManager) {
-           self.scene = scene
-           self.enemyManager = enemyManager
-           self.screenHeight = Int(UIScreen.main.bounds.height)
-           self.isiPhoneSE = screenHeight <= 667 // SE (2nd gen) has 667 points height
-           setupRoadmap()
-       }
+    private func setupRoadmap() {
+        guard let scene = scene else { return }
         
-        private func setupRoadmap() {
-            guard let scene = scene else { return }
-            
-            // Ensure thorough cleanup before setting up
-            cleanup()
-            
-            let spacing: CGFloat = 50
-            let dotRadius: CGFloat = 15
-            let centerX: CGFloat = 45
-            
-            // Adjust margins based on device
-            let topMargin: CGFloat = isiPhoneSE ? 30 : 80
-            let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
-            
-            // Create connecting "space path" with enhanced visibility
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: centerX, y: startY))
-            path.addLine(to: CGPoint(x: centerX, y: scene.size.height - topMargin))
+        // Ensure thorough cleanup before setting up
+        cleanup()
+        
+        let spacing: CGFloat = 50 * layoutInfo.screenScaleFactor
+        let dotRadius: CGFloat = 15 * layoutInfo.screenScaleFactor
+        let centerX: CGFloat = 45 * layoutInfo.screenScaleFactor
+        
+        // Adjust margins based on device
+        let topMargin: CGFloat = isiPhoneSE ? 30 : 80
+        let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
+        
+        // Create connecting "space path" with enhanced visibility
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: centerX, y: startY))
+        path.addLine(to: CGPoint(x: centerX, y: scene.size.height - topMargin))
             
         
         // Add glowing background to path
         let glowPath = SKShapeNode(path: path)
         glowPath.strokeColor = SKColor(red: 0.3, green: 0.4, blue: 0.8, alpha: 0.2)
-        glowPath.lineWidth = 12
+        glowPath.lineWidth = 12 * layoutInfo.screenScaleFactor  // Scale the line width
         glowPath.lineCap = .round
         glowPath.zPosition = 1
         
         let mainPath = SKShapeNode(path: path)
         mainPath.strokeColor = SKColor(red: 0.3, green: 0.4, blue: 0.8, alpha: 0.4)
-        mainPath.lineWidth = 4
+        mainPath.lineWidth = 4 * layoutInfo.screenScaleFactor  // Scale the line width
         mainPath.lineCap = .round
         mainPath.zPosition = 2
         
@@ -196,15 +197,17 @@ class WaveRoadmap {
         
         // Create triangular ship shape
         let shipPath = CGMutablePath()
-        shipPath.move(to: CGPoint(x: 0, y: 12))      // Top point
-        shipPath.addLine(to: CGPoint(x: -8, y: -6))  // Bottom left
-        shipPath.addLine(to: CGPoint(x: 8, y: -6))   // Bottom right
+        shipPath.move(to: CGPoint(x: 0, y: 12 * self.layoutInfo.screenScaleFactor))      // Top point
+        shipPath.addLine(to: CGPoint(x: -8 * self.layoutInfo.screenScaleFactor,
+                                     y: -6 * self.layoutInfo.screenScaleFactor))  // Bottom left
+        shipPath.addLine(to: CGPoint(x: 8 * self.layoutInfo.screenScaleFactor,
+                                     y: -6 * self.layoutInfo.screenScaleFactor))   // Bottom right
         shipPath.closeSubpath()
         
         let ship = SKShapeNode(path: shipPath)
         ship.fillColor = SKColor(red: 1.0, green: 0.8, blue: 0.2, alpha: 0.9)
         ship.strokeColor = SKColor(red: 1.0, green: 0.9, blue: 0.3, alpha: 1.0)
-        ship.lineWidth = 2
+        ship.lineWidth = 2 * layoutInfo.screenScaleFactor
         ship.zPosition = 10
         ship.name = "playerIndicator"  // Add a name to help with cleanup
         
@@ -212,7 +215,7 @@ class WaveRoadmap {
         let engineGlow = SKShapeNode(path: CGMutablePath())
         engineGlow.fillColor = SKColor(red: 1.0, green: 0.5, blue: 0.2, alpha: 0.6)
         engineGlow.strokeColor = .clear
-        engineGlow.position = CGPoint(x: 0, y: -8)
+        engineGlow.position = CGPoint(x: 0, y: -8 * layoutInfo.screenScaleFactor)
         
         let pulseAction = SKAction.sequence([
             SKAction.fadeAlpha(to: 0.2, duration: 0.5),
@@ -237,17 +240,25 @@ class WaveRoadmap {
     }
     
     func updateCurrentWave(_ wave: Int) {
-            guard let scene = scene else { return }
-            
-            let spacing: CGFloat = 50
-            let topMargin: CGFloat = isiPhoneSE ? 30 : 80
-            let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
-            let currentStage = wave == 0 ? 0 : (wave - 1) % stageCount
-            let y = startY + CGFloat(currentStage) * spacing
+        guard let scene = scene else { return }
         
+        let spacing: CGFloat = 50 * layoutInfo.screenScaleFactor  // Scale the spacing
+        let topMargin: CGFloat = isiPhoneSE ? 30 : 80
+        let startY = scene.size.height - topMargin - (CGFloat(stageCount - 1) * spacing)
+        let currentStage = wave == 0 ? 0 : (wave - 1) % stageCount
+        let y = startY + CGFloat(currentStage) * spacing
+        
+        // Adjust the X position based on the device model
+        let xPosition: CGFloat
+        if isiPhoneSE {
+            xPosition = 45 - 13.5  // Move left for iPhone SE
+        } else {
+            xPosition = 45  // Keep it as is for other devices
+        }
+
         // Only move the existing indicator, don't create a new one
         if let indicator = currentStageIndicator {
-            let moveAction = SKAction.move(to: CGPoint(x: 45, y: y), duration: 0.8)
+            let moveAction = SKAction.move(to: CGPoint(x: xPosition, y: y), duration: 0.8)
             moveAction.timingMode = .easeInEaseOut
             indicator.run(moveAction)
         }
@@ -293,9 +304,9 @@ class WaveRoadmap {
             }
         }
         
-        // Move player indicator
+        // Move player indicator with adjusted X position
         if let indicator = currentStageIndicator {
-            let moveAction = SKAction.move(to: CGPoint(x: 45, y: y), duration: 0.8)
+            let moveAction = SKAction.move(to: CGPoint(x: xPosition, y: y), duration: 0.8)
             moveAction.timingMode = .easeInEaseOut
             indicator.run(moveAction)
         }
@@ -327,10 +338,10 @@ class WaveRoadmap {
             let bossSprite = SKSpriteNode(imageNamed: spriteName)
             bossSprite.alpha = 0 // Start invisible for fade in
             bossSprite.size = switch self.enemyManager.bossNum {
-            case 2: CGSize(width: 50, height: 30)
-            case 3: CGSize(width: 30, height: 30)
-            case 4: CGSize(width: 30, height: 30)
-            default: CGSize(width: 45, height: 30)
+            case 2: CGSize(width: 50 * self.layoutInfo.screenScaleFactor, height: 30 * self.layoutInfo.screenScaleFactor)
+            case 3: CGSize(width: 30 * self.layoutInfo.screenScaleFactor, height: 30 * self.layoutInfo.screenScaleFactor)
+            case 4: CGSize(width: 30 * self.layoutInfo.screenScaleFactor, height: 30 * self.layoutInfo.screenScaleFactor)
+            default: CGSize(width: 45 * self.layoutInfo.screenScaleFactor, height: 30 * self.layoutInfo.screenScaleFactor)
             }
             bossSprite.position = .zero
             marker.addChild(bossSprite)

@@ -21,19 +21,17 @@ class Player {
     private var shieldTimer: Timer?
     private var damageTimer: Timer?
     var canShoot: Bool = true
-    
+    var scaleFactor: CGFloat
+    var layoutInfo: OBLayoutInfo // Store the layoutInfo to access screenScaleFactor
+
     init(scene: SKScene, layoutInfo: OBLayoutInfo) {
         self.scene = scene
-        
-        // Initialize ship
-        //ship = SKSpriteNode(color: .white, size: CGSize(width: 30, height: 30))
-        
-//        init(scene: SKScene, layoutInfo: LayoutInfo) {
-//            self.scene = scene
-//
+        self.scaleFactor = 1.5
+        self.layoutInfo = layoutInfo // Store layoutInfo for access to screenScaleFactor
+
         // Use size and position from LayoutInfo
         ship = SKSpriteNode(imageNamed: "Player")
-        let scaleFactor: CGFloat = 1.5 // Adjust this to fine-tune the size
+        // let scaleFactor: CGFloat = 1.5 // Adjust this to fine-tune the size
         ship.size = CGSize(width: layoutInfo.nodeSize.width * scaleFactor,
                            height: layoutInfo.nodeSize.height * scaleFactor)
         
@@ -59,34 +57,43 @@ class Player {
         SoundManager.shared.playSound(soundName)
     }
     
-    func update(currentTime: TimeInterval) {
+    func update(currentTime: TimeInterval, layoutInfo: OBLayoutInfo) {
         // Only fire if canShoot is true
         if canShoot && currentTime - lastFireTime >= fireRate {
-            fireBullet()
+            fireBullet(layoutInfo: layoutInfo)
             lastFireTime = currentTime
         }
     }
     
-    func fireBullet() {
+    func fireBullet(layoutInfo: OBLayoutInfo) {
         guard let scene = scene else { return }
-        // bullet damage gets multiplied by damage multiplier (either 0 or 1 depending on power up status)
-        let bulletdamage: Int = 10 * damageMultiplier
         
-        // Create new bullet with damage criteria from above
-        let bullet = Bullet(damage: bulletdamage, texture: SKTexture(imageNamed: "playerBullet"), size: CGSize(width: 6, height: 10))
+        // Bullet damage gets multiplied by damage multiplier (either 0 or 1 depending on power-up status)
+        let bulletDamage: Int = 10 * damageMultiplier
         
-        // set bullet position
-        bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height/2)
+        // Define the base size for the bullet
+        let baseBulletSize = CGSize(width: 6, height: 10)
+        
+        // Create a new bullet with the damage and scaled size
+        let bullet = Bullet(
+            damage: bulletDamage,
+            texture: SKTexture(imageNamed: "playerBullet"),
+            size: baseBulletSize,
+            scaleFactor: layoutInfo.screenScaleFactor // Pass the scale factor
+        )
+        
+        // Set the bullet position
+        bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height / 2)
         bullet.name = "testBullet"
         
-        // adds bullet to ship
+        // Add the bullet to the scene
         scene.addChild(bullet)
         
+        // Move the bullet upwards and remove it when out of bounds
         let moveAction = SKAction.moveBy(x: 0, y: scene.size.height + bullet.size.height, duration: 1.0)
         let removeAction = SKAction.removeFromParent()
         bullet.run(SKAction.sequence([moveAction, removeAction]))
     }
-    
     
     func handleTouch(_ touch: UITouch) {
         guard let scene = scene else { return }
@@ -112,7 +119,10 @@ class Player {
     func addShield() {
         hasShield = true
         if shieldNode == nil {
-            shieldNode = SKShapeNode(circleOfRadius: 50)
+            // Use the screenScaleFactor to adjust the shield size
+            let shieldRadius = 50 * layoutInfo.screenScaleFactor // Scale the shield radius by screenScaleFactor
+            shieldNode = SKShapeNode(circleOfRadius: shieldRadius)
+            
             shieldNode?.strokeColor = .clear
             shieldNode?.fillColor = UIColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 0.3)
             shieldNode?.position = CGPoint(x: 0, y: 0)

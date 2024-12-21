@@ -25,15 +25,16 @@ class Enemy: SKSpriteNode {
         self.holdsPowerUp = false
         self.holdsDebuff = false
         self.layoutInfo = layoutInfo
-
-        super.init(texture: SKTexture(imageNamed: "enemy"), color: .white,
-                   size: CGSize(width: EnemyType.size.width * 2, height: EnemyType.size.height * 2.3))
         
+        let scaledSize = type.size(using: layoutInfo)
+
+        super.init(texture: SKTexture(imageNamed: "enemy"), color: .white, size: scaledSize)
+       
         self.zPosition = 1
         self.zRotation = 0
         self.colorBlendFactor = 1.0
         
-        self.physicsBody = SKPhysicsBody(circleOfRadius: EnemyType.size.width)
+        self.physicsBody = SKPhysicsBody(circleOfRadius: scaledSize.width / 2)
         self.physicsBody?.categoryBitMask = 0x1 << 2        // Category 2 (Enemy)
         self.physicsBody?.contactTestBitMask = 0x1 << 1     // Player bullets (Category 1)
         self.physicsBody?.collisionBitMask = 0              // No physical collisions
@@ -67,7 +68,7 @@ class Enemy: SKSpriteNode {
         
         if currentTime >= nextShootTime {
             print("Enemy shooting at time: \(currentTime)")
-            shoot(scene: scene)
+            shoot(scene: scene, layoutInfo: layoutInfo)
             playSoundEffect(named: "new_enemy_shoot.mp3")
             
             let baseInterval = 3.0
@@ -309,9 +310,9 @@ class Enemy: SKSpriteNode {
         run(SKAction.repeatForever(diveSequence))
     }
     
-    private func shoot(scene: SKScene) {
+    private func shoot(scene: SKScene, layoutInfo: OBLayoutInfo) {
         let bullet = SKSpriteNode(texture: SKTexture(imageNamed: "enemyBullet"))
-        bullet.size = CGSize(width: 8, height: 12)
+        bullet.size = CGSize(width: 6 * layoutInfo.screenScaleFactor, height: 10 * layoutInfo.screenScaleFactor)
         bullet.position = CGPoint(x: position.x, y: position.y - size.height/2)
         bullet.name = "enemyBullet"
         
@@ -322,8 +323,6 @@ class Enemy: SKSpriteNode {
         bullet.physicsBody?.affectedByGravity = false
         
         scene.addChild(bullet)
-        
-
 
         // Ensure bullets travel full screen height
         let moveAction = SKAction.moveBy(x: 0, y: -(scene.size.height + bullet.size.height), duration: 2.0)
@@ -334,7 +333,7 @@ class Enemy: SKSpriteNode {
     func dropPowerUp(scene: SKScene) {
         if (self.holdsPowerUp) {
             let powerUpType = PowerUps.allCases.randomElement()!
-            let powerUp = PowerUp(type: powerUpType, color: .green, size: CGSize(width: 10, height: 10))
+            let powerUp = PowerUp(type: powerUpType, color: .green, layoutInfo: layoutInfo)
             
             powerUp.name = "powerUp"
             powerUp.position = CGPoint(x: position.x, y: position.y - size.height/2)

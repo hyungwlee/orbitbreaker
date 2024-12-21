@@ -50,8 +50,8 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         initializeHaptics()
-        // setupDebugControls()
-        powerUpManager = PowerUpManager(scene: self)
+         setupDebugControls()
+        powerUpManager = PowerUpManager(scene: self, layoutInfo: layoutInfo)
         super.didMove(to: view)
         didSceneLoad = true
         if !contentCreated {
@@ -276,7 +276,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     private func setupScoreLabel() {
         scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
         scoreLabel.text = "Score: 0"
-        scoreLabel.fontSize = 20
+        scoreLabel.fontSize = 20 * layoutInfo.screenScaleFactor
         scoreLabel.fontColor = .white
         scoreLabel.horizontalAlignmentMode = .right
         
@@ -309,7 +309,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         super.update(currentTime)
         powerUpManager.update(currentTime: currentTime)
         enemyManager.update(currentTime: currentTime)
-        user.update(currentTime: currentTime)
+        user.update(currentTime: currentTime, layoutInfo: layoutInfo)
         
     }
     
@@ -557,7 +557,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         enemyManager = EnemyManager(scene: self, layoutInfo: layoutInfo)
 
         // Reset power up manager
-        powerUpManager = PowerUpManager(scene: self)
+        powerUpManager = PowerUpManager(scene: self, layoutInfo: layoutInfo)
 
         // Create new content
         createContent()

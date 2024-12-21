@@ -19,12 +19,12 @@ class EnemyManager {
 
     var currentWave = 0
     var bossNum: Int = 1
-    
+    var layoutInfo: OBLayoutInfo
     init(scene: OBGameScene, layoutInfo: OBLayoutInfo) {
             self.scene = scene
             self.waveManager = WaveManager(scene: scene)
             self.bossAnnouncement = BossAnnouncement(scene: scene)
-
+        self.layoutInfo = layoutInfo
             // Look for existing roadmap nodes and remove them
             scene.enumerateChildNodes(withName: "*") { node, _ in
                 if let circle = node as? SKShapeNode, circle.strokeColor == .yellow {
@@ -33,7 +33,7 @@ class EnemyManager {
             }
             
             // Create new roadmap for fresh start
-            self.roadmap = WaveRoadmap(scene: scene, enemyManager: self)
+        self.roadmap = WaveRoadmap(scene: scene, enemyManager: self, layoutInfo: layoutInfo)
         }
     
     
@@ -118,7 +118,7 @@ class EnemyManager {
         }
         
         // Show announcement first
-        asteroidFieldAnnouncement = AsteroidFieldAnnouncement(scene: scene)
+        asteroidFieldAnnouncement = AsteroidFieldAnnouncement(scene: scene, layoutInfo: layoutInfo)
         asteroidChallenge = AsteroidFieldChallenge(scene: scene)
         
         asteroidFieldAnnouncement?.showAnnouncement { [weak self] in
