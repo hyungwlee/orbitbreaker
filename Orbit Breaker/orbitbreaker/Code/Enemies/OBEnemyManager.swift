@@ -109,7 +109,7 @@ class OBEnemyManager {
         guard let scene = scene else { return }
         
         // Clean up any existing power-ups
-        scene.enumerateChildNodes(withName: "powerUp") { node, _ in
+        scene.enumerateChildNodes(withName: "OBpowerUp") { node, _ in
             if let powerUp = node as? OBPowerUp {
                 // Remove any ongoing animations first
                 powerUp.removeAllActions()
@@ -345,17 +345,17 @@ class OBEnemyManager {
             asteroidFieldAnnouncement = nil
             
             // Remove any remaining asteroid nodes
-            scene?.enumerateChildNodes(withName: "asteroid") { node, _ in
+            scene?.enumerateChildNodes(withName: "OBasteroid") { node, _ in
                 node.removeFromParent()
             }
             
             // Remove any remaining enemy bullets
-            scene?.enumerateChildNodes(withName: "enemyBullet") { node, _ in
+            scene?.enumerateChildNodes(withName: "OBenemyBullet") { node, _ in
                 node.removeFromParent()
             }
             
             // Remove any power-ups
-            scene?.enumerateChildNodes(withName: "powerUp") { node, _ in
+            scene?.enumerateChildNodes(withName: "OBpowerUp") { node, _ in
                 node.removeFromParent()
             }
         }
@@ -377,7 +377,7 @@ class OBEnemyManager {
             asteroidChallenge = nil
             
             // Remove any remaining asteroid nodes
-            scene?.enumerateChildNodes(withName: "asteroid") { node, _ in
+            scene?.enumerateChildNodes(withName: "OBasteroid") { node, _ in
                 node.removeFromParent()
             }
             

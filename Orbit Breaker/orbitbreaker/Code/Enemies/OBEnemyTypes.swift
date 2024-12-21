@@ -22,15 +22,15 @@ enum OBEnemyType {
     }
 
     static var name: String {
-        return "enemy"
+        return "OBenemy"
     }
     
     // Get sprite name based on health and boss type
     static func spriteForHealth(_ health: Int, bossType: OBBossType) -> String {
-        let prefix = bossType == .anger ? "Angry" :
-                    bossType == .disgust ? "Breathe" :
-                    bossType == .sadness ? "Sad" :
-                    "Love"
+        let prefix = bossType == .anger ? "OBAngry" :
+                    bossType == .disgust ? "OBBreathe" :
+                    bossType == .sadness ? "OBSad" :
+                    "OBLove"
         
         switch health {
         case 31...40: return "\(prefix) Face UFO (Base)"    // Full health

@@ -78,7 +78,7 @@ class OBPowerUpIndicator: SKNode {
         switch type {
         case .shield:
             self.duration = 10.0
-            iconNode.texture = SKTexture(imageNamed: "shield")
+            iconNode.texture = SKTexture(imageNamed: "OBshield")
             textNode.text = ""
             progressRing.strokeColor = SKColor(red: 0.2, green: 0.8, blue: 1.0, alpha: 1.0)
             if let shieldGlow = iconNode.copy() as? SKSpriteNode {
@@ -88,7 +88,7 @@ class OBPowerUpIndicator: SKNode {
             
         case .doubleDamage:
             self.duration = 5.0
-            iconNode.texture = SKTexture(imageNamed: "doubleDamage")
+            iconNode.texture = SKTexture(imageNamed: "OBdoubleDamage")
             textNode.text = ""
             if sizeChanged == false {
                 iconNode.size = CGSize(width: iconNode.size.width * 1.7 * layoutInfo.screenScaleFactor, height: iconNode.size.height * 1.3 * layoutInfo.screenScaleFactor)

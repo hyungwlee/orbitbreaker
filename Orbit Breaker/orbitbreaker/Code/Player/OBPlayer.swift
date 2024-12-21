@@ -30,7 +30,7 @@ class OBPlayer {
         self.layoutInfo = layoutInfo // Store layoutInfo for access to screenScaleFactor
 
         // Use size and position from LayoutInfo
-        ship = SKSpriteNode(imageNamed: "Player")
+        ship = SKSpriteNode(imageNamed: "OBPlayer")
         // let scaleFactor: CGFloat = 1.5 // Adjust this to fine-tune the size
         ship.size = CGSize(width: layoutInfo.nodeSize.width * scaleFactor,
                            height: layoutInfo.nodeSize.height * scaleFactor)
@@ -77,14 +77,14 @@ class OBPlayer {
         // Create a new bullet with the damage and scaled size
         let bullet = OBBullet(
             damage: bulletDamage,
-            texture: SKTexture(imageNamed: "playerBullet"),
+            texture: SKTexture(imageNamed: "OBplayerBullet"),
             size: baseBulletSize,
             scaleFactor: layoutInfo.screenScaleFactor // Pass the scale factor
         )
         
         // Set the bullet position
         bullet.position = CGPoint(x: ship.position.x, y: ship.position.y + ship.size.height / 2)
-        bullet.name = "testBullet"
+        bullet.name = "OBtestBullet"
         
         // Add the bullet to the scene
         scene.addChild(bullet)
@@ -144,7 +144,7 @@ class OBPlayer {
         shieldNode = nil
         shieldTimer?.invalidate()
         shieldTimer = nil
-        playSoundEffect(named: "shieldDamaged.mp3")
+        playSoundEffect(named: "OBshieldDamaged.mp3")
     }
     
     func setDoubleDamage() {
@@ -169,7 +169,7 @@ class OBPlayer {
         removeShield()
         removeDamageBoost()
         ship.removeFromParent()
-        playSoundEffect(named: "playerDeath.mp3")
+        playSoundEffect(named: "OBplayerDeath.mp3")
         
     }
 }

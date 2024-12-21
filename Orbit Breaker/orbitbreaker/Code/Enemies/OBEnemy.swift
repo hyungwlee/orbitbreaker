@@ -28,7 +28,7 @@ class OBEnemy: SKSpriteNode {
         
         let scaledSize = type.size(using: layoutInfo)
 
-        super.init(texture: SKTexture(imageNamed: "enemy"), color: .white, size: scaledSize)
+        super.init(texture: SKTexture(imageNamed: "OBenemy"), color: .white, size: scaledSize)
        
         self.zPosition = 1
         self.zRotation = 0
@@ -69,7 +69,7 @@ class OBEnemy: SKSpriteNode {
         if currentTime >= nextShootTime {
             print("Enemy shooting at time: \(currentTime)")
             shoot(scene: scene, layoutInfo: layoutInfo)
-            playSoundEffect(named: "new_enemy_shoot.mp3")
+            playSoundEffect(named: "OBnew_enemy_shoot.mp3")
             
             let baseInterval = 3.0
             let randomVariation = Double.random(in: -0.5...0.5)
@@ -81,7 +81,7 @@ class OBEnemy: SKSpriteNode {
     func startKamikazeBehavior() {
         guard let scene = scene else { return }
         
-        self.name = "kamikazeEnemy"
+        self.name = "OBkamikazeEnemy"
         
         // Get the boss-themed color with increased saturation
         let glowColor: SKColor = {
@@ -99,7 +99,7 @@ class OBEnemy: SKSpriteNode {
         
         // Create a single optimized glow effect
         let glowNode = SKEffectNode()
-        glowNode.name = "kamikazeGlow"
+        glowNode.name = "OBkamikazeGlow"
         glowNode.shouldRasterize = true
         glowNode.shouldEnableEffects = true
         glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10.0])
@@ -160,7 +160,7 @@ class OBEnemy: SKSpriteNode {
                 ])
             )
         ])
-        playSoundEffect(named: "ufo_descent.mp3")
+        playSoundEffect(named: "OBufo_descent.mp3")
 
         self.run(sequence)
     }
@@ -214,13 +214,13 @@ class OBEnemy: SKSpriteNode {
         let textureName: String
         switch bossType {
         case .anger:
-            textureName = "angryEnemy"
+            textureName = "OBangryEnemy"
         case .sadness:
-            textureName = "sadnessEnemy"
+            textureName = "OBsadnessEnemy"
         case .disgust:
-            textureName = "disgustEnemy"
+            textureName = "OBdisgustEnemy"
         case .love:
-            textureName = "loveEnemy"
+            textureName = "OBloveEnemy"
         }
         self.texture = SKTexture(imageNamed: textureName)
     }
@@ -311,10 +311,10 @@ class OBEnemy: SKSpriteNode {
     }
     
     private func shoot(scene: SKScene, layoutInfo: OBLayoutInfo) {
-        let bullet = SKSpriteNode(texture: SKTexture(imageNamed: "enemyBullet"))
+        let bullet = SKSpriteNode(texture: SKTexture(imageNamed: "OBenemyBullet"))
         bullet.size = CGSize(width: 6 * layoutInfo.screenScaleFactor, height: 10 * layoutInfo.screenScaleFactor)
         bullet.position = CGPoint(x: position.x, y: position.y - size.height/2)
-        bullet.name = "enemyBullet"
+        bullet.name = "OBenemyBullet"
         
         bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.size)
         bullet.physicsBody?.categoryBitMask = 0x1 << 3
@@ -335,7 +335,7 @@ class OBEnemy: SKSpriteNode {
             let powerUpType = OBPowerUps.allCases.randomElement()!
             let powerUp = OBPowerUp(type: powerUpType, color: .green, layoutInfo: layoutInfo)
             
-            powerUp.name = "powerUp"
+            powerUp.name = "OBpowerUp"
             powerUp.position = CGPoint(x: position.x, y: position.y - size.height/2)
             
             powerUp.physicsBody = SKPhysicsBody(rectangleOf: powerUp.size)
@@ -405,7 +405,7 @@ class OBEnemy: SKSpriteNode {
                 updateSprite(forHealth: health, bossType: enemyManager.getBossType())
                 
                 // Update kamikaze effects if needed
-                if name == "kamikazeEnemy" {
+                if name == "OBkamikazeEnemy" {
                     let glowColor: SKColor = {
                         switch enemyManager.getBossType() {
                         case .anger: return .red
@@ -416,17 +416,17 @@ class OBEnemy: SKSpriteNode {
                     }()
                     
                     // Update all glow effects
-                    if let outerGlow = childNode(withName: "kamikazeOuterGlow") as? SKEffectNode,
+                    if let outerGlow = childNode(withName: "OBkamikazeOuterGlow") as? SKEffectNode,
                        let outerSprite = outerGlow.children.first as? SKSpriteNode {
                         outerSprite.color = glowColor
                     }
                     
-                    if let innerGlow = childNode(withName: "kamikazeInnerGlow") as? SKEffectNode,
+                    if let innerGlow = childNode(withName: "OBkamikazeInnerGlow") as? SKEffectNode,
                        let innerSprite = innerGlow.children.first as? SKSpriteNode {
                         innerSprite.color = glowColor
                     }
                     
-                    if let warning = childNode(withName: "kamikazeWarning") as? SKSpriteNode {
+                    if let warning = childNode(withName: "OBkamikazeWarning") as? SKSpriteNode {
                         warning.color = glowColor
                     }
                 }

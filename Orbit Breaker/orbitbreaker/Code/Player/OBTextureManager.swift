@@ -17,26 +17,26 @@ class OBTextureManager {
     func preloadTextures() {
         
         let backgroundTextures = [
-            "backgroundANGER",
-            "backgroundSAD",
-            "backgroundDISGUST",
-            "backgroundLOVE"
+            "OBbackgroundANGER",
+            "OBbackgroundSAD",
+            "OBbackgroundDISGUST",
+            "OBbackgroundLOVE"
         ]
         
         // Boss-related textures
         let bossTextures = [
-            "anger", "sadness", "disgust", "love",
-            "heart", "heartShield", "slimeBall", "Fireball",
-            "raindrop", "raincloud"
+            "OBanger", "OBsadness", "OBdisgust", "OBlove",
+            "OBheart", "OBheartShield", "OBslimeBall", "OBFireball",
+            "OBraindrop", "OBraincloud"
         ]
         
         // Enemy state textures for each boss type
-        let enemyStates = ["Base", "Damaged1", "Damaged2", "Damaged3"]
-        let bossTypes = ["Angry", "Breathe", "Sad", "Love"]
+        let enemyStates = ["OBBase", "OBDamaged1", "OBDamaged2", "OBDamaged3"]
+        let bossTypes = ["OBAngry", "OBBreathe", "OBSad", "OBLove"]
         
         for bossType in bossTypes {
             for state in enemyStates {
-                let textureName = "\(bossType) Face UFO (\(state))"
+                let textureName = "OB\(bossType) Face UFO (\(state))"
                 textureCache[textureName] = SKTexture(imageNamed: textureName)
             }
         }
@@ -54,7 +54,7 @@ class OBTextureManager {
                     }
                 }
         
-        let shieldTexture = SKTexture(imageNamed: "shield")
+        let shieldTexture = SKTexture(imageNamed: "OBshield")
                 textureCache["shield"] = shieldTexture
                 shieldTexture.preload { }
                 

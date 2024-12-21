@@ -157,7 +157,7 @@ class OBWaveRoadmap {
                 crater.position = CGPoint(x: radius * position.x, y: radius * position.y)
                 crater.fillColor = SKColor(red: 0.55, green: 0.53, blue: 0.52, alpha: 0.7)
                 crater.strokeColor = SKColor(red: 0.45, green: 0.43, blue: 0.42, alpha: 0.8)
-                crater.name = "crater"  // Add name to identify craters
+                crater.name = "OBcrater"  // Add name to identify craters
                 marker.addChild(crater)
             }
         } else {  // Enemy waves
@@ -210,7 +210,7 @@ class OBWaveRoadmap {
         ship.strokeColor = SKColor(red: 1.0, green: 0.9, blue: 0.3, alpha: 1.0)
         ship.lineWidth = 2 * layoutInfo.screenScaleFactor
         ship.zPosition = 10
-        ship.name = "playerIndicator"  // Add a name to help with cleanup
+        ship.name = "OBplayerIndicator"  // Add a name to help with cleanup
         
         // Add engine glow
         let engineGlow = SKShapeNode(path: CGMutablePath())
@@ -274,7 +274,7 @@ class OBWaveRoadmap {
                 // If it's the asteroid stage, also update the craters
                 if i == 2 {
                     stageDots[i].children.forEach { child in
-                        if child.name == "crater" {
+                        if child.name == "OBcrater" {
                             if let crater = child as? SKShapeNode {
                                 crater.fillColor = SKColor(red: 0.3, green: 0.8, blue: 0.3, alpha: 0.7)
                                 crater.strokeColor = SKColor(red: 0.4, green: 0.9, blue: 0.4, alpha: 0.8)
@@ -291,7 +291,7 @@ class OBWaveRoadmap {
                     stageDots[i].strokeColor = SKColor(red: 0.75, green: 0.73, blue: 0.72, alpha: 1.0)
                     // Reset crater colors
                     stageDots[i].children.forEach { child in
-                        if child.name == "crater" {
+                        if child.name == "OBcrater" {
                             if let crater = child as? SKShapeNode {
                                 crater.fillColor = SKColor(red: 0.55, green: 0.53, blue: 0.52, alpha: 0.7)
                                 crater.strokeColor = SKColor(red: 0.45, green: 0.43, blue: 0.42, alpha: 0.8)
@@ -330,10 +330,10 @@ class OBWaveRoadmap {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             // Create new boss sprite
             let spriteName = switch self.enemyManager.bossNum {
-            case 2: "SadnessIcon"
-            case 3: "DisgustIcon"
-            case 4: "LoveIcon"
-            default: "AngerIcon"
+            case 2: "OBSadnessIcon"
+            case 3: "OBDisgustIcon"
+            case 4: "OBLoveIcon"
+            default: "OBAngerIcon"
             }
             
             let bossSprite = SKSpriteNode(imageNamed: spriteName)
@@ -373,7 +373,7 @@ class OBWaveRoadmap {
         stageDots.removeAll()
         
         // Also remove any nodes that might have the player indicator name
-        scene?.enumerateChildNodes(withName: "playerIndicator") { node, _ in
+        scene?.enumerateChildNodes(withName: "OBplayerIndicator") { node, _ in
             node.removeAllActions()
             node.removeFromParent()
         }

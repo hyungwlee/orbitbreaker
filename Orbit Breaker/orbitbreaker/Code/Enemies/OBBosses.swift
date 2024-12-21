@@ -122,8 +122,8 @@ class OBBoss: OBEnemy {
             height: type.size.height * 1.7 * layoutInfo.screenScaleFactor
         )
         
-        let sprite = SKSpriteNode(imageNamed: type == .sadness ? "sadness" :
-                                    type == .disgust ? "disgust" : type == .love ? "love" : "anger")
+        let sprite = SKSpriteNode(imageNamed: type == .sadness ? "OBsadness" :
+                                    type == .disgust ? "OBdisgust" : type == .love ? "OBlove" : "OBanger")
         sprite.size = spriteSize
         addChild(sprite)
         
@@ -137,7 +137,7 @@ class OBBoss: OBEnemy {
         self.health = type.health
         self.initialHealth = type.health
         self.canShoot = false
-        self.name = "boss"
+        self.name = "OBboss"
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -181,7 +181,7 @@ class OBBoss: OBEnemy {
         titleLabel.fontSize = 32
         titleLabel.fontColor = .white
         titleLabel.position = CGPoint(x: scene.size.width/2, y: yPosition + 30)
-        titleLabel.name = "bossTitle"
+        titleLabel.name = "OBbossTitle"
         
         let shadowLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
         shadowLabel.text = titleLabel.text
@@ -352,9 +352,9 @@ class OBBoss: OBEnemy {
     private func shootHomingHeart(in scene: SKScene) {
         guard let player = scene.childNode(withName: "testPlayer") else { return }
         
-        let heart = SKSpriteNode(imageNamed: "heart")
+        let heart = SKSpriteNode(imageNamed: "OBheart")
         heart.size = CGSize(width: 20 * layoutInfo.screenScaleFactor, height: 20 * layoutInfo.screenScaleFactor)
-        heart.name = "enemyBullet"
+        heart.name = "OBenemyBullet"
         heart.position = position
         
         heart.physicsBody = SKPhysicsBody(rectangleOf: heart.size)
@@ -391,7 +391,7 @@ class OBBoss: OBEnemy {
         
         heart.run(SKAction.sequence([initialMove, wait, homingMove, SKAction.removeFromParent()]))
         
-        playSoundEffect(named: "loveShoot.mp3")
+        playSoundEffect(named: "OBloveShoot.mp3")
 
     }
     
@@ -402,9 +402,9 @@ class OBBoss: OBEnemy {
         for i in 0..<shieldCount {
             let angle = (CGFloat(i) / CGFloat(shieldCount)) * CGFloat.pi * 2
             
-            let shield = SKSpriteNode(imageNamed: "heartShield")
+            let shield = SKSpriteNode(imageNamed: "OBheartShield")
             shield.size = CGSize(width: 20 * layoutInfo.screenScaleFactor, height: 20 * layoutInfo.screenScaleFactor)
-            shield.name = "heartShield"
+            shield.name = "OBheartShield"
             shield.zPosition = 1
             shield.position = CGPoint(
                 x: position.x + radius * cos(angle),
@@ -448,7 +448,7 @@ class OBBoss: OBEnemy {
         
         if shieldDamageCount[shield, default: 0] >= 2 {
             shield.removeFromParent()
-            playSoundEffect(named: "loveShield.mp3")
+            playSoundEffect(named: "OBloveShield.mp3")
             heartShields.removeAll { $0 == shield }
             shieldDamageCount.removeValue(forKey: shield)
         } else {
@@ -456,7 +456,7 @@ class OBBoss: OBEnemy {
                 SKAction.scale(to: 1.2, duration: 0.1),
                 SKAction.scale(to: 1.0, duration: 0.1)
             ]))
-            playSoundEffect(named: "loveShield.mp3")
+            playSoundEffect(named: "OBloveShield.mp3")
 
         }
     }
@@ -475,7 +475,7 @@ class OBBoss: OBEnemy {
             let heart = SKShapeNode(rect: CGRect(x: -15, y: -15, width: 30, height: 30), cornerRadius: 7.5)
             heart.fillColor = .systemPink
             heart.strokeColor = .red
-            heart.name = "enemyBullet"
+            heart.name = "OBenemyBullet"
             heart.position = position
             heart.zRotation = angle + .pi / 4
             
@@ -553,7 +553,7 @@ class OBBoss: OBEnemy {
         }
         
         // Clean up all heart shields in the scene
-        scene?.enumerateChildNodes(withName: "heartShield") { node, _ in
+        scene?.enumerateChildNodes(withName: "OBheartShield") { node, _ in
             node.physicsBody = nil
             node.removeAllActions()
             node.removeFromParent()
@@ -581,10 +581,10 @@ class OBBoss: OBEnemy {
     
     
     private func createRaindrop(at position: CGPoint, in scene: SKScene) {
-        let raindrop = SKSpriteNode(imageNamed: "raindrop")
+        let raindrop = SKSpriteNode(imageNamed: "OBraindrop")
         raindrop.size = CGSize(width: 8 * layoutInfo.screenScaleFactor, height: 16 * layoutInfo.screenScaleFactor)
         raindrop.position = position
-        raindrop.name = "enemyBullet"
+        raindrop.name = "OBenemyBullet"
         raindrop.alpha = 0.7
         raindrop.zPosition = 1
         
@@ -601,7 +601,7 @@ class OBBoss: OBEnemy {
         let terminalSpeed: CGFloat = 300
         let accelerationTime: TimeInterval = 1.0
         let moveDistance = scene.size.height + 50
-        playSoundEffect(named: "sadnessShoot.mp3") // maybe replace this one
+        playSoundEffect(named: "OBsadnessShoot.mp3") // maybe replace this one
         let accelerate = SKAction.customAction(withDuration: accelerationTime) { node, elapsedTime in
             let progress = elapsedTime / CGFloat(accelerationTime)
             let currentSpeed = initialSpeed + (terminalSpeed - initialSpeed) * progress
@@ -628,7 +628,7 @@ class OBBoss: OBEnemy {
         let proposedY = playerPosition.y + 250
         let cloudY = min(proposedY, maxCloudHeight)
         
-        let cloud = SKSpriteNode(imageNamed: "raincloud")
+        let cloud = SKSpriteNode(imageNamed: "OBraincloud")
         cloud.size = CGSize(width: 100 * layoutInfo.screenScaleFactor, height: 60 * layoutInfo.screenScaleFactor)
         cloud.position = CGPoint(x: playerPosition.x, y: cloudY)
         cloud.zPosition = 2
@@ -724,7 +724,7 @@ class OBBoss: OBEnemy {
         
         if shieldHits[shield, default: 0] >= 4 {
             shield.removeFromParent()
-            playSoundEffect(named: "loveShield1.mp3")
+            playSoundEffect(named: "OBloveShield1.mp3")
 
             heartShields.removeAll { $0 == shield }
             shieldHits.removeValue(forKey: shield)
@@ -835,10 +835,10 @@ class OBBoss: OBEnemy {
     private func shootToxicProjectile(in scene: SKScene) {
         guard let player = scene.childNode(withName: "testPlayer") else { return }
         
-        let projectile = SKSpriteNode(imageNamed: "slimeBall")
+        let projectile = SKSpriteNode(imageNamed: "OBslimeBall")
         projectile.size = CGSize(width: 20 * layoutInfo.screenScaleFactor, height: 20 * layoutInfo.screenScaleFactor)
         projectile.position = position
-        projectile.name = "enemyBullet"
+        projectile.name = "OBenemyBullet"
         
         projectile.physicsBody = SKPhysicsBody(circleOfRadius: 10)
         projectile.physicsBody?.categoryBitMask = 0x1 << 3
@@ -870,7 +870,7 @@ class OBBoss: OBEnemy {
             SKAction.removeFromParent()
         ]))
         
-        playSoundEffect(named: "disgustShoot.mp3")
+        playSoundEffect(named: "OBdisgustShoot.mp3")
     }
     
     
@@ -910,7 +910,7 @@ class OBBoss: OBEnemy {
         if currentTime - entryStartTime > 3.0 {
             if !isSwooping && currentTime - lastSwoopTime >= 5.0 {
                 startSwoop(in: scene)
-                playSoundEffect(named: "angerDive.mp3")
+                playSoundEffect(named: "OBangerDive.mp3")
                 lastSwoopTime = currentTime
                 lastShootTime = currentTime
             } else if !isSwooping {
@@ -956,14 +956,14 @@ class OBBoss: OBEnemy {
     private func createPoisonBurst(in scene: SKScene) {
         let bulletCount = 12
         let bulletSpeed: CGFloat = 300
-        playSoundEffect(named: "disgustRing.mp3")
+        playSoundEffect(named: "OBdisgustRing.mp3")
         for i in 0..<bulletCount {
             let angle = (CGFloat(i) / CGFloat(bulletCount)) * CGFloat.pi * 2
             
             let bullet = SKShapeNode(circleOfRadius: 8 * layoutInfo.screenScaleFactor)
             bullet.fillColor = .green
             bullet.strokeColor = .init(red: 0.2, green: 0.8, blue: 0.2, alpha: 1.0)
-            bullet.name = "enemyBullet"
+            bullet.name = "OBenemyBullet"
             bullet.position = position
             
             bullet.physicsBody = SKPhysicsBody(circleOfRadius: 8)
@@ -1017,16 +1017,16 @@ class OBBoss: OBEnemy {
         let bulletSpeed: CGFloat = 300
         
         for i in 0..<bulletCount {
-            let fireball = SKSpriteNode(imageNamed: "Fireball")
+            let fireball = SKSpriteNode(imageNamed: "OBFireball")
             fireball.size = CGSize(width: 24 * layoutInfo.screenScaleFactor, height: 24 * layoutInfo.screenScaleFactor)
-            fireball.name = "enemyBullet"
+            fireball.name = "OBenemyBullet"
             
             // Create glow effect
             let glowEffect = SKEffectNode()
             glowEffect.shouldRasterize = true
             glowEffect.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 2.0])
             
-            let glowSprite = SKSpriteNode(imageNamed: "Fireball")
+            let glowSprite = SKSpriteNode(imageNamed: "OBFireball")
             glowSprite.size = fireball.size
             glowSprite.color = .yellow
             glowSprite.colorBlendFactor = 1.0
@@ -1068,7 +1068,7 @@ class OBBoss: OBEnemy {
             
             fireball.run(SKAction.sequence([moveAction, SKAction.removeFromParent()]))
             
-            playSoundEffect(named: "angerShoot.mp3")
+            playSoundEffect(named: "OBangerShoot.mp3")
         }
     }
 }

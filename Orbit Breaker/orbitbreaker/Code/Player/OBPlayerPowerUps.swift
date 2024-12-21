@@ -38,11 +38,11 @@ class OBPowerUp: SKSpriteNode {
         
         // For double damage, create a custom node
         if type == .doubleDamage {
-            let texture = SKTexture(imageNamed: "doubleDamage")
+            let texture = SKTexture(imageNamed: "OBdoubleDamage")
             super.init(texture: texture, color: .white, size: scaledSize)
         } else {
             // Shield uses the sprite
-            let texture = SKTexture(imageNamed: "shield")
+            let texture = SKTexture(imageNamed: "OBshield")
             super.init(texture: texture, color: .white, size: scaledSize)
         }
         
@@ -52,7 +52,7 @@ class OBPowerUp: SKSpriteNode {
         self.physicsBody?.contactTestBitMask = 0x1 << 2
         self.physicsBody?.collisionBitMask = 0
         self.physicsBody?.affectedByGravity = false
-        self.name = "powerUp"
+        self.name = "OBpowerUp"
         
         // Add glow effect
         addGlowEffect()
@@ -98,7 +98,7 @@ class OBPowerUp: SKSpriteNode {
     func apply(to player: OBPlayer) {
         // Create pickup effect
         createPickupEffect()
-        playSoundEffect(named: "powerUp.mp3")
+        playSoundEffect(named: "OBpowerUp.mp3")
         switch type {
         case .shield:
             player.addShield()

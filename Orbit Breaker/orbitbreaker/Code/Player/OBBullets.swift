@@ -10,7 +10,7 @@ import SpriteKit
 class OBBullet: SKSpriteNode {
     var damage: Int
     
-    init(damage: Int, texture: SKTexture? = SKTexture(imageNamed: "playerBullet"), size: CGSize, scaleFactor: CGFloat) {
+    init(damage: Int, texture: SKTexture? = SKTexture(imageNamed: "OBplayerBullet"), size: CGSize, scaleFactor: CGFloat) {
         self.damage = damage
         let scaledSize = CGSize(width: size.width * scaleFactor, height: size.height * scaleFactor)
 

@@ -23,7 +23,7 @@ class OBAsteroidFieldAnnouncement {
     
     func showAnnouncement(completion: @escaping () -> Void) {
         guard let scene = scene else { return }
-        playSoundEffect(named: "announcementSound.mp3") // Replace with your sound file name
+        playSoundEffect(named: "OBannouncementSound.mp3") // Replace with your sound file name
         powerUpManager.cleanup()
         
         // Create dark overlay
@@ -138,10 +138,10 @@ class OBAsteroidFieldChallenge {
     }
     
     private func createAsteroid(at position: CGPoint, withMove moveAction: SKAction? = nil) -> SKNode {
-        let asteroid = SKSpriteNode(imageNamed: "Asteroid\(Int.random(in: 1...3))")
+        let asteroid = SKSpriteNode(imageNamed: "OBAsteroid\(Int.random(in: 1...3))")
         asteroid.size = CGSize(width: 40, height: 40) // Adjust size as needed
         asteroid.position = position
-        asteroid.name = "asteroid"
+        asteroid.name = "OBasteroid"
         
         asteroid.physicsBody = SKPhysicsBody(circleOfRadius: 20)
         asteroid.physicsBody?.categoryBitMask = 0x1 << 6

@@ -22,7 +22,7 @@ class OBBossAnnouncement {
     func showAnnouncement(bossType: OBBossType, completion: @escaping () -> Void) {
         guard let scene = scene else { return }
         
-        playSoundEffect(named: "announcementSound.mp3") // Replace with your sound file name
+        playSoundEffect(named: "OBannouncementSound.mp3") // Replace with your sound file name
 
         // Create container node for centering and scaling
         let container = SKNode()

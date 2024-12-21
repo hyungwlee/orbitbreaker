@@ -122,7 +122,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
 
     
     func playBackgroundMusic() {
-        guard let musicURL = Bundle.main.url(forResource: "backgroundMusic", withExtension: "mp3") else {
+        guard let musicURL = Bundle.main.url(forResource: "OBbackgroundMusic", withExtension: "mp3") else {
             print("Background music file not found")
             return
         }
@@ -137,7 +137,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func preloadSounds() {
-        let sounds = ["backgroundMusic.mp3"]
+        let sounds = ["OBbackgroundMusic.mp3"]
         for soundName in sounds {
             if let url = Bundle.main.url(forResource: soundName, withExtension: nil) {
                 do {
@@ -160,7 +160,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         bossCount = 0
 
         // Initialize and add background 1
-        background1 = SKSpriteNode(imageNamed: "backgroundANGER")
+        background1 = SKSpriteNode(imageNamed: "OBbackgroundANGER")
         background1.size = CGSize(width: size.width, height: size.height)
         background1.position = CGPoint(x: size.width / 2, y: size.height / 2)
         background1.zPosition = -2
@@ -174,7 +174,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         addChild(darkOverlay1)
 
         // Initialize and add background 2
-        background2 = SKSpriteNode(imageNamed: "backgroundANGER")
+        background2 = SKSpriteNode(imageNamed: "OBbackgroundANGER")
         background2.size = CGSize(width: size.width, height: size.height)
         background2.position = CGPoint(x: size.width / 2, y: background1.position.y + size.height)
         background2.zPosition = -2
@@ -245,10 +245,10 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
             let newBackground: String
             
             switch boss.bossType {
-            case .anger: newBackground = "backgroundSAD"
-            case .sadness: newBackground = "backgroundDISGUST"
-            case .disgust: newBackground = "backgroundLOVE"
-            case .love: newBackground = "backgroundANGER"
+            case .anger: newBackground = "OBbackgroundSAD"
+            case .sadness: newBackground = "OBbackgroundDISGUST"
+            case .disgust: newBackground = "OBbackgroundLOVE"
+            case .love: newBackground = "OBbackgroundANGER"
             }
             
             // Get pre-loaded texture
@@ -334,7 +334,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     }
     private func shieldHit(_ shield: SKSpriteNode) {
         // Find boss in the scene
-        enumerateChildNodes(withName: "boss") { node, _ in
+        enumerateChildNodes(withName: "OBboss") { node, _ in
             if let boss = node as? OBBoss {
                 boss.damageShield(shield)
             }
@@ -355,7 +355,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         
         // Check for heart shield collision with bullets
         if let bullet = nodeA as? OBBullet, let shield = nodeB as? SKSpriteNode,
-           shield.name == "heartShield" {
+           shield.name == "OBheartShield" {
             bullet.removeFromParent()
             shieldHit(shield)
         } else if let bullet = nodeB as? OBBullet, let shield = nodeA as? SKSpriteNode,
@@ -408,26 +408,26 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
         
         // Handle player collisions with enemy bullets
         if let bullet = nodeA, let playerNode = nodeB as? SKSpriteNode,
-           bullet.name == "enemyBullet" && playerNode.name == "testPlayer" {
+           bullet.name == "OBenemyBullet" && playerNode.name == "testPlayer" {
             handlePlayerBulletCollision(bullet)
         } else if let bullet = nodeB, let playerNode = nodeA as? SKSpriteNode,
-                  bullet.name == "enemyBullet" && playerNode.name == "testPlayer" {
+                  bullet.name == "OBenemyBullet" && playerNode.name == "testPlayer" {
             handlePlayerBulletCollision(bullet)
         }
         
         // Handle power-up collisions
         if let powerUp = nodeA as? OBPowerUp, let playerNode = nodeB as? SKSpriteNode,
-           powerUp.name == "powerUp" && playerNode.name == "testPlayer" {
+           powerUp.name == "OBpowerUp" && playerNode.name == "testPlayer" {
             handlePowerUpCollision(powerUp)
         } else if let powerUp = nodeB as? OBPowerUp, let playerNode = nodeA as? SKSpriteNode,
-                  powerUp.name == "powerUp" && playerNode.name == "testPlayer" {
+                  powerUp.name == "OBpowerUp" && playerNode.name == "testPlayer" {
             handlePowerUpCollision(powerUp)
         }
     }
     
     private func handlePlayerBulletCollision(_ bullet: SKNode) {
         if user.hasShield {
-            SoundManager.shared.playSound("shieldDamaged.mp3")
+            SoundManager.shared.playSound("OBshieldDamaged.mp3")
             user.removeShield()  // This will set hasShield to false and remove the shield node
             powerUpManager.hideShieldIndicator()  // Add this line to hide the shield indicator
             bullet.removeFromParent()
@@ -454,7 +454,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
                 // Do thorough cleanup after death animation
                 self.cleanupLevel()
                 
-                enumerateChildNodes(withName: "boss") { node, _ in
+                enumerateChildNodes(withName: "OBboss") { node, _ in
                     if let boss = node as? OBBoss {
                         boss.cleanup()
                     }
@@ -463,7 +463,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
                 // Additional thorough cleanup for any remaining effects
                 self.enumerateChildNodes(withName: "//*") { node, _ in
                     if let sprite = node as? SKSpriteNode,
-                       sprite.texture?.description.contains("raincloud") == true {
+                       sprite.texture?.description.contains("OBraincloud") == true {
                         sprite.removeAllActions()
                         sprite.removeFromParent()
                     }
@@ -478,7 +478,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
                 }
                 
                 // Remove all enemy bullets
-                self.enumerateChildNodes(withName: "enemyBullet") { node, _ in
+                self.enumerateChildNodes(withName: "OBenemyBullet") { node, _ in
                     node.removeAllActions()
                     node.removeFromParent()
                 }
@@ -609,18 +609,18 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     
     private func cleanupLevel() {
             // Remove all bullets
-            enumerateChildNodes(withName: "testBullet") { node, _ in
+            enumerateChildNodes(withName: "OBtestBullet") { node, _ in
                 node.removeFromParent()
             }
-            enumerateChildNodes(withName: "enemyBullet") { node, _ in
+            enumerateChildNodes(withName: "OBenemyBullet") { node, _ in
                 node.removeFromParent()
             }
-            enumerateChildNodes(withName: "powerUp") { node, _ in
+            enumerateChildNodes(withName: "OBpowerUp") { node, _ in
                 node.removeFromParent()
             }
             
             // Remove all heart shields
-            enumerateChildNodes(withName: "heartShield") { node, _ in
+            enumerateChildNodes(withName: "OBheartShield") { node, _ in
                 node.physicsBody = nil
                 node.removeFromParent()
             }
@@ -704,7 +704,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handleBossDefeat(_ boss: OBBoss) {
             // Create multiple explosion waves
-        SoundManager.shared.playSound("bossDeath.mp3")
+        SoundManager.shared.playSound("OBbossDeath.mp3")
             for i in 0...3 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.2) {
                     // Create expanding ring
@@ -821,7 +821,7 @@ class OBGameScene: SKScene, SKPhysicsContactDelegate {
             case .love:
                 // Add hearts bursting outward
                 for _ in 0...12 {
-                    let heart = SKSpriteNode(imageNamed: "heart")
+                    let heart = SKSpriteNode(imageNamed: "OBheart")
                     heart.size = CGSize(width: 20, height: 20)
                     heart.position = boss.position
                     heart.zPosition = 4
@@ -902,25 +902,25 @@ class SoundManager {
     
     func preloadSounds() {
         let soundNames = [
-            "announcementSound.mp3",
-            "loveShoot.mp3",
-            "sadnessShoot.mp3",
-            "disgustShoot.mp3",
-            "angerShoot.mp3",
-            "loveShield.mp3",
-            "loveShield1.mp3",
-            "angerDive.mp3",
-            "disgustRing.mp3",
-            "enemyHit.mp4a",
-            "shieldDamaged.mp3",
-            "powerUp.mp3",
-            "playerDeath.mp3",
-            "ufo_descent.mp3",
-            "new_enemy_shoot.mp3",
-            "bossDeath.mp3",
-            "asteroidHit.mp3",  // Add asteroid-related sounds
-            "asteroidWarning.mp3",
-            "gameOver.mp3"
+            "OBannouncementSound.mp3",
+            "OBloveShoot.mp3",
+            "OBsadnessShoot.mp3",
+            "OBdisgustShoot.mp3",
+            "OBangerShoot.mp3",
+            "OBloveShield.mp3",
+            "OBloveShield1.mp3",
+            "OBangerDive.mp3",
+            "OBdisgustRing.mp3",
+            "OBenemyHit.mp4a",
+            "OBshieldDamaged.mp3",
+            "OBpowerUp.mp3",
+            "OBplayerDeath.mp3",
+            "OBufo_descent.mp3",
+            "OBnew_enemy_shoot.mp3",
+            "OBbossDeath.mp3",
+            "OBasteroidHit.mp3",  // Add asteroid-related sounds
+            "OBasteroidWarning.mp3",
+            "OBgameOver.mp3"
         ]
         
         for name in soundNames {

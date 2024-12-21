@@ -24,7 +24,7 @@ class OBDebuffs: SKSpriteNode {
         self.physicsBody?.contactTestBitMask = 0x1 << 2
         self.physicsBody?.collisionBitMask = 0
         self.physicsBody?.affectedByGravity = false
-        self.name = "debuffs"
+        self.name = "OBdebuffs"
     }
     
     required init?(coder aDecoder: NSCoder) {
