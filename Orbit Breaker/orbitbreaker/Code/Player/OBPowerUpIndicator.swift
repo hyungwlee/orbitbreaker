@@ -99,6 +99,11 @@ class OBPowerUpIndicator: SKNode {
             self.duration = 10.0
             iconNode.texture = SKTexture(imageNamed: "OBshield")
             textNode.text = ""
+            // Apply consistent scaling for shield icon
+            iconNode.size = CGSize(
+                width: originalIconSize.width * layoutInfo.screenScaleFactor,
+                height: originalIconSize.height * layoutInfo.screenScaleFactor
+            )
             progressRing.strokeColor = SKColor(red: 0.2, green: 0.8, blue: 1.0, alpha: 1.0)
             if let shieldGlow = iconNode.copy() as? SKSpriteNode {
                 shieldGlow.alpha = 0.6
