@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "playerBullet+txt.png",
+      "filename" : "OBdoubleDamage.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "playerBullet+txt@2x.png",
+      "filename" : "OBdoubleDamage@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "playerBullet+txt@3x.png",
+      "filename" : "OBdoubleDamage@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
